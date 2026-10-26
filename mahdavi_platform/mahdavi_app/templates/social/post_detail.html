@@ -1,0 +1,558 @@
+{% extends 'social/base.html' %}
+{% load static %}
+
+{% block title %}پست {{ post.user.get_full_name }} - نور مهدی{% endblock %}
+
+{% block content %}
+<div class="post-detail">
+    <div class="card">
+        <!-- هدر پست -->
+        <div class="post-header">
+            <div class="post-user-info">
+                <div class="user-avatar">
+                    {% if post.user.profile_image %}
+                        <img src="{{ post.user.profile_image.url }}" alt="{{ post.user.get_full_name }}">
+                    {% else %}
+                        <span>{{ post.user.first_name|first }}</span>
+                    {% endif %}
+                </div>
+                <div class="user-details">
+                    <a href="{% url 'social_profile' post.user.id %}" class="username">
+                        {{ post.user.get_full_name }}
+                    </a>
+                    {% if post.location %}
+                    <span class="location">{{ post.location }}</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="post-time">
+                {{ post.created_at|timesince }} قبل
+            </div>
+        </div>
+        
+        <!-- محتوای پست -->
+        <div class="post-content">
+            {% if post.content_type == 'image' and post.image %}
+            <div class="post-media">
+                <img src="{{ post.image.url }}" alt="پست {{ post.user.get_full_name }}" class="post-image">
+            </div>
+            {% elif post.content_type == 'video' and post.video %}
+            <div class="post-media">
+                <video controls class="post-video">
+                    <source src="{{ post.video.url }}" type="video/mp4">
+                    مرورگر شما از ویدیو پشتیبانی نمی‌کند.
+                </video>
+            </div>
+            {% elif post.content_type == 'audio' and post.audio %}
+            <div class="post-media">
+                <audio controls class="post-audio">
+                    <source src="{{ post.audio.url }}" type="audio/mpeg">
+                    مرورگر شما از صوت پشتیبانی نمی‌کند.
+                </audio>
+            </div>
+            {% endif %}
+            
+            {% if post.caption %}
+            <div class="post-caption">
+                {{ post.caption|linebreaks }}
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- آمار و اقدامات -->
+        <div class="post-actions">
+            <div class="action-buttons">
+                <button class="action-btn like-btn {% if is_liked %}liked{% endif %}" data-post-id="{{ post.id }}">
+                    <i class="{% if is_liked %}fas{% else %}far{% endif %} fa-heart"></i>
+                    <span class="likes-count">{{ post.likes_count }}</span>
+                </button>
+                <button class="action-btn comment-btn">
+                    <i class="far fa-comment"></i>
+                    <span class="comments-count">{{ post.comments_count }}</span>
+                </button>
+                <button class="action-btn share-btn">
+                    <i class="far fa-share-square"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- بخش نظرات -->
+        <div class="comments-section">
+            <h4 class="comments-title">نظرات</h4>
+            
+            <!-- فرم ارسال نظر -->
+            {% if user.is_authenticated %}
+            <div class="comment-form">
+                <form method="post" action="{% url 'add_comment' post.id %}">
+                    {% csrf_token %}
+                    <div class="comment-input-group">
+                        <textarea name="text" class="comment-input" placeholder="نظر خود را بنویسید..." rows="2"></textarea>
+                        <button type="submit" class="btn btn-primary comment-submit">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+            {% endif %}
+            
+            <!-- لیست نظرات -->
+            <div class="comments-list">
+                {% for comment in comments %}
+                <div class="comment-item">
+                    <div class="comment-avatar">
+                        {% if comment.user.profile_image %}
+                            <img src="{{ comment.user.profile_image.url }}" alt="{{ comment.user.get_full_name }}">
+                        {% else %}
+                            <span>{{ comment.user.first_name|first }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="comment-content">
+                        <div class="comment-header">
+                            <a href="{% url 'social_profile' comment.user.id %}" class="comment-username">
+                                {{ comment.user.get_full_name }}
+                            </a>
+                            <span class="comment-time">{{ comment.created_at|timesince }} قبل</span>
+                        </div>
+                        <div class="comment-text">
+                            {{ comment.text }}
+                        </div>
+                        <div class="comment-actions">
+                            <button class="comment-like-btn">
+                                <i class="far fa-heart"></i>
+                                <span>{{ comment.likes_count }}</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="no-comments">
+                    <i class="fas fa-comment-slash"></i>
+                    <p>هنوز نظری وجود ندارد</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.post-detail {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.post-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--border-gold);
+}
+
+.post-user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold), var(--dark-gold));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: #000;
+    overflow: hidden;
+}
+
+.user-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.user-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.username {
+    font-weight: bold;
+    color: var(--text-light);
+    text-decoration: none;
+}
+
+.username:hover {
+    color: var(--gold);
+}
+
+.location {
+    font-size: 0.8rem;
+    color: var(--text-light);
+    opacity: 0.7;
+}
+
+.post-time {
+    font-size: 0.8rem;
+    color: var(--text-light);
+    opacity: 0.7;
+}
+
+.post-content {
+    padding: 20px;
+}
+
+.post-media {
+    margin-bottom: 15px;
+}
+
+.post-image {
+    width: 100%;
+    max-height: 500px;
+    object-fit: contain;
+    border-radius: 8px;
+}
+
+.post-video,
+.post-audio {
+    width: 100%;
+    border-radius: 8px;
+}
+
+.post-caption {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--text-light);
+}
+
+.post-actions {
+    padding: 15px 20px;
+    border-top: 1px solid var(--border-gold);
+    border-bottom: 1px solid var(--border-gold);
+}
+
+.action-buttons {
+    display: flex;
+    gap: 20px;
+}
+
+.action-btn {
+    background: none;
+    border: none;
+    color: var(--text-light);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.action-btn:hover {
+    color: var(--gold);
+}
+
+.action-btn.liked {
+    color: #e74c3c;
+}
+
+.comments-section {
+    padding: 20px;
+}
+
+.comments-title {
+    color: var(--gold);
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+}
+
+.comment-form {
+    margin-bottom: 20px;
+}
+
+.comment-input-group {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+}
+
+.comment-input {
+    flex: 1;
+    padding: 10px 12px;
+    background: rgba(30, 30, 30, 0.8);
+    border: 1px solid var(--border-gold);
+    border-radius: 8px;
+    color: var(--text-light);
+    resize: vertical;
+    min-height: 60px;
+}
+
+.comment-input:focus {
+    outline: none;
+    border-color: var(--gold);
+}
+
+.comment-submit {
+    padding: 10px 15px;
+    height: 60px;
+}
+
+.comments-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.comment-item {
+    display: flex;
+    gap: 12px;
+    padding: 15px;
+    background: rgba(30, 30, 30, 0.5);
+    border-radius: 8px;
+    border: 1px solid var(--border-gold);
+}
+
+.comment-avatar {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold), var(--dark-gold));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: #000;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.comment-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.comment-content {
+    flex: 1;
+}
+
+.comment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.comment-username {
+    font-weight: bold;
+    color: var(--text-light);
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.comment-username:hover {
+    color: var(--gold);
+}
+
+.comment-time {
+    font-size: 0.7rem;
+    color: var(--text-light);
+    opacity: 0.7;
+}
+
+.comment-text {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--text-light);
+    margin-bottom: 8px;
+}
+
+.comment-actions {
+    display: flex;
+    gap: 15px;
+}
+
+.comment-like-btn {
+    background: none;
+    border: none;
+    color: var(--text-light);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.8rem;
+    transition: all 0.3s ease;
+}
+
+.comment-like-btn:hover {
+    color: #e74c3c;
+}
+
+.no-comments {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-light);
+    opacity: 0.7;
+}
+
+.no-comments i {
+    font-size: 2rem;
+    margin-bottom: 10px;
+    color: var(--gold);
+}
+
+@media (max-width: 768px) {
+    .post-header {
+        padding: 12px 15px;
+    }
+    
+    .post-content {
+        padding: 15px;
+    }
+    
+    .comments-section {
+        padding: 15px;
+    }
+    
+    .comment-input-group {
+        flex-direction: column;
+    }
+    
+    .comment-submit {
+        height: auto;
+        align-self: flex-end;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // مدیریت لایک پست
+    const likeBtn = document.querySelector('.like-btn');
+    if (likeBtn) {
+        likeBtn.addEventListener('click', function() {
+            const postId = this.dataset.postId;
+            toggleLike(postId, this);
+        });
+    }
+    
+    // مدیریت ارسال نظر با AJAX
+    const commentForm = document.querySelector('.comment-form form');
+    if (commentForm) {
+        commentForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const commentInput = this.querySelector('.comment-input');
+            const commentsList = document.querySelector('.comments-list');
+            const noComments = document.querySelector('.no-comments');
+            
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // پاک کردن فیلد نظر
+                    commentInput.value = '';
+                    
+                    // مخفی کردن پیام "نظری وجود ندارد"
+                    if (noComments) {
+                        noComments.style.display = 'none';
+                    }
+                    
+                    // افزودن نظر جدید به لیست
+                    const commentHtml = `
+                        <div class="comment-item">
+                            <div class="comment-avatar">
+                                <span>{{ user.first_name|first }}</span>
+                            </div>
+                            <div class="comment-content">
+                                <div class="comment-header">
+                                    <a href="{% url 'social_profile' user.id %}" class="comment-username">
+                                        {{ user.get_full_name }}
+                                    </a>
+                                    <span class="comment-time">همین الان</span>
+                                </div>
+                                <div class="comment-text">
+                                    ${data.text}
+                                </div>
+                                <div class="comment-actions">
+                                    <button class="comment-like-btn">
+                                        <i class="far fa-heart"></i>
+                                        <span>0</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    if (commentsList.querySelector('.no-comments')) {
+                        commentsList.innerHTML = commentHtml;
+                    } else {
+                        commentsList.insertAdjacentHTML('afterbegin', commentHtml);
+                    }
+                    
+                    // آپدیت تعداد نظرات
+                    const commentsCount = document.querySelector('.comments-count');
+                    if (commentsCount) {
+                        commentsCount.textContent = parseInt(commentsCount.textContent) + 1;
+                    }
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    }
+});
+
+function toggleLike(postId, likeBtn) {
+    const likeIcon = likeBtn.querySelector('i');
+    const likesCount = likeBtn.querySelector('.likes-count');
+    
+    fetch(`/social/like/${postId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            if (data.action === 'liked') {
+                likeIcon.className = 'fas fa-heart';
+                likeBtn.classList.add('liked');
+            } else {
+                likeIcon.className = 'far fa-heart';
+                likeBtn.classList.remove('liked');
+            }
+            likesCount.textContent = data.likes_count;
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}

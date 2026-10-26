@@ -1,0 +1,241 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}سفارش {{ order.order_number }} - نور مهدی{% endblock %}
+
+{% block extra_css %}
+<style>
+    .order-detail-section {
+        padding: 2rem 0;
+    }
+
+    .breadcrumb {
+        margin-bottom: 2rem;
+        color: var(--text-secondary);
+    }
+
+    .breadcrumb a {
+        color: var(--primary-gold);
+        text-decoration: none;
+    }
+
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 25px;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    .status-pending { background: #f39c12; color: white; }
+    .status-paid { background: #3498db; color: white; }
+    .status-processing { background: #9b59b6; color: white; }
+    .status-shipped { background: #2ecc71; color: white; }
+    .status-delivered { background: #27ae60; color: white; }
+    .status-cancelled { background: #e74c3c; color: white; }
+
+    .order-actions {
+        background: rgba(243, 156, 18, 0.1);
+        border: 2px solid var(--border-gold);
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-top: 2rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="order-detail-section fade-in">
+    <div class="container">
+        <!-- مسیر ناوبری -->
+        <div class="breadcrumb">
+            <a href="{% url 'order_list' %}">سفارشات من</a>
+            <span style="margin: 0 10px;">/</span>
+            <span>سفارش {{ order.order_number }}</span>
+        </div>
+
+        <div class="grid grid-2">
+            <!-- اطلاعات سفارش -->
+            <div class="card">
+                <h2 class="card-title">
+                    <i class="fas fa-info-circle card-icon"></i>
+                    اطلاعات سفارش
+                </h2>
+
+                <div class="order-info">
+                    <div class="info-row">
+                        <strong>شماره سفارش:</strong>
+                        <span>{{ order.order_number }}</span>
+                    </div>
+                    
+                    <div class="info-row">
+                        <strong>تاریخ ثبت:</strong>
+                        <span>{{ order.created_at|date:"Y/m/d - H:i" }}</span>
+                    </div>
+                    
+                    <div class="info-row">
+                        <strong>وضعیت:</strong>
+                        {% if order.status == 'pending' %}
+                        <span class="status-badge status-pending">
+                            <i class="fas fa-clock"></i>
+                            در انتظار پرداخت
+                        </span>
+                        {% elif order.status == 'paid' %}
+                        <span class="status-badge status-paid">
+                            <i class="fas fa-check"></i>
+                            پرداخت شده
+                        </span>
+                        {% elif order.status == 'processing' %}
+                        <span class="status-badge status-processing">
+                            <i class="fas fa-cog"></i>
+                            در حال پردازش
+                        </span>
+                        {% elif order.status == 'shipped' %}
+                        <span class="status-badge status-shipped">
+                            <i class="fas fa-shipping-fast"></i>
+                            ارسال شده
+                        </span>
+                        {% elif order.status == 'delivered' %}
+                        <span class="status-badge status-delivered">
+                            <i class="fas fa-box-open"></i>
+                            تحویل داده شده
+                        </span>
+                        {% elif order.status == 'cancelled' %}
+                        <span class="status-badge status-cancelled">
+                            <i class="fas fa-times"></i>
+                            لغو شده
+                        </span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="info-row">
+                        <strong>روش پرداخت:</strong>
+                        <span>
+                            {% if order.payment_method == 'card_to_card' %}
+                            کارت به کارت
+                            {% else %}
+                            پرداخت آنلاین
+                            {% endif %}
+                        </span>
+                    </div>
+                    
+                    <div class="info-row">
+                        <strong>مبلغ کل:</strong>
+                        <span class="total-amount">{{ order.total_amount|floatformat:0 }} تومان</span>
+                    </div>
+                </div>
+
+                <!-- رسید پرداخت -->
+                {% if order.payment_receipt %}
+                <div class="receipt-section">
+                    <strong>رسید پرداخت:</strong>
+                    <a href="{{ order.payment_receipt.url }}" target="_blank" class="btn btn-secondary">
+                        <i class="fas fa-download"></i>
+                        مشاهده رسید
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- اطلاعات مشتری -->
+            <div class="card">
+                <h2 class="card-title">
+                    <i class="fas fa-user card-icon"></i>
+                    اطلاعات گیرنده
+                </h2>
+
+                <div class="customer-info">
+                    <div class="info-row">
+                        <strong>نام و نام خانوادگی:</strong>
+                        <span>{{ order.customer_name }}</span>
+                    </div>
+                    
+                    <div class="info-row">
+                        <strong>شماره تلفن:</strong>
+                        <span>{{ order.customer_phone }}</span>
+                    </div>
+                    
+                    <div class="info-row">
+                        <strong>کد پستی:</strong>
+                        <span>{{ order.customer_postal_code }}</span>
+                    </div>
+                    
+                    <div class="info-row">
+                        <strong>آدرس:</strong>
+                        <p>{{ order.customer_address }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- آیتم‌های سفارش -->
+        <div class="card">
+            <h2 class="card-title">
+                <i class="fas fa-boxes card-icon"></i>
+                اقلام سفارش
+            </h2>
+
+            <div class="order-items-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>محصول</th>
+                            <th>قیمت واحد</th>
+                            <th>تعداد</th>
+                            <th>جمع</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in order.items.all %}
+                        <tr>
+                            <td>
+                                <div class="product-info">
+                                    {% if item.product.main_image %}
+                                    <img src="{{ item.product.main_image.url }}" alt="{{ item.product_name }}" class="product-image">
+                                    {% else %}
+                                    <div class="product-image placeholder">
+                                        <i class="fas fa-image"></i>
+                                    </div>
+                                    {% endif %}
+                                    <div class="product-details">
+                                        <div class="product-name">{{ item.product_name }}</div>
+                                        {% if item.product.category %}
+                                        <small class="product-category">{{ item.product.category.name }}</small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="price">{{ item.product_price|floatformat:0 }} تومان</td>
+                            <td class="quantity">{{ item.quantity }}</td>
+                            <td class="total">{{ item.total_price|floatformat:0 }} تومان</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="3">جمع کل:</td>
+                            <td class="total-amount">{{ order.total_amount|floatformat:0 }} تومان</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+
+        <!-- اقدامات -->
+        {% if order.status == 'pending' %}
+        <div class="order-actions">
+            <h3 style="color: var(--primary-gold); margin-bottom: 1rem;">
+                <i class="fas fa-exclamation-triangle"></i>
+                اقدام لازم
+            </h3>
+            <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
+                این سفارش در انتظار پرداخت است. لطفاً برای تکمیل سفارش، مبلغ را پرداخت کرده و رسید را آپلود کنید.
+            </p>
+            <a href="{% url 'payment_page' order.id %}" class="btn btn-primary">
+                <i class="fas fa-credit-card"></i>
+                تکمیل پرداخت
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

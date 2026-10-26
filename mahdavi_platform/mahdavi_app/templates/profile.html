@@ -1,0 +1,816 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}پروفایل من - پلتفرم مهدوی{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 100px; min-height: 100vh;">
+    <!-- هدر پروفایل -->
+    <div class="card golden-border" style="margin-bottom: 2rem;">
+        <div class="profile-header">
+            <div class="profile-avatar">
+                {% if user.profile.avatar %}
+                <img src="{{ user.profile.avatar.url }}" alt="{{ user.get_full_name }}" class="avatar-image">
+                {% else %}
+                <div class="avatar-default">
+                    {{ user.first_name|first }}{{ user.last_name|first }}
+                </div>
+                {% endif %}
+                <div class="online-status"></div>
+            </div>
+            
+            <div class="profile-info">
+                <h1 class="profile-name">{{ user.get_full_name|default:user.username }}</h1>
+                <p class="profile-bio">{{ user.profile.bio|default:"عاشق امام زمان (عج) و در مسیر شناخت ایشان" }}</p>
+                
+                <div class="profile-stats">
+                    <div class="stat">
+                        <div class="stat-number">{{ user.profile.level|default:1 }}</div>
+                        <div class="stat-label">سطح معنوی</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">{{ user.profile.points|default:0 }}</div>
+                        <div class="stat-label">امتیاز کل</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">{{ user.profile.completed_stations|default:0 }}</div>
+                        <div class="stat-label">ایستگاه تکمیل شده</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">{{ user.profile.streak_days|default:0 }}</div>
+                        <div class="stat-label">روز متوالی</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="profile-actions">
+                <button class="btn btn-outline" onclick="editProfile()">
+                    <i class="fas fa-edit"></i>
+                    ویرایش پروفایل
+                </button>
+                <button class="btn btn-primary" onclick="shareProfile()">
+                    <i class="fas fa-share"></i>
+                    اشتراک‌گذاری
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-2" style="gap: 2rem;">
+        <!-- ستون سمت راست -->
+        <div class="grid" style="gap: 2rem;">
+            <!-- پیشرفت کلی -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="fas fa-chart-line"></i>
+                        پیشرفت کلی
+                    </h2>
+                </div>
+                
+                <div class="progress-section">
+                    <div class="progress-item">
+                        <div class="progress-info">
+                            <span>سفر معنوی</span>
+                            <span>{{ user.profile.overall_progress|default:25 }}%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: {{ user.profile.overall_progress|default:25 }}%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="progress-item">
+                        <div class="progress-info">
+                            <span>درک معارف</span>
+                            <span>{{ user.profile.knowledge_progress|default:40 }}%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: {{ user.profile.knowledge_progress|default:40 }}%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="progress-item">
+                        <div class="progress-info">
+                            <span>عملکرد عبادی</span>
+                            <span>{{ user.profile.worship_progress|default:60 }}%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: {{ user.profile.worship_progress|default:60 }}%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- نشان‌های افتخار -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="fas fa-medal"></i>
+                        نشان‌های افتخار
+                    </h2>
+                </div>
+                
+                <div class="badges-grid">
+                    <div class="badge-item gold">
+                        <i class="fas fa-crown"></i>
+                        <span>پیشگام مهدوی</span>
+                    </div>
+                    <div class="badge-item silver">
+                        <i class="fas fa-book-quran"></i>
+                        <span>قاری قرآن</span>
+                    </div>
+                    <div class="badge-item bronze">
+                        <i class="fas fa-pray"></i>
+                        <span>مداوم در دعا</span>
+                    </div>
+                    <div class="badge-item locked">
+                        <i class="fas fa-lock"></i>
+                        <span>عالِم مهدوی</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ستون سمت چپ -->
+        <div class="grid" style="gap: 2rem;">
+            <!-- فعالیت‌های اخیر -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="fas fa-history"></i>
+                        فعالیت‌های اخیر
+                    </h2>
+                </div>
+                
+                <div class="activity-list">
+                    <div class="activity-item">
+                        <div class="activity-icon success">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-title">ایستگاه "شناخت امام" تکمیل شد</div>
+                            <div class="activity-time">۲ ساعت پیش</div>
+                        </div>
+                        <div class="activity-points">+۵۰ امتیاز</div>
+                    </div>
+                    
+                    <div class="activity-item">
+                        <div class="activity-icon primary">
+                            <i class="fas fa-pray"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-title">دعای روز خوانده شد</div>
+                            <div class="activity-time">۵ ساعت پیش</div>
+                        </div>
+                        <div class="activity-points">+۱۰ امتیاز</div>
+                    </div>
+                    
+                    <div class="activity-item">
+                        <div class="activity-icon warning">
+                            <i class="fas fa-book-open"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-title">درس جدید شروع شد</div>
+                            <div class="activity-time">دیروز</div>
+                        </div>
+                        <div class="activity-points">+۲۰ امتیاز</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- اهداف هفتگی -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="fas fa-bullseye"></i>
+                        اهداف هفتگی
+                    </h2>
+                </div>
+                
+                <div class="goals-list">
+                    <div class="goal-item completed">
+                        <div class="goal-checkbox">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <div class="goal-content">
+                            <div class="goal-title">۵ ایستگاه تکمیل شود</div>
+                            <div class="goal-progress">۵/۵ تکمیل</div>
+                        </div>
+                    </div>
+                    
+                    <div class="goal-item in-progress">
+                        <div class="goal-checkbox">
+                            <div class="progress-circle" style="--progress: 60"></div>
+                        </div>
+                        <div class="goal-content">
+                            <div class="goal-title">۷ روز متوالی دعا</div>
+                            <div class="goal-progress">۴/۷ روز</div>
+                        </div>
+                    </div>
+                    
+                    <div class="goal-item">
+                        <div class="goal-checkbox">
+                            <i class="fas fa-circle"></i>
+                        </div>
+                        <div class="goal-content">
+                            <div class="goal-title">کسب ۲۰۰ امتیاز</div>
+                            <div class="goal-progress">۱۲۰/۲۰۰ امتیاز</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- آمار تفصیلی -->
+    <div class="card" style="margin-top: 2rem;">
+        <div class="card-header">
+            <h2 class="card-title">
+                <i class="fas fa-chart-bar"></i>
+                آمار تفصیلی
+            </h2>
+        </div>
+        
+        <div class="grid grid-4">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number">{{ user.profile.total_study_time|default:12 }}</div>
+                    <div class="stat-label">ساعت مطالعه</div>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-praying-hands"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number">{{ user.profile.prayers_count|default:45 }}</div>
+                    <div class="stat-label">دعاهای خوانده شده</div>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-tasks"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number">{{ user.profile.quizzes_passed|default:8 }}</div>
+                    <div class="stat-label">آزمون‌های گذرانده</div>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-calendar-day"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number">{{ user.profile.joining_days|default:30 }}</div>
+                    <div class="stat-label">روز عضویت</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* هدر پروفایل */
+    .profile-header {
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+        padding: 2rem;
+    }
+
+    .profile-avatar {
+        position: relative;
+        flex-shrink: 0;
+    }
+
+    .avatar-image,
+    .avatar-default {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        border: 4px solid var(--primary-gold);
+    }
+
+    .avatar-default {
+        background: linear-gradient(135deg, var(--primary-gold), var(--light-gold));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--dark-bg);
+        font-size: 2.5rem;
+        font-weight: bold;
+    }
+
+    .online-status {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        width: 20px;
+        height: 20px;
+        background: var(--success);
+        border: 3px solid var(--card-bg);
+        border-radius: 50%;
+    }
+
+    .profile-info {
+        flex: 1;
+    }
+
+    .profile-name {
+        color: var(--primary-gold);
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+        font-family: 'Lateef', serif;
+    }
+
+    .profile-bio {
+        color: var(--text-secondary);
+        margin-bottom: 1.5rem;
+        line-height: 1.6;
+    }
+
+    .profile-stats {
+        display: flex;
+        gap: 2rem;
+    }
+
+    .profile-stats .stat {
+        text-align: center;
+    }
+
+    .profile-stats .stat-number {
+        font-size: 1.8rem;
+        color: var(--primary-gold);
+        font-weight: bold;
+        margin-bottom: 0.25rem;
+    }
+
+    .profile-stats .stat-label {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+
+    .profile-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        flex-shrink: 0;
+    }
+
+    /* بخش پیشرفت */
+    .progress-section {
+        padding: 1.5rem;
+    }
+
+    .progress-item {
+        margin-bottom: 1.5rem;
+    }
+
+    .progress-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .progress-info {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+    }
+
+    .progress-bar {
+        height: 8px;
+        background: var(--hover-bg);
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--primary-gold), var(--light-gold));
+        border-radius: 4px;
+        transition: width 1s ease;
+    }
+
+    /* نشان‌ها */
+    .badges-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        padding: 1.5rem;
+    }
+
+    .badge-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1.5rem 1rem;
+        border-radius: 12px;
+        border: 2px solid var(--border-gold);
+        transition: all 0.3s ease;
+        text-align: center;
+    }
+
+    .badge-item:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .badge-item.gold {
+        background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(180, 150, 50, 0.05));
+        border-color: var(--primary-gold);
+    }
+
+    .badge-item.silver {
+        background: linear-gradient(135deg, rgba(192, 192, 192, 0.1), rgba(160, 160, 160, 0.05));
+        border-color: #c0c0c0;
+    }
+
+    .badge-item.bronze {
+        background: linear-gradient(135deg, rgba(205, 127, 50, 0.1), rgba(180, 110, 40, 0.05));
+        border-color: #cd7f32;
+    }
+
+    .badge-item.locked {
+        background: var(--hover-bg);
+        border-color: var(--text-muted);
+        opacity: 0.6;
+    }
+
+    .badge-item i {
+        font-size: 2rem;
+    }
+
+    .badge-item.gold i {
+        color: var(--primary-gold);
+    }
+
+    .badge-item.silver i {
+        color: #c0c0c0;
+    }
+
+    .badge-item.bronze i {
+        color: #cd7f32;
+    }
+
+    .badge-item.locked i {
+        color: var(--text-muted);
+    }
+
+    .badge-item span {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+    }
+
+    /* فعالیت‌ها */
+    .activity-list {
+        padding: 1rem;
+    }
+
+    .activity-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        border-bottom: 1px solid var(--border-gold);
+        transition: all 0.3s ease;
+    }
+
+    .activity-item:last-child {
+        border-bottom: none;
+    }
+
+    .activity-item:hover {
+        background: var(--hover-bg);
+        border-radius: 8px;
+    }
+
+    .activity-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .activity-icon.success {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--success);
+    }
+
+    .activity-icon.primary {
+        background: rgba(212, 175, 55, 0.1);
+        color: var(--primary-gold);
+    }
+
+    .activity-icon.warning {
+        background: rgba(245, 158, 11, 0.1);
+        color: var(--warning);
+    }
+
+    .activity-content {
+        flex: 1;
+    }
+
+    .activity-title {
+        color: var(--text-primary);
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+
+    .activity-time {
+        color: var(--text-muted);
+        font-size: 0.8rem;
+    }
+
+    .activity-points {
+        background: linear-gradient(135deg, var(--primary-gold), var(--dark-gold));
+        color: var(--dark-bg);
+        padding: 0.5rem 0.75rem;
+        border-radius: 12px;
+        font-weight: bold;
+        font-size: 0.8rem;
+        flex-shrink: 0;
+    }
+
+    /* اهداف */
+    .goals-list {
+        padding: 1rem;
+    }
+
+    .goal-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        border-bottom: 1px solid var(--border-gold);
+    }
+
+    .goal-item:last-child {
+        border-bottom: none;
+    }
+
+    .goal-checkbox {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .goal-item.completed .goal-checkbox {
+        background: var(--success);
+        color: white;
+    }
+
+    .goal-item.in-progress .goal-checkbox {
+        background: var(--primary-gold);
+        color: var(--dark-bg);
+    }
+
+    .goal-item:not(.completed):not(.in-progress) .goal-checkbox {
+        border: 2px solid var(--border-gold);
+        color: var(--text-muted);
+    }
+
+    .progress-circle {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: conic-gradient(var(--dark-bg) 0deg, var(--dark-bg) calc(360deg - var(--progress)*3.6deg), 
+                    currentColor 0deg, currentColor calc(var(--progress)*3.6deg));
+        position: relative;
+    }
+
+    .progress-circle::before {
+        content: '';
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        right: 2px;
+        bottom: 2px;
+        background: var(--primary-gold);
+        border-radius: 50%;
+    }
+
+    .goal-content {
+        flex: 1;
+    }
+
+    .goal-title {
+        color: var(--text-primary);
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+
+    .goal-progress {
+        color: var(--text-muted);
+        font-size: 0.8rem;
+    }
+
+    /* آمار */
+    .stat-card {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1.5rem;
+        background: var(--card-bg);
+        border: 1px solid var(--border-gold);
+        border-radius: 12px;
+        transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-3px);
+        border-color: var(--primary-gold);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .stat-card .stat-icon {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, var(--primary-gold), var(--light-gold));
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--dark-bg);
+        font-size: 1.2rem;
+        flex-shrink: 0;
+    }
+
+    .stat-content {
+        flex: 1;
+    }
+
+    .stat-card .stat-number {
+        font-size: 1.5rem;
+        color: var(--primary-gold);
+        font-weight: bold;
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-card .stat-label {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+
+    /* انیمیشن‌ها */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .card {
+        animation: fadeInUp 0.6s ease;
+    }
+
+    .card:nth-child(1) { animation-delay: 0.1s; }
+    .card:nth-child(2) { animation-delay: 0.2s; }
+    .card:nth-child(3) { animation-delay: 0.3s; }
+    .card:nth-child(4) { animation-delay: 0.4s; }
+
+    /* ریسپانسیو */
+    @media (max-width: 1024px) {
+        .grid-2 {
+            grid-template-columns: 1fr;
+        }
+        
+        .grid-4 {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .container {
+            padding-top: 80px;
+        }
+
+        .profile-header {
+            flex-direction: column;
+            text-align: center;
+            gap: 1.5rem;
+        }
+
+        .profile-stats {
+            justify-content: center;
+        }
+
+        .profile-actions {
+            flex-direction: row;
+        }
+
+        .badges-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .grid-4 {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .container {
+            padding-top: 70px;
+        }
+
+        .profile-stats {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .profile-actions {
+            flex-direction: column;
+        }
+
+        .activity-item {
+            flex-direction: column;
+            text-align: center;
+            gap: 0.75rem;
+        }
+
+        .stat-card {
+            flex-direction: column;
+            text-align: center;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // انیمیشن نوارهای پیشرفت
+        const progressBars = document.querySelectorAll('.progress-fill');
+        progressBars.forEach(bar => {
+            const finalWidth = bar.style.width;
+            bar.style.width = '0%';
+            
+            setTimeout(() => {
+                bar.style.transition = 'width 1s ease';
+                bar.style.width = finalWidth;
+            }, 500);
+        });
+
+        // کلیک روی نشان‌ها
+        const badgeItems = document.querySelectorAll('.badge-item');
+        badgeItems.forEach(badge => {
+            badge.addEventListener('click', function() {
+                if (this.classList.contains('locked')) {
+                    if (window.MahdaviApp) {
+                        window.MahdaviApp.showNotification('این نشان هنوز قفل است. برای کسب آن به فعالیت ادامه دهید.', 'info');
+                    }
+                } else {
+                    const badgeName = this.querySelector('span').textContent;
+                    if (window.MahdaviApp) {
+                        window.MahdaviApp.showNotification(`نشان "${badgeName}" را کسب کرده‌اید!`, 'success');
+                    }
+                }
+            });
+        });
+
+        window.shareProfile = function() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'پروفایل من در پلتفرم مهدوی',
+                    text: `من ${document.querySelector('.profile-name').textContent} هستم و در پلتفرم مهدوی در حال یادگیری معارف مهدویت می‌باشم.`,
+                    url: window.location.href
+                });
+            } else {
+                if (window.MahdaviApp) {
+                    window.MahdaviApp.showNotification('لینک پروفایل در حافظه کلیپ‌بورد کپی شد', 'success');
+                }
+            }
+        };
+
+        // انیمیشن ورود
+        const cards = document.querySelectorAll('.card');
+        cards.forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            
+            setTimeout(() => {
+                card.style.transition = 'all 0.6s ease';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, (index + 1) * 200);
+        });
+    });
+</script>
+{% endblock %}

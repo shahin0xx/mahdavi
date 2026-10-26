@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}شبکه اجتماعی مهدوی - نور مهدی{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/font-face.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Lateef:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --gold: #d4af37;
+            --dark-gold: #b8941f;
+            --light-gold: #f4e4a9;
+            --dark-blue: #1e3d59;
+            --darker-blue: #0f1c2e;
+            --text-light: #e8e6e3;
+            --text-lighter: #f0ede5;
+            --bg-dark: #0a0a0a;
+            --bg-darker: #050505;
+            --bg-card: rgba(15, 15, 15, 0.95);
+            --border-gold: rgba(212, 175, 55, 0.3);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Vazir', 'Lateef', Tahoma, sans-serif;
+        }
+
+        body {
+            background: var(--bg-darker);
+            color: var(--text-light);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* هدر شبکه اجتماعی */
+        .social-header {
+            background: rgba(10, 10, 10, 0.98);
+            backdrop-filter: blur(20px);
+            border-bottom: 2px solid var(--border-gold);
+            padding: 12px 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.8);
+        }
+        
+        .social-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .social-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+        
+        .social-logo i {
+            font-size: 1.8rem;
+            color: var(--gold);
+        }
+        
+        .social-logo-text h1 {
+            font-size: 1.3rem;
+            color: var(--gold);
+            font-family: 'Lateef', serif;
+            margin: 0;
+        }
+        
+        .nav-icons {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .nav-icon {
+            color: var(--text-light);
+            font-size: 1.3rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .nav-icon:hover {
+            color: var(--gold);
+            transform: scale(1.1);
+        }
+        
+        .nav-icon.active {
+            color: var(--gold);
+        }
+        
+        .badge {
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            background: #e74c3c;
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .user-avatar-nav {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--gold), var(--dark-gold));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #000;
+            font-size: 0.9rem;
+            overflow: hidden;
+        }
+        
+        .user-avatar-nav img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* محتوای اصلی */
+        .social-main {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            display: flex;
+            gap: 20px;
+        }
+        
+        .social-feed {
+            flex: 1;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .social-sidebar {
+            width: 300px;
+            flex-shrink: 0;
+        }
+        
+        /* کارت‌ها */
+        .card {
+            background: var(--bg-card);
+            backdrop-filter: blur(15px);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-gold);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-gold);
+        }
+        
+        .card-title {
+            font-size: 1.1rem;
+            color: var(--gold);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        /* دکمه‌ها */
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--gold), var(--dark-gold));
+            color: #000;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
+        }
+        
+        .btn-secondary {
+            background: rgba(40, 40, 40, 0.8);
+            color: var(--text-light);
+            border: 1px solid var(--border-gold);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(212, 175, 55, 0.1);
+        }
+        
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+        }
+        
+        /* استایل‌های عمومی */
+        .empty-state {
+            padding: 40px 20px;
+            text-align: center;
+            color: var(--text-light);
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            color: var(--gold);
+            margin-bottom: 15px;
+        }
+        
+        .empty-state h3 {
+            color: var(--gold);
+            margin-bottom: 10px;
+        }
+
+        /* پیام‌ها */
+        .messages-container {
+            margin-bottom: 20px;
+        }
+        
+        .alert {
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            border: 1px solid;
+        }
+        
+        .alert-success {
+            background: rgba(39, 174, 96, 0.2);
+            border-color: #27ae60;
+            color: #27ae60;
+        }
+        
+        .alert-error {
+            background: rgba(231, 76, 60, 0.2);
+            border-color: #e74c3c;
+            color: #e74c3c;
+        }
+
+        /* رسپانسیو */
+        @media (max-width: 768px) {
+            .social-main {
+                flex-direction: column;
+                padding: 15px;
+            }
+            
+            .social-sidebar {
+                width: 100%;
+                order: -1;
+            }
+            
+            .social-feed {
+                max-width: 100%;
+            }
+            
+            .nav-icons {
+                gap: 15px;
+            }
+            
+            .nav-icon {
+                font-size: 1.2rem;
+            }
+            
+            .social-nav {
+                padding: 0 15px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .social-main {
+                padding: 10px;
+            }
+            
+            .card {
+                padding: 15px;
+            }
+            
+            .nav-icons {
+                gap: 12px;
+            }
+            
+            .nav-icon {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- هدر شبکه اجتماعی -->
+    <header class="social-header">
+        <nav class="social-nav">
+            <!-- لوگو -->
+            <a href="{% url 'social_home' %}" class="social-logo">
+                <i class="fas fa-users"></i>
+                <div class="social-logo-text">
+                    <h1>شبکه اجتماعی مهدوی</h1>
+                </div>
+            </a>
+            
+            <!-- آیکون‌های ناوبری -->
+            <div class="nav-icons">
+                <a href="{% url 'social_home' %}" class="nav-icon {% if request.resolver_match.url_name == 'social_home' %}active{% endif %}">
+                    <i class="fas fa-home"></i>
+                </a>
+                <a href="{% url 'search_users' %}" class="nav-icon {% if request.resolver_match.url_name == 'search_users' %}active{% endif %}">
+                    <i class="fas fa-search"></i>
+                </a>
+                <a href="{% url 'create_post' %}" class="nav-icon {% if request.resolver_match.url_name == 'create_post' %}active{% endif %}">
+                    <i class="fas fa-plus-square"></i>
+                </a>
+                <a href="{% url 'create_story' %}" class="nav-icon {% if request.resolver_match.url_name == 'create_story' %}active{% endif %}">
+                    <i class="fas fa-circle-plus"></i>
+                </a>
+                
+                {% if user.is_authenticated and user.social_profile.is_private and pending_requests_count > 0 %}
+                <a href="{% url 'follow_requests' %}" class="nav-icon {% if request.resolver_match.url_name == 'follow_requests' %}active{% endif %}">
+                    <i class="fas fa-user-clock"></i>
+                    <span class="badge">{{ pending_requests_count }}</span>
+                </a>
+                {% endif %}
+                
+                <a href="{% url 'social_profile' %}" class="nav-icon">
+                    <div class="user-avatar-nav">
+                        {% if user.profile_image %}
+                            <img src="{{ user.profile_image.url }}" alt="{{ user.get_full_name }}">
+                        {% else %}
+                            <span>{{ user.first_name|first }}</span>
+                        {% endif %}
+                    </div>
+                </a>
+                
+                <a href="{% url 'index' %}" class="nav-icon" title="بازگشت به سایت اصلی">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- محتوای اصلی -->
+    <main class="social-main">
+        <div class="social-feed">
+            {% if messages %}
+            <div class="messages-container">
+                {% for message in messages %}
+                <div class="alert alert-{% if message.tags == 'error' %}error{% else %}success{% endif %} fade-in">
+                    <i class="fas fa-{% if message.tags == 'error' %}exclamation-circle{% else %}check-circle{% endif %}"></i>
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% block content %}
+            {% endblock %}
+        </div>
+        
+        <aside class="social-sidebar">
+            {% block sidebar %}
+            <!-- پروفایل کاربر -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">پروفایل شما</h3>
+                    <a href="{% url 'social_profile' %}" class="btn btn-secondary btn-sm">مشاهده</a>
+                </div>
+                <div class="sidebar-profile">
+                    <div class="profile-avatar">
+                        {% if user.profile_image %}
+                            <img src="{{ user.profile_image.url }}" alt="{{ user.get_full_name }}">
+                        {% else %}
+                            <span>{{ user.first_name|first }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="profile-info">
+                        <h4>{{ user.get_full_name }}</h4>
+                        <p>@{{ user.phone }}</p>
+                        <div class="profile-stats">
+                            <div class="stat">
+                                <strong>{{ user.posts.count }}</strong>
+                                <span>پست</span>
+                            </div>
+                            <div class="stat">
+                                <strong>{{ user.followers.count }}</strong>
+                                <span>دنبال‌کننده</span>
+                            </div>
+                            <div class="stat">
+                                <strong>{{ user.following.count }}</strong>
+                                <span>دنبال‌شونده</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- پیشنهاد کاربران -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">پیشنهاد برای دنبال کردن</h3>
+                </div>
+                <div class="suggested-users">
+                    {% for suggested_user in suggested_users %}
+                    <div class="suggested-user">
+                        <div class="user-avatar">
+                            {% if suggested_user.profile_image %}
+                                <img src="{{ suggested_user.profile_image.url }}" alt="{{ suggested_user.get_full_name }}">
+                            {% else %}
+                                <span>{{ suggested_user.first_name|first }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="user-details">
+                            <a href="{% url 'social_profile' suggested_user.id %}" class="user-name">{{ suggested_user.get_full_name }}</a>
+                            <form method="post" action="{% url 'follow_user' suggested_user.id %}" class="follow-form">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-primary btn-sm">دنبال کردن</button>
+                            </form>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="no-suggestions">پیشنهادی موجود نیست</p>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endblock %}
+        </aside>
+    </main>
+
+    <style>
+    .sidebar-profile {
+        text-align: center;
+    }
+    
+    .profile-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--gold), var(--dark-gold));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        font-weight: bold;
+        color: #000;
+        margin: 0 auto 15px;
+        overflow: hidden;
+    }
+    
+    .profile-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .profile-info h4 {
+        color: var(--gold);
+        margin-bottom: 5px;
+    }
+    
+    .profile-info p {
+        color: var(--text-light);
+        opacity: 0.7;
+        margin-bottom: 15px;
+        font-size: 0.9rem;
+    }
+    
+    .profile-stats {
+        display: flex;
+        justify-content: space-around;
+    }
+    
+    .stat {
+        text-align: center;
+    }
+    
+    .stat strong {
+        display: block;
+        color: var(--gold);
+        font-size: 1.1rem;
+    }
+    
+    .stat span {
+        font-size: 0.8rem;
+        color: var(--text-light);
+        opacity: 0.7;
+    }
+    
+    .suggested-users {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .suggested-user {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px;
+        border-radius: 8px;
+        transition: background 0.3s ease;
+    }
+    
+    .suggested-user:hover {
+        background: rgba(212, 175, 55, 0.1);
+    }
+    
+    .suggested-user .user-avatar {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+    
+    .user-details {
+        flex: 1;
+    }
+    
+    .user-name {
+        color: var(--text-light);
+        text-decoration: none;
+        font-size: 0.9rem;
+        display: block;
+        margin-bottom: 4px;
+    }
+    
+    .user-name:hover {
+        color: var(--gold);
+    }
+    
+    .follow-form {
+        margin: 0;
+    }
+    
+    .no-suggestions {
+        text-align: center;
+        color: var(--text-light);
+        opacity: 0.7;
+        font-size: 0.9rem;
+        padding: 10px;
+    }
+    
+    .fade-in {
+        animation: fadeIn 0.5s ease-out;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    </style>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

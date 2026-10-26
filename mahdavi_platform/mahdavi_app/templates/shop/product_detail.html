@@ -1,0 +1,390 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ product.name }} - نور مهدی{% endblock %}
+
+{% block extra_css %}
+<style>
+    .product-detail-section {
+        padding: 2rem 0;
+    }
+
+    .breadcrumb {
+        margin-bottom: 2rem;
+        color: var(--text-secondary);
+    }
+
+    .breadcrumb a {
+        color: var(--primary-gold);
+        text-decoration: none;
+    }
+
+    .product-gallery {
+        position: relative;
+    }
+
+    .main-image {
+        width: 100%;
+        max-height: 400px;
+        object-fit: contain;
+        border-radius: 12px;
+        margin-bottom: 1rem;
+    }
+
+    .gallery-thumbs {
+        display: flex;
+        gap: 0.5rem;
+        overflow-x: auto;
+        padding: 0.5rem 0;
+    }
+
+    .thumb {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 8px;
+        cursor: pointer;
+        border: 2px solid var(--border-gold);
+        transition: border-color var(--transition-fast);
+    }
+
+    .thumb:hover,
+    .thumb.active {
+        border-color: var(--primary-gold);
+    }
+
+    .product-unavailable {
+        background: #e74c3c;
+        color: white;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        text-align: center;
+    }
+
+    .discount-badge {
+        background: var(--primary-gold);
+        color: #000;
+        padding: 0.5rem 1rem;
+        border-radius: 25px;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    .stock-info {
+        margin: 1rem 0;
+    }
+
+    .stock-high { color: #27ae60; }
+    .stock-low { color: #f39c12; }
+    .stock-none { color: #e74c3c; }
+
+    .review-section {
+        margin-top: 2rem;
+    }
+
+    .review-form {
+        background: rgba(30, 30, 30, 0.8);
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        border: 1px solid var(--border-gold);
+    }
+
+    .user-review {
+        background: rgba(212, 175, 55, 0.1);
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        border: 1px solid var(--border-gold);
+    }
+
+    .related-products {
+        margin-top: 3rem;
+    }
+
+    @media (max-width: 768px) {
+        .product-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .action-buttons {
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="product-detail-section fade-in">
+    <div class="container">
+        <!-- مسیر ناوبری -->
+        <div class="breadcrumb">
+            <a href="{% url 'shop_home' %}">فروشگاه</a>
+            <span style="margin: 0 10px;">/</span>
+            <a href="{% url 'product_list' %}?category={{ product.category.id }}">
+                {{ product.category.name }}
+            </a>
+            <span style="margin: 0 10px;">/</span>
+            <span>{{ product.name }}</span>
+        </div>
+
+        <div class="grid grid-2">
+            <!-- ستون تصاویر -->
+            <div class="card product-gallery">
+                <div style="text-align: center;">
+                    {% if product.main_image %}
+                    <img src="{{ product.main_image.url }}" alt="{{ product.name }}" 
+                         class="main-image" id="mainProductImage">
+                    {% else %}
+                    <div class="main-image placeholder">
+                        <i class="fas fa-image" style="color: var(--primary-gold); font-size: 3rem;"></i>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- گالری تصاویر -->
+                {% if product.images.all %}
+                <div class="gallery-thumbs">
+                    {% for image in product.images.all %}
+                    <img src="{{ image.image.url }}" alt="{{ image.alt_text }}" 
+                         class="thumb" 
+                         onclick="document.getElementById('mainProductImage').src = this.src">
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- ستون اطلاعات -->
+            <div class="card">
+                <!-- وضعیت محصول -->
+                {% if not product.is_available %}
+                <div class="product-unavailable">
+                    <i class="fas fa-times-circle"></i>
+                    این محصول در حال حاضر موجود نمی‌باشد
+                </div>
+                {% endif %}
+
+                <h1 style="color: var(--primary-gold); margin-bottom: 1rem; font-size: 1.5rem;">{{ product.name }}</h1>
+                
+                <div style="margin-bottom: 1.5rem;">
+                    {% if product.has_discount %}
+                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
+                        <span class="price-large">{{ product.final_price|floatformat:0 }} تومان</span>
+                        <span class="price-old">{{ product.price|floatformat:0 }} تومان</span>
+                        <span class="discount-badge">{{ product.discount_percentage }}% تخفیف</span>
+                    </div>
+                    {% else %}
+                    <span class="price-large">{{ product.price|floatformat:0 }} تومان</span>
+                    {% endif %}
+                </div>
+
+                <!-- موجودی -->
+                <div class="stock-info">
+                    <span>
+                        <i class="fas fa-box"></i>
+                        موجودی: 
+                        {% if product.stock_quantity > 10 %}
+                        <span class="stock-high">{{ product.stock_quantity }} عدد در انبار</span>
+                        {% elif product.stock_quantity > 0 %}
+                        <span class="stock-low">فقط {{ product.stock_quantity }} عدد باقی مانده</span>
+                        {% else %}
+                        <span class="stock-none">ناموجود</span>
+                        {% endif %}
+                    </span>
+                </div>
+
+                <!-- دکمه‌های اقدام -->
+                <div class="action-buttons">
+                    {% if product.is_available %}
+                    <form method="post" action="{% url 'add_to_cart' product.id %}" class="add-to-cart-form">
+                        {% csrf_token %}
+                        <div style="display: flex; gap: 1rem;">
+                            <input type="number" name="quantity" value="1" min="1" max="{{ product.stock_quantity }}" 
+                                   class="form-control quantity-input">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-cart-plus"></i>
+                                افزودن به سبد خرید
+                            </button>
+                        </div>
+                    </form>
+                    {% endif %}
+
+                    <!-- علاقه‌مندی -->
+                    {% if user.is_authenticated %}
+                        {% if in_wishlist %}
+                        <a href="{% url 'remove_from_wishlist' product.id %}" class="btn btn-secondary">
+                            <i class="fas fa-heart" style="color: #e74c3c;"></i>
+                            حذف از علاقه‌مندی
+                        </a>
+                        {% else %}
+                        <a href="{% url 'add_to_wishlist' product.id %}" class="btn btn-secondary">
+                            <i class="fas fa-heart"></i>
+                            افزودن به علاقه‌مندی
+                        </a>
+                        {% endif %}
+                    {% endif %}
+                </div>
+
+                <!-- توضیحات کوتاه -->
+                {% if product.short_description %}
+                <div class="short-description">
+                    <h3 style="color: var(--primary-gold); margin-bottom: 0.5rem;">توضیحات مختصر</h3>
+                    <p style="color: var(--text-secondary); line-height: 1.6;">{{ product.short_description }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- توضیحات کامل -->
+        <div class="card">
+            <h2 style="color: var(--primary-gold); margin-bottom: 1rem;">توضیحات محصول</h2>
+            <div style="color: var(--text-secondary); line-height: 1.8;">
+                {{ product.description|linebreaks }}
+            </div>
+        </div>
+
+        <!-- نظرات -->
+        <div class="card review-section">
+            <h2 style="color: var(--primary-gold); margin-bottom: 1.5rem;">
+                نظرات کاربران
+                <span style="color: var(--text-secondary); font-size: 1rem; margin-right: 1rem;">
+                    ({{ review_count }} نظر)
+                </span>
+                <span style="color: var(--primary-gold); font-size: 1rem;">
+                    <i class="fas fa-star"></i>
+                    {{ avg_rating }} از 5
+                </span>
+            </h2>
+
+            <!-- فرم نظر -->
+            {% if user.is_authenticated and not user_review and review_form %}
+            <div class="review-form">
+                <h3 style="color: var(--primary-gold); margin-bottom: 1rem;">ثبت نظر</h3>
+                <form method="post" action="{% url 'submit_review' product.id %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label class="form-label">امتیاز شما</label>
+                        <div class="rating-options">
+                            {% for choice in review_form.rating %}
+                            <label class="rating-option">
+                                {{ choice.tag }}
+                                <i class="fas fa-star"></i>
+                                {{ choice.choice_label }}
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">نظر شما</label>
+                        {{ review_form.comment }}
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i>
+                        ارسال نظر
+                    </button>
+                </form>
+            </div>
+            {% elif user_review %}
+            <div class="user-review">
+                <h4 style="color: var(--primary-gold); margin-bottom: 0.5rem;">نظر شما</h4>
+                <div style="color: var(--text-secondary);">
+                    <div class="rating-stars" style="margin-bottom: 0.5rem;">
+                        {% for i in "12345" %}
+                        <i class="fas fa-star" style="color: {% if forloop.counter <= user_review.rating %}var(--primary-gold){% else %}var(--border-gold){% endif %};"></i>
+                        {% endfor %}
+                    </div>
+                    <p>{{ user_review.comment }}</p>
+                    <small style="opacity: 0.7;">{{ user_review.created_at|date:"Y/m/d" }}</small>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- لیست نظرات -->
+            {% if reviews %}
+            <div class="reviews-list">
+                {% for review in reviews %}
+                <div class="review-item">
+                    <div class="review-header">
+                        <div>
+                            <strong style="color: var(--text-primary);">{{ review.user.get_full_name }}</strong>
+                            <div class="rating-stars">
+                                {% for i in "12345" %}
+                                <i class="fas fa-star" style="color: {% if forloop.counter <= review.rating %}var(--primary-gold){% else %}var(--border-gold){% endif %}; font-size: 0.9rem;"></i>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <small style="color: var(--text-secondary); opacity: 0.7;">{{ review.created_at|date:"Y/m/d" }}</small>
+                    </div>
+                    <p style="color: var(--text-secondary); line-height: 1.6; margin: 0.5rem 0 0 0;">{{ review.comment }}</p>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-reviews">
+                <i class="fas fa-comments" style="font-size: 2rem; color: var(--border-gold); margin-bottom: 1rem;"></i>
+                <p style="color: var(--text-secondary);">هنوز نظری برای این محصول ثبت نشده است.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- محصولات مرتبط -->
+        {% if related_products %}
+        <div class="card related-products">
+            <h2 style="color: var(--primary-gold); margin-bottom: 1.5rem;">محصولات مرتبط</h2>
+            <div class="grid grid-4">
+                {% for product in related_products %}
+                <div class="card product-card">
+                    {% if product.main_image %}
+                    <img src="{{ product.main_image.url }}" alt="{{ product.name }}" 
+                         class="product-image">
+                    {% else %}
+                    <div class="product-image placeholder">
+                        <i class="fas fa-image"></i>
+                    </div>
+                    {% endif %}
+                    
+                    <h4 style="color: var(--text-primary); margin-bottom: 0.5rem; font-size: 0.9rem;">{{ product.name }}</h4>
+                    
+                    <div class="product-price">
+                        <span>{{ product.final_price|floatformat:0 }} تومان</span>
+                    </div>
+                    
+                    <a href="{% url 'product_detail' product.id %}" class="btn btn-primary">
+                        <i class="fas fa-eye"></i>
+                        مشاهده
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+// مدیریت گالری تصاویر
+document.addEventListener('DOMContentLoaded', function() {
+    const mainImage = document.getElementById('mainProductImage');
+    const thumbs = document.querySelectorAll('.thumb');
+    
+    if (mainImage && thumbs.length > 0) {
+        thumbs.forEach(thumb => {
+            thumb.addEventListener('click', function() {
+                // حذف کلاس active از همه thumbs
+                thumbs.forEach(t => t.classList.remove('active'));
+                // اضافه کردن کلاس active به thumb کلیک شده
+                this.classList.add('active');
+                // بروزرسانی تصویر اصلی
+                mainImage.src = this.src;
+            });
+        });
+        
+        // فعال کردن اولین thumb به صورت پیش‌فرض
+        if (thumbs[0]) {
+            thumbs[0].classList.add('active');
+        }
+    }
+});
+</script>
+{% endblock %}

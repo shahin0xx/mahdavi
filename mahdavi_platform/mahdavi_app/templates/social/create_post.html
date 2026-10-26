@@ -1,0 +1,214 @@
+{% extends 'social/base.html' %}
+{% load static %}
+
+{% block title %}ایجاد پست جدید - نور مهدی{% endblock %}
+
+{% block content %}
+<div class="create-post">
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">
+                <i class="fas fa-plus-circle card-icon"></i>
+                ایجاد پست جدید
+            </h2>
+            <a href="{% url 'social_home' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-right"></i>
+                بازگشت
+            </a>
+        </div>
+        
+        <div class="post-form">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label class="form-label">کپشن</label>
+                    <textarea name="caption" class="form-control" rows="4" placeholder="چه خبر؟...">{{ form.caption.value|default:'' }}</textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">نوع محتوا</label>
+                    <div class="content-type-selector">
+                        <div class="type-option" data-type="text">
+                            <i class="fas fa-file-alt"></i>
+                            <span>متن</span>
+                        </div>
+                        <div class="type-option" data-type="image">
+                            <i class="fas fa-image"></i>
+                            <span>عکس</span>
+                        </div>
+                        <div class="type-option" data-type="video">
+                            <i class="fas fa-video"></i>
+                            <span>ویدیو</span>
+                        </div>
+                        <div class="type-option" data-type="audio">
+                            <i class="fas fa-music"></i>
+                            <span>صوت</span>
+                        </div>
+                        <div class="type-option" data-type="prayer">
+                            <i class="fas fa-pray"></i>
+                            <span>دعا</span>
+                        </div>
+                        <div class="type-option" data-type="article">
+                            <i class="fas fa-newspaper"></i>
+                            <span>مطلب</span>
+                        </div>
+                    </div>
+                    <input type="hidden" name="content_type" id="content_type" value="text">
+                </div>
+                
+                <div class="media-upload" id="media-upload">
+                    <div class="upload-section" id="image-upload" style="display: none;">
+                        <label class="form-label">عکس</label>
+                        <input type="file" name="image" accept="image/*" class="form-control">
+                    </div>
+                    
+                    <div class="upload-section" id="video-upload" style="display: none;">
+                        <label class="form-label">ویدیو</label>
+                        <input type="file" name="video" accept="video/*" class="form-control">
+                    </div>
+                    
+                    <div class="upload-section" id="audio-upload" style="display: none;">
+                        <label class="form-label">صوت</label>
+                        <input type="file" name="audio" accept="audio/*" class="form-control">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">مکان (اختیاری)</label>
+                    <input type="text" name="location" value="{{ form.location.value|default:'' }}" class="form-control" placeholder="مکان">
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-share"></i>
+                        انتشار پست
+                    </button>
+                    <a href="{% url 'social_home' %}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i>
+                        انصراف
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.create-post {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.post-form {
+    padding: 20px 0;
+}
+
+.content-type-selector {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.type-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 15px 10px;
+    background: rgba(30, 30, 30, 0.8);
+    border: 2px solid var(--border-gold);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.type-option:hover {
+    background: rgba(212, 175, 55, 0.1);
+    border-color: var(--gold);
+}
+
+.type-option.active {
+    background: rgba(212, 175, 55, 0.2);
+    border-color: var(--gold);
+    color: var(--gold);
+}
+
+.type-option i {
+    font-size: 1.5rem;
+    color: var(--gold);
+}
+
+.type-option span {
+    font-size: 0.8rem;
+}
+
+.media-upload {
+    margin: 20px 0;
+}
+
+.upload-section {
+    padding: 15px;
+    background: rgba(30, 30, 30, 0.5);
+    border-radius: 8px;
+    border: 1px solid var(--border-gold);
+}
+
+@media (max-width: 768px) {
+    .content-type-selector {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .content-type-selector {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const typeOptions = document.querySelectorAll('.type-option');
+    const contentTypeInput = document.getElementById('content_type');
+    const mediaUpload = document.getElementById('media-upload');
+    const uploadSections = {
+        image: document.getElementById('image-upload'),
+        video: document.getElementById('video-upload'),
+        audio: document.getElementById('audio-upload')
+    };
+    
+    // انتخاب نوع محتوا
+    typeOptions.forEach(option => {
+        option.addEventListener('click', function() {
+            // حذف کلاس active از همه
+            typeOptions.forEach(opt => opt.classList.remove('active'));
+            // اضافه کردن کلاس active به گزینه انتخاب شده
+            this.classList.add('active');
+            
+            const selectedType = this.dataset.type;
+            contentTypeInput.value = selectedType;
+            
+            // مخفی کردن تمام بخش‌های آپلود
+            Object.values(uploadSections).forEach(section => {
+                if (section) section.style.display = 'none';
+            });
+            
+            // نمایش بخش آپلود مربوطه
+            if (selectedType === 'image' && uploadSections.image) {
+                uploadSections.image.style.display = 'block';
+            } else if (selectedType === 'video' && uploadSections.video) {
+                uploadSections.video.style.display = 'block';
+            } else if (selectedType === 'audio' && uploadSections.audio) {
+                uploadSections.audio.style.display = 'block';
+            }
+        });
+    });
+    
+    // انتخاب پیش‌فرض
+    typeOptions[0].click();
+});
+</script>
+{% endblock %}

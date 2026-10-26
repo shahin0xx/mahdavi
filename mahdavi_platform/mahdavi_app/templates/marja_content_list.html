@@ -1,0 +1,847 @@
+<!-- mahdavi_app/templates/marja_content_list.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card fade-in">
+    <div class="card-header" style="text-align: center; border-bottom: none; padding: 20px;">
+        <div style="margin-bottom: 10px;">
+            <i class="fas fa-book-open" style="font-size: 2.5rem; color: var(--gold);"></i>
+        </div>
+        <h1 class="card-title" style="font-size: 1.8rem; margin-bottom: 8px; font-family: 'Lateef', serif;">
+            محتوای مراجع تقلید
+        </h1>
+        <p style="font-size: 1rem; opacity: 0.8; margin: 0; line-height: 1.5;">
+            جدیدترین مطالب آموزشی از مراجع مورد علاقه شما
+        </p>
+    </div>
+</div>
+
+<!-- فیلترها و جستجو -->
+<div class="card fade-in">
+    <div class="content-filters">
+        <div class="filter-section">
+            <div class="filter-group">
+                <label for="content-type-filter">
+                    <i class="fas fa-filter"></i>
+                    فیلتر بر اساس نوع محتوا:
+                </label>
+                <select id="content-type-filter" class="filter-select">
+                    <option value="all">همه انواع</option>
+                    <option value="article">مقاله</option>
+                    <option value="video">ویدیو</option>
+                    <option value="audio">پادکست</option>
+                    <option value="image">عکس</option>
+                    <option value="story">داستان</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="marja-filter">
+                    <i class="fas fa-user-tie"></i>
+                    فیلتر بر اساس مرجع:
+                </label>
+                <select id="marja-filter" class="filter-select">
+                    <option value="all">همه مراجع</option>
+                    <!-- این قسمت می‌تواند با داده‌های واقعی پر شود -->
+                </select>
+            </div>
+        </div>
+        
+        <div class="search-section">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="جستجو در محتواها..." class="search-input" id="content-search">
+            </div>
+            <button class="btn btn-primary" id="search-btn">
+                <i class="fas fa-search"></i>
+                جستجو
+            </button>
+        </div>
+    </div>
+</div>
+
+{% if contents %}
+<!-- لیست محتواها -->
+<div class="contents-grid">
+    {% for content in contents %}
+    <div class="content-card {% if content.id in completed_contents %}completed{% endif %}" 
+         data-content-type="{{ content.content_type }}"
+         data-marja="{{ content.marja.id }}">
+        <div class="content-header">
+            <div class="content-type-badge {{ content.content_type }}">
+                {% if content.content_type == 'article' %}
+                <i class="fas fa-newspaper"></i>
+                {% elif content.content_type == 'video' %}
+                <i class="fas fa-video"></i>
+                {% elif content.content_type == 'audio' %}
+                <i class="fas fa-podcast"></i>
+                {% elif content.content_type == 'image' %}
+                <i class="fas fa-image"></i>
+                {% else %}
+                <i class="fas fa-book"></i>
+                {% endif %}
+                <span>{{ content.get_content_type_display }}</span>
+            </div>
+            
+            {% if content.id in completed_contents %}
+            <div class="completion-badge">
+                <i class="fas fa-check-circle"></i>
+                تکمیل شده
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="content-thumbnail">
+            {% if content.thumbnail %}
+            <img src="{{ content.thumbnail.url }}" alt="{{ content.title }}" class="thumbnail-image">
+            {% else %}
+            <div class="thumbnail-placeholder {{ content.content_type }}">
+                {% if content.content_type == 'article' %}
+                <i class="fas fa-newspaper"></i>
+                {% elif content.content_type == 'video' %}
+                <i class="fas fa-video"></i>
+                {% elif content.content_type == 'audio' %}
+                <i class="fas fa-podcast"></i>
+                {% elif content.content_type == 'image' %}
+                <i class="fas fa-image"></i>
+                {% else %}
+                <i class="fas fa-book"></i>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="content-body">
+            <h3 class="content-title">{{ content.title }}</h3>
+            
+            <div class="content-meta">
+                <div class="marja-info">
+                    <div class="marja-avatar-small">
+                        {% if content.marja.profile_image %}
+                        <img src="{{ content.marja.profile_image.url }}" alt="{{ content.marja.get_full_name }}">
+                        {% else %}
+                        <div class="avatar-default-xs">
+                            {{ content.marja.first_name|first|upper }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    <span class="marja-name">{{ content.marja.get_full_name }}</span>
+                </div>
+                
+                <div class="content-date">
+                    <i class="fas fa-calendar"></i>
+                    {{ content.created_date|date:"Y/m/d" }}
+                </div>
+            </div>
+
+            <div class="content-excerpt">
+                {{ content.content|truncatewords:20|striptags }}
+            </div>
+        </div>
+
+        <div class="content-footer">
+            <div class="content-points">
+                <i class="fas fa-star"></i>
+                {{ content.points }} امتیاز
+            </div>
+            
+            <div class="content-actions">
+                {% if content.id in completed_contents %}
+                <span class="btn btn-completed">
+                    <i class="fas fa-check"></i>
+                    مطالعه شده
+                </span>
+                {% else %}
+                <a href="{% url 'marja_content_detail' content.id %}" class="btn btn-primary">
+                    <i class="fas fa-play"></i>
+                    مشاهده محتوا
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- صفحه‌بندی -->
+<div class="card fade-in">
+    <div class="pagination">
+        <button class="pagination-btn prev" disabled>
+            <i class="fas fa-chevron-right"></i>
+            قبلی
+        </button>
+        
+        <div class="page-numbers">
+            <span class="page-number active">1</span>
+            <span class="page-number">2</span>
+            <span class="page-number">3</span>
+            <span class="page-dots">...</span>
+            <span class="page-number">10</span>
+        </div>
+        
+        <button class="pagination-btn next">
+            بعدی
+            <i class="fas fa-chevron-left"></i>
+        </button>
+    </div>
+</div>
+
+{% else %}
+<!-- حالت خالی -->
+<div class="card fade-in empty-state">
+    <div class="empty-content">
+        <i class="fas fa-book-open"></i>
+        <h3>محتوایی یافت نشد</h3>
+        <p>هنوز محتوایی از مراجع مورد علاقه شما منتشر نشده است.</p>
+        
+        {% if not user_following_any_marja %}
+        <div class="empty-actions">
+            <p>برای مشاهده محتوا، ابتدا مراجع تقلید را دنبال کنید:</p>
+            <a href="{% url 'marja_list' %}" class="btn btn-primary">
+                <i class="fas fa-users"></i>
+                مشاهده مراجع
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+<!-- راهنمای انواع محتوا -->
+<div class="card fade-in">
+    <div class="card-header">
+        <h2 class="card-title">
+            <i class="fas fa-info-circle card-icon"></i>
+            انواع محتوا
+        </h2>
+    </div>
+    <div class="content-types-guide">
+        <div class="content-type-item">
+            <div class="type-icon article">
+                <i class="fas fa-newspaper"></i>
+            </div>
+            <div class="type-info">
+                <h4>مقاله</h4>
+                <p>مطالب نوشتاری و تحلیلی</p>
+            </div>
+        </div>
+        <div class="content-type-item">
+            <div class="type-icon video">
+                <i class="fas fa-video"></i>
+            </div>
+            <div class="type-info">
+                <h4>ویدیو</h4>
+                <p>محتوای تصویری آموزشی</p>
+            </div>
+        </div>
+        <div class="content-type-item">
+            <div class="type-icon audio">
+                <i class="fas fa-podcast"></i>
+            </div>
+            <div class="type-info">
+                <h4>پادکست</h4>
+                <p>محتوای صوتی</p>
+            </div>
+        </div>
+        <div class="content-type-item">
+            <div class="type-icon image">
+                <i class="fas fa-image"></i>
+            </div>
+            <div class="type-info">
+                <h4>عکس</h4>
+                <p>محتوای تصویری</p>
+            </div>
+        </div>
+        <div class="content-type-item">
+            <div class="type-icon story">
+                <i class="fas fa-book"></i>
+            </div>
+            <div class="type-info">
+                <h4>داستان</h4>
+                <p>داستان‌های مذهبی و اخلاقی</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* فیلترها و جستجو */
+    .content-filters {
+        padding: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 30px;
+        flex-wrap: wrap;
+    }
+
+    .filter-section {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .filter-group label {
+        font-size: 0.9rem;
+        color: var(--text-light);
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .filter-select {
+        padding: 8px 12px;
+        background: rgba(30,30,30,0.8);
+        border: 1px solid var(--border-gold);
+        border-radius: 6px;
+        color: var(--text-light);
+        min-width: 150px;
+        font-size: 0.85rem;
+    }
+
+    .search-section {
+        display: flex;
+        align-items: flex-end;
+        gap: 10px;
+    }
+
+    .search-box {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .search-box i {
+        position: absolute;
+        right: 12px;
+        color: var(--gold);
+        opacity: 0.7;
+    }
+
+    .search-input {
+        padding: 8px 35px 8px 12px;
+        background: rgba(30,30,30,0.8);
+        border: 1px solid var(--border-gold);
+        border-radius: 6px;
+        color: var(--text-light);
+        width: 250px;
+        font-size: 0.85rem;
+    }
+
+    /* گرید محتواها */
+    .contents-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    /* کارت محتوا */
+    .content-card {
+        background: linear-gradient(145deg, rgba(20,20,20,0.95), rgba(30,30,30,0.95));
+        border-radius: 12px;
+        padding: 20px;
+        border: 1px solid var(--border-gold);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        height: 380px;
+    }
+
+    .content-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(212, 175, 55, 0.2);
+    }
+
+    .content-card.completed {
+        border-color: #27ae60;
+    }
+
+    /* هدر کارت */
+    .content-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 15px;
+    }
+
+    .content-type-badge {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 10px;
+        border-radius: 15px;
+        font-size: 0.75rem;
+        font-weight: bold;
+    }
+
+    .content-type-badge.article {
+        background: rgba(52, 152, 219, 0.2);
+        color: #3498db;
+    }
+
+    .content-type-badge.video {
+        background: rgba(231, 76, 60, 0.2);
+        color: #e74c3c;
+    }
+
+    .content-type-badge.audio {
+        background: rgba(155, 89, 182, 0.2);
+        color: #9b59b6;
+    }
+
+    .content-type-badge.image {
+        background: rgba(241, 196, 15, 0.2);
+        color: #f1c40f;
+    }
+
+    .content-type-badge.story {
+        background: rgba(46, 204, 113, 0.2);
+        color: #2ecc71;
+    }
+
+    .completion-badge {
+        background: rgba(39, 174, 96, 0.2);
+        color: #27ae60;
+        padding: 4px 8px;
+        border-radius: 10px;
+        font-size: 0.7rem;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    /* تصویر محتوا */
+    .content-thumbnail {
+        height: 120px;
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 15px;
+        background: rgba(40,40,40,0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .thumbnail-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .thumbnail-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        opacity: 0.5;
+    }
+
+    .thumbnail-placeholder.article { color: #3498db; }
+    .thumbnail-placeholder.video { color: #e74c3c; }
+    .thumbnail-placeholder.audio { color: #9b59b6; }
+    .thumbnail-placeholder.image { color: #f1c40f; }
+    .thumbnail-placeholder.story { color: #2ecc71; }
+
+    /* بدنه محتوا */
+    .content-body {
+        flex: 1;
+        margin-bottom: 15px;
+    }
+
+    .content-title {
+        color: var(--text-light);
+        font-size: 1rem;
+        margin-bottom: 10px;
+        line-height: 1.3;
+        height: 2.6em;
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+    }
+
+    .content-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid rgba(212,175,55,0.1);
+    }
+
+    .marja-info {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .marja-avatar-small img,
+    .avatar-default-xs {
+        width: 25px;
+        height: 25px;
+        border-radius: 50%;
+        border: 1px solid var(--border-gold);
+    }
+
+    .avatar-default-xs {
+        background: linear-gradient(135deg, var(--gold), var(--dark-gold));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #000;
+        font-size: 0.7rem;
+        font-weight: bold;
+    }
+
+    .marja-name {
+        font-size: 0.8rem;
+        opacity: 0.8;
+    }
+
+    .content-date {
+        font-size: 0.75rem;
+        opacity: 0.6;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .content-excerpt {
+        font-size: 0.85rem;
+        opacity: 0.7;
+        line-height: 1.4;
+        height: 2.8em;
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+    }
+
+    /* فوتر کارت */
+    .content-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .content-points {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 0.8rem;
+        color: var(--gold);
+        font-weight: bold;
+    }
+
+    .content-actions .btn {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+        border-radius: 6px;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        white-space: nowrap;
+    }
+
+    .btn-completed {
+        background: rgba(39, 174, 96, 0.2);
+        color: #27ae60;
+        border: 1px solid #27ae60;
+        cursor: default;
+    }
+
+    /* صفحه‌بندی */
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 15px;
+        padding: 20px;
+    }
+
+    .pagination-btn {
+        padding: 8px 16px;
+        background: rgba(40,40,40,0.8);
+        border: 1px solid var(--border-gold);
+        border-radius: 6px;
+        color: var(--text-light);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .pagination-btn:hover:not(:disabled) {
+        background: linear-gradient(135deg, var(--gold), var(--dark-gold));
+        color: #000;
+    }
+
+    .pagination-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .page-numbers {
+        display: flex;
+        gap: 8px;
+    }
+
+    .page-number {
+        width: 35px;
+        height: 35px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+        background: rgba(40,40,40,0.8);
+        border: 1px solid var(--border-gold);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+    }
+
+    .page-number.active,
+    .page-number:hover {
+        background: linear-gradient(135deg, var(--gold), var(--dark-gold));
+        color: #000;
+    }
+
+    .page-dots {
+        display: flex;
+        align-items: center;
+        padding: 0 5px;
+        opacity: 0.6;
+    }
+
+    /* حالت خالی */
+    .empty-state {
+        text-align: center;
+        padding: 60px 40px;
+    }
+
+    .empty-content i {
+        font-size: 4rem;
+        color: var(--gold);
+        opacity: 0.3;
+        margin-bottom: 20px;
+    }
+
+    .empty-content h3 {
+        color: var(--gold);
+        margin-bottom: 15px;
+        font-family: 'Lateef', serif;
+    }
+
+    .empty-content p {
+        opacity: 0.7;
+        margin-bottom: 25px;
+    }
+
+    .empty-actions {
+        margin-top: 20px;
+    }
+
+    /* راهنمای انواع محتوا */
+    .content-types-guide {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        padding: 20px;
+    }
+
+    .content-type-item {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 15px;
+        background: rgba(30,30,30,0.7);
+        border-radius: 8px;
+        border: 1px solid rgba(212,175,55,0.1);
+    }
+
+    .type-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+        flex-shrink: 0;
+    }
+
+    .type-icon.article { background: rgba(52, 152, 219, 0.2); color: #3498db; }
+    .type-icon.video { background: rgba(231, 76, 60, 0.2); color: #e74c3c; }
+    .type-icon.audio { background: rgba(155, 89, 182, 0.2); color: #9b59b6; }
+    .type-icon.image { background: rgba(241, 196, 15, 0.2); color: #f1c40f; }
+    .type-icon.story { background: rgba(46, 204, 113, 0.2); color: #2ecc71; }
+
+    .type-info h4 {
+        color: var(--text-light);
+        margin-bottom: 5px;
+        font-size: 0.9rem;
+    }
+
+    .type-info p {
+        font-size: 0.8rem;
+        opacity: 0.7;
+        margin: 0;
+    }
+
+    /* رسپانسیو */
+    @media (max-width: 768px) {
+        .content-filters {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 20px;
+        }
+
+        .filter-section {
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .search-section {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .search-input {
+            width: 100%;
+        }
+
+        .contents-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .content-card {
+            height: auto;
+            min-height: 350px;
+        }
+
+        .content-types-guide {
+            grid-template-columns: 1fr;
+        }
+
+        .pagination {
+            flex-wrap: wrap;
+        }
+
+        .page-numbers {
+            order: -1;
+            width: 100%;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .content-footer {
+            flex-direction: column;
+            gap: 10px;
+            align-items: stretch;
+        }
+
+        .content-actions .btn {
+            justify-content: center;
+        }
+    }
+
+    /* انیمیشن‌ها */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .fade-in {
+        animation: fadeInUp 0.6s ease-out;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // فیلترها
+        const typeFilter = document.getElementById('content-type-filter');
+        const marjaFilter = document.getElementById('marja-filter');
+        const searchInput = document.getElementById('content-search');
+        const searchBtn = document.getElementById('search-btn');
+        const contentCards = document.querySelectorAll('.content-card');
+
+        function filterContents() {
+            const selectedType = typeFilter.value;
+            const selectedMarja = marjaFilter.value;
+            const searchTerm = searchInput.value.toLowerCase();
+
+            contentCards.forEach(card => {
+                const contentType = card.dataset.contentType;
+                const marjaId = card.dataset.marja;
+                const title = card.querySelector('.content-title').textContent.toLowerCase();
+                const excerpt = card.querySelector('.content-excerpt').textContent.toLowerCase();
+
+                const typeMatch = selectedType === 'all' || contentType === selectedType;
+                const marjaMatch = selectedMarja === 'all' || marjaId === selectedMarja;
+                const searchMatch = searchTerm === '' || 
+                    title.includes(searchTerm) || 
+                    excerpt.includes(searchTerm);
+
+                if (typeMatch && marjaMatch && searchMatch) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        typeFilter.addEventListener('change', filterContents);
+        marjaFilter.addEventListener('change', filterContents);
+        searchInput.addEventListener('input', filterContents);
+        searchBtn.addEventListener('click', filterContents);
+
+        // صفحه‌بندی
+        const pageNumbers = document.querySelectorAll('.page-number');
+        const prevBtn = document.querySelector('.pagination-btn.prev');
+        const nextBtn = document.querySelector('.pagination-btn.next');
+
+        pageNumbers.forEach(page => {
+            page.addEventListener('click', function() {
+                pageNumbers.forEach(p => p.classList.remove('active'));
+                this.classList.add('active');
+                // در اینجا می‌توانید درخواست AJAX برای بارگذاری صفحه جدید ارسال کنید
+            });
+        });
+
+        // لود بیشتر داده‌ها برای فیلتر مراجع (می‌تواند از API گرفته شود)
+        // این یک نمونه ساده است
+        const marjaOptions = [
+            { id: '1', name: 'مرجع نمونه ۱' },
+            { id: '2', name: 'مرجع نمونه ۲' },
+            { id: '3', name: 'مرجع نمونه ۳' }
+        ];
+
+        marjaOptions.forEach(marja => {
+            const option = document.createElement('option');
+            option.value = marja.id;
+            option.textContent = marja.name;
+            marjaFilter.appendChild(option);
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,16 @@
+<div class="stories-scroll">
+    {% for story in stories %}
+    <div class="story-item" onclick="location.href='{% url 'story_view' story.id %}'">
+        <div class="story-avatar">
+            {% if story.user.profile_image %}
+                <img src="{{ story.user.profile_image.url }}" alt="{{ story.user.get_full_name }}">
+            {% else %}
+                <span>{{ story.user.first_name|first }}</span>
+            {% endif %}
+        </div>
+        <div class="story-username">
+            {{ story.user.first_name }}
+        </div>
+    </div>
+    {% endfor %}
+</div>

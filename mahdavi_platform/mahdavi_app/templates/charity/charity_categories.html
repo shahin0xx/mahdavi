@@ -1,0 +1,978 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}دسته‌بندی‌های خیریه - پلتفرم مهدوی{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* استایل‌های اختصاصی صفحه دسته‌بندی‌های خیریه */
+    .charity-categories {
+        min-height: 100vh;
+        background: linear-gradient(135deg, 
+            rgba(15, 15, 26, 0.98) 0%, 
+            rgba(26, 26, 46, 0.95) 50%, 
+            rgba(15, 15, 26, 0.98) 100%);
+    }
+
+    /* هدر صفحه */
+    .page-header {
+        padding: 6rem 0;
+        background: linear-gradient(135deg, 
+            rgba(212, 175, 55, 0.9) 0%, 
+            rgba(192, 155, 35, 0.85) 50%, 
+            rgba(172, 135, 25, 0.9) 100%);
+        position: relative;
+        overflow: hidden;
+        color: var(--dark-bg);
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1.5" fill="rgba(255,255,255,0.2)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+        opacity: 0.1;
+    }
+
+    .page-header h1 {
+        font-size: 3.5rem;
+        font-weight: 800;
+        margin-bottom: 1.5rem;
+        animation: slideInLeft 1s ease-out;
+        text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+
+    .page-header .lead {
+        font-size: 1.5rem;
+        opacity: 0.9;
+        animation: slideInLeft 1s ease-out 0.3s both;
+    }
+
+    /* کارت دسته‌بندی */
+    .category-card {
+        background: var(--darker-bg);
+        border: 2px solid transparent;
+        border-radius: 25px;
+        padding: 0;
+        overflow: hidden;
+        position: relative;
+        transition: all var(--transition-normal);
+        height: 100%;
+        opacity: 0;
+        transform: translateY(50px);
+        animation: fadeInUp 0.8s ease-out forwards;
+    }
+
+    .category-card.animate {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .category-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        background: linear-gradient(90deg, 
+            var(--primary-gold), 
+            var(--light-gold), 
+            var(--primary-gold));
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.6s ease;
+    }
+
+    .category-card:hover::before {
+        transform: scaleX(1);
+    }
+
+    .category-card:hover {
+        transform: translateY(-15px) scale(1.02);
+        border-color: var(--primary-gold);
+        box-shadow: 0 20px 40px rgba(212, 175, 55, 0.2),
+                    0 0 60px rgba(212, 175, 55, 0.1);
+    }
+
+    .card-header {
+        padding: 3rem 2rem 1rem;
+        background: transparent;
+    }
+
+    .category-icon {
+        width: 100px;
+        height: 100px;
+        margin: 0 auto 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: linear-gradient(135deg, 
+            rgba(212, 175, 55, 0.1), 
+            rgba(212, 175, 55, 0.05));
+        position: relative;
+        overflow: hidden;
+        transition: all 0.4s ease;
+    }
+
+    .category-icon::before {
+        content: '';
+        position: absolute;
+        top: -2px;
+        left: -2px;
+        right: -2px;
+        bottom: -2px;
+        background: linear-gradient(45deg, 
+            var(--primary-gold), 
+            var(--light-gold), 
+            var(--primary-gold));
+        border-radius: 50%;
+        z-index: -1;
+        opacity: 0;
+        transition: opacity 0.4s ease;
+    }
+
+    .category-card:hover .category-icon {
+        transform: scale(1.1) rotate(10deg);
+    }
+
+    .category-card:hover .category-icon::before {
+        opacity: 1;
+    }
+
+    .category-icon i {
+        font-size: 2.5rem;
+        background: linear-gradient(45deg, var(--primary-gold), var(--light-gold));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .category-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+        position: relative;
+        padding-bottom: 0.5rem;
+    }
+
+    .category-title::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60px;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, var(--primary-gold), transparent);
+        transition: width 0.3s ease;
+    }
+
+    .category-card:hover .category-title::after {
+        width: 100px;
+    }
+
+    .category-description {
+        color: var(--text-secondary);
+        line-height: 1.8;
+        font-size: 1.1rem;
+        min-height: 80px;
+    }
+
+    /* آمار داخل کارت */
+    .category-stats {
+        padding: 1.5rem;
+        background: rgba(212, 175, 55, 0.05);
+        border-radius: 15px;
+        margin: 1.5rem 0;
+        border: 1px solid rgba(212, 175, 55, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    .category-card:hover .category-stats {
+        background: rgba(212, 175, 55, 0.1);
+        border-color: rgba(212, 175, 55, 0.3);
+    }
+
+    .stat-number {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: var(--primary-gold);
+        display: block;
+        line-height: 1;
+    }
+
+    .stat-label {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+    }
+
+    /* دکمه */
+    .card-footer {
+        padding: 0 2rem 2.5rem;
+        background: transparent;
+    }
+
+    .btn-outline-primary {
+        border: 2px solid var(--primary-gold);
+        color: var(--primary-gold);
+        background: transparent;
+        padding: 0.75rem 2rem;
+        border-radius: 50px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        z-index: 1;
+    }
+
+    .btn-outline-primary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, var(--primary-gold), transparent);
+        transition: left 0.6s ease;
+        z-index: -1;
+    }
+
+    .btn-outline-primary:hover::before {
+        left: 100%;
+    }
+
+    .btn-outline-primary:hover {
+        background: var(--primary-gold);
+        color: var(--dark-bg);
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(212, 175, 55, 0.3);
+    }
+
+    /* بخش خالی */
+    .empty-state {
+        padding: 6rem 2rem;
+        text-align: center;
+    }
+
+    .empty-state i {
+        font-size: 5rem;
+        background: linear-gradient(45deg, var(--primary-gold), var(--light-gold));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 2rem;
+        display: block;
+        animation: pulse 2s infinite;
+    }
+
+    /* بخش CTA */
+    .cta-section {
+        padding: 6rem 0;
+        position: relative;
+        background: linear-gradient(135deg, 
+            rgba(212, 175, 55, 0.1) 0%, 
+            rgba(192, 155, 35, 0.08) 50%, 
+            rgba(172, 135, 25, 0.1) 100%);
+        overflow: hidden;
+    }
+
+    .cta-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse"><path d="M 50 0 L 0 0 0 50" fill="none" stroke="rgba(212,175,55,0.1)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+        opacity: 0.5;
+    }
+
+    .cta-section h2 {
+        font-size: 2.8rem;
+        color: var(--primary-gold);
+        margin-bottom: 1.5rem;
+        font-weight: 700;
+        position: relative;
+        z-index: 2;
+        animation: fadeInUp 1s ease-out;
+    }
+
+    .cta-section .lead {
+        font-size: 1.3rem;
+        color: var(--text-secondary);
+        margin-bottom: 3rem;
+        position: relative;
+        z-index: 2;
+        animation: fadeInUp 1s ease-out 0.2s both;
+    }
+
+    .cta-section .btn-lg {
+        padding: 1rem 2.5rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border-radius: 50px;
+        position: relative;
+        z-index: 2;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary-gold), var(--dark-gold));
+        border: none;
+        color: var(--dark-bg);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-primary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+        transition: left 0.6s ease;
+    }
+
+    .btn-primary:hover::before {
+        left: 100%;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(212, 175, 55, 0.4);
+    }
+
+    /* انیمیشن‌ها */
+    @keyframes slideInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-50px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+        50% {
+            transform: scale(1.1);
+            opacity: 0.8;
+        }
+    }
+
+    @keyframes float {
+        0%, 100% {
+            transform: translateY(0) rotate(0deg);
+        }
+        50% {
+            transform: translateY(-20px) rotate(5deg);
+        }
+    }
+
+    /* عناصر شناور */
+    .floating-hearts {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    .floating-heart {
+        position: absolute;
+        color: var(--primary-gold);
+        font-size: 1.5rem;
+        opacity: 0.1;
+        animation: float 6s ease-in-out infinite;
+    }
+
+    /* رسپانسیو */
+    @media (max-width: 992px) {
+        .page-header h1 {
+            font-size: 2.8rem;
+        }
+        
+        .page-header .lead {
+            font-size: 1.3rem;
+        }
+        
+        .category-card {
+            margin-bottom: 2rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .page-header {
+            padding: 4rem 0;
+            text-align: center;
+        }
+        
+        .page-header h1 {
+            font-size: 2.3rem;
+        }
+        
+        .cta-section h2 {
+            font-size: 2.2rem;
+        }
+        
+        .category-icon {
+            width: 80px;
+            height: 80px;
+        }
+        
+        .category-icon i {
+            font-size: 2rem;
+        }
+        
+        .category-title {
+            font-size: 1.6rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .page-header h1 {
+            font-size: 2rem;
+        }
+        
+        .cta-section .btn-lg {
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+        
+        .category-stats .row > div {
+            margin-bottom: 1rem;
+        }
+        
+        .stat-number {
+            font-size: 1.8rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="charity-categories">
+    <!-- هدر -->
+    <section class="page-header">
+        <div class="floating-hearts">
+            {% for i in "123456"|make_list %}
+            <div class="floating-heart" style="
+                top: {{ forloop.counter|add:10 }}%;
+                left: {{ forloop.counter|add:5 }}%;
+                animation-delay: {{ forloop.counter }}s;
+            ">❤️</div>
+            <div class="floating-heart" style="
+                top: {{ forloop.counter|add:30 }}%;
+                right: {{ forloop.counter|add:5 }}%;
+                animation-delay: {{ forloop.counter|add:2 }}s;
+            ">🤲</div>
+            {% endfor %}
+        </div>
+        
+        <div class="container position-relative" style="z-index: 2;">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <h1>دسته‌بندی‌های خیریه</h1>
+                    <p class="lead">پروژه‌های خیریه در حوزه‌های مختلف برای کمک به نیازمندان و خدمت به جامعه مهدوی</p>
+                </div>
+                <div class="col-lg-4 text-lg-end mt-4 mt-lg-0">
+                    <a href="{% url 'charity_projects' %}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-heart ml-2"></i>
+                        مشاهده همه پروژه‌ها
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- دسته‌بندی‌ها -->
+    <section class="categories-section py-6">
+        <div class="container">
+            <div class="row" id="categories-container">
+                {% for category in categories %}
+                <div class="col-lg-4 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:1|multiply:100 }}">
+                    <div class="category-card" data-category-id="{{ category.id }}">
+                        <div class="card-header">
+                            <div class="category-icon">
+                                <i class="{{ category.icon }}"></i>
+                            </div>
+                            <h3 class="category-title">{{ category.name }}</h3>
+                        </div>
+                        <div class="card-body">
+                            <p class="category-description">
+                                {{ category.description|truncatewords:25 }}
+                            </p>
+                            <div class="category-stats">
+                                <div class="row text-center">
+                                    <div class="col-6">
+                                        <span class="stat-number" data-count="{{ category.projects.count }}">0</span>
+                                        <div class="stat-label">پروژه فعال</div>
+                                    </div>
+                                    <div class="col-6">
+                                        <span class="stat-number" data-count="
+                                            {% with total=category.projects.all %}
+                                                {% if total %}
+                                                    {% with project=total.0 %}
+                                                        {{ project.current_amount|floatformat:0 }}
+                                                    {% endwith %}
+                                                {% else %}
+                                                    ۰
+                                                {% endif %}
+                                            {% endwith %}
+                                        ">0</span>
+                                        <div class="stat-label">تومان جمع‌آوری</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <a href="{% url 'charity_projects' %}?category={{ category.id }}" 
+                               class="btn btn-outline-primary w-100">
+                                <i class="fas fa-arrow-left ml-2"></i>
+                                مشاهده پروژه‌ها
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12">
+                    <div class="empty-state">
+                        <i class="fas fa-folder-open"></i>
+                        <h3 class="mt-4 mb-3" style="color: var(--text-primary);">دسته‌بندی‌ای یافت نشد</h3>
+                        <p class="text-muted">هنوز هیچ دسته‌بندی خیریه ایجاد نشده است</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section">
+        <div class="floating-hearts">
+            {% for i in "1234"|make_list %}
+            <div class="floating-heart" style="
+                top: {{ forloop.counter|add:60 }}%;
+                left: {{ forloop.counter|add:15 }}%;
+                animation-delay: {{ forloop.counter }}s;
+            ">🕌</div>
+            <div class="floating-heart" style="
+                top: {{ forloop.counter|add:50 }}%;
+                right: {{ forloop.counter|add:10 }}%;
+                animation-delay: {{ forloop.counter|add:1 }}s;
+            ">🤲</div>
+            {% endfor %}
+        </div>
+        
+        <div class="container position-relative" style="z-index: 2;">
+            <h2>به جمع نیکوکاران مهدوی بپیوندید</h2>
+            <p class="lead">در هر حوزه‌ای که علاقه دارید، می‌توانید به پروژه‌های خیریه کمک کنید و اجر اخروی کسب نمایید</p>
+            <div class="d-flex justify-content-center gap-3 flex-wrap">
+                <a href="{% url 'charity_projects' %}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-heart ml-2"></i>مشاهده همه پروژه‌ها
+                </a>
+                {% if not user.is_authenticated %}
+                <a href="{% url 'register' %}" class="btn btn-outline-primary btn-lg">
+                    <i class="fas fa-user-plus ml-2"></i>عضویت در پلتفرم
+                </a>
+                {% endif %}
+                <a href="{% url 'charity_donate' %}" class="btn btn-lg" style="
+                    background: linear-gradient(135deg, var(--light-gold), var(--primary-gold));
+                    color: var(--dark-bg);
+                    border: none;
+                ">
+                    <i class="fas fa-hand-holding-heart ml-2"></i>کمک مالی سریع
+                </a>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    class CharityCategoriesAnimations {
+        constructor() {
+            this.init();
+        }
+
+        init() {
+            this.initScrollAnimations();
+            this.initCounterAnimation();
+            this.initHoverEffects();
+            this.init3DEffects();
+            this.createFloatingHearts();
+            this.initInteractiveElements();
+            this.initMouseParallax();
+        }
+
+        initScrollAnimations() {
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -100px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const card = entry.target.querySelector('.category-card') || entry.target;
+                        card.classList.add('animate');
+                        
+                        // انیمیشن ویژه برای آمار
+                        const stats = card.querySelectorAll('.stat-number');
+                        stats.forEach(stat => {
+                            this.animateCounter(stat);
+                        });
+                        
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+
+            // مشاهده دسته‌بندی‌ها
+            document.querySelectorAll('.col-lg-4').forEach(col => {
+                observer.observe(col);
+            });
+        }
+
+        initCounterAnimation() {
+            const counters = document.querySelectorAll('.stat-number');
+            
+            counters.forEach(counter => {
+                this.animateCounter(counter);
+            });
+        }
+
+        animateCounter(counter) {
+            const target = parseInt(counter.getAttribute('data-count')) || 0;
+            if (target <= 0) return;
+            
+            const duration = 2000;
+            const step = target / (duration / 16);
+            let current = 0;
+            
+            const timer = setInterval(() => {
+                current += step;
+                if (current >= target) {
+                    current = target;
+                    clearInterval(timer);
+                    
+                    // افکت تکمیل شمارش
+                    counter.style.transform = 'scale(1.2)';
+                    setTimeout(() => {
+                        counter.style.transform = 'scale(1)';
+                    }, 300);
+                }
+                counter.textContent = Math.floor(current).toLocaleString('fa-IR');
+            }, 16);
+        }
+
+        initHoverEffects() {
+            const cards = document.querySelectorAll('.category-card');
+            
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', (e) => {
+                    this.createRippleEffect(e, card);
+                    this.createGlowEffect(card);
+                });
+                
+                card.addEventListener('mousemove', (e) => {
+                    this.tiltCard(e, card);
+                });
+                
+                card.addEventListener('mouseleave', () => {
+                    this.resetTilt(card);
+                });
+            });
+        }
+
+        createRippleEffect(e, card) {
+            const ripple = document.createElement('div');
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            ripple.style.cssText = `
+                position: absolute;
+                top: ${y}px;
+                left: ${x}px;
+                width: 0;
+                height: 0;
+                border-radius: 50%;
+                background: radial-gradient(circle, rgba(212,175,55,0.2) 0%, transparent 70%);
+                transform: translate(-50%, -50%);
+                pointer-events: none;
+                z-index: 0;
+            `;
+            
+            card.appendChild(ripple);
+            
+            // انیمیشن موج
+            const size = Math.max(rect.width, rect.height) * 2;
+            ripple.animate([
+                { width: '0px', height: '0px', opacity: 1 },
+                { width: `${size}px`, height: `${size}px`, opacity: 0 }
+            ], {
+                duration: 800,
+                easing: 'ease-out'
+            }).onfinish = () => ripple.remove();
+        }
+
+        createGlowEffect(card) {
+            const glow = card.querySelector('.glow-effect') || document.createElement('div');
+            if (!card.querySelector('.glow-effect')) {
+                glow.className = 'glow-effect';
+                glow.style.cssText = `
+                    position: absolute;
+                    top: -2px;
+                    left: -2px;
+                    right: -2px;
+                    bottom: -2px;
+                    background: linear-gradient(45deg, 
+                        transparent, 
+                        rgba(212,175,55,0.1), 
+                        transparent);
+                    border-radius: 27px;
+                    z-index: -1;
+                    opacity: 0;
+                `;
+                card.appendChild(glow);
+            }
+            
+            glow.animate([
+                { opacity: 0 },
+                { opacity: 0.5 },
+                { opacity: 0 }
+            ], {
+                duration: 1000,
+                easing: 'ease-out'
+            });
+        }
+
+        tiltCard(e, card) {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            
+            const rotateY = ((x - centerX) / centerX) * 5;
+            const rotateX = ((centerY - y) / centerY) * 5;
+            
+            card.style.transform = `
+                perspective(1000px) 
+                rotateX(${rotateX}deg) 
+                rotateY(${rotateY}deg) 
+                translateY(-15px) 
+                scale3d(1.02, 1.02, 1.02)
+            `;
+        }
+
+        resetTilt(card) {
+            card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) translateY(0) scale3d(1, 1, 1)';
+        }
+
+        init3DEffects() {
+            // ایجاد سایه متحرک
+            const cards = document.querySelectorAll('.category-card');
+            
+            cards.forEach(card => {
+                card.addEventListener('mousemove', (e) => {
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    const shadowX = (x / rect.width - 0.5) * 20;
+                    const shadowY = (y / rect.height - 0.5) * 20;
+                    
+                    card.style.boxShadow = `
+                        ${shadowX}px ${shadowY}px 40px rgba(212, 175, 55, 0.3),
+                        0 0 60px rgba(212, 175, 55, 0.1)
+                    `;
+                });
+                
+                card.addEventListener('mouseleave', () => {
+                    card.style.boxShadow = '0 20px 40px rgba(212, 175, 55, 0.2), 0 0 60px rgba(212, 175, 55, 0.1)';
+                });
+            });
+        }
+
+        createFloatingHearts() {
+            const sections = document.querySelectorAll('.page-header, .cta-section');
+            
+            sections.forEach(section => {
+                const existingHearts = section.querySelector('.floating-hearts');
+                if (existingHearts) return;
+                
+                const heartsContainer = document.createElement('div');
+                heartsContainer.className = 'floating-hearts';
+                section.appendChild(heartsContainer);
+                
+                // ایجاد قلب‌های متحرک
+                const hearts = ['❤️', '🤲', '🕌', '🌟', '✨', '☪️'];
+                
+                for (let i = 0; i < 12; i++) {
+                    const heart = document.createElement('div');
+                    heart.className = 'floating-heart';
+                    heart.textContent = hearts[Math.floor(Math.random() * hearts.length)];
+                    
+                    heart.style.cssText = `
+                        position: absolute;
+                        top: ${Math.random() * 100}%;
+                        left: ${Math.random() * 100}%;
+                        font-size: ${Math.random() * 1.5 + 1}rem;
+                        opacity: ${Math.random() * 0.15 + 0.05};
+                        animation: float ${Math.random() * 6 + 4}s ease-in-out infinite;
+                        animation-delay: ${Math.random() * 3}s;
+                    `;
+                    
+                    heartsContainer.appendChild(heart);
+                }
+            });
+        }
+
+        initInteractiveElements() {
+            // کلیک روی کارت
+            const cards = document.querySelectorAll('.category-card');
+            
+            cards.forEach(card => {
+                card.style.cursor = 'pointer';
+                
+                card.addEventListener('click', (e) => {
+                    if (!e.target.closest('a')) {
+                        const link = card.querySelector('a.btn');
+                        if (link) {
+                            // افکت کلیک
+                            card.style.transform = 'scale(0.95)';
+                            setTimeout(() => {
+                                card.style.transform = '';
+                            }, 200);
+                            
+                            setTimeout(() => {
+                                window.location.href = link.href;
+                            }, 300);
+                        }
+                    }
+                });
+            });
+            
+            // انیمیشن دکمه‌ها
+            const buttons = document.querySelectorAll('.btn');
+            buttons.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    // افکت موج روی دکمه
+                    const ripple = document.createElement('span');
+                    const rect = btn.getBoundingClientRect();
+                    const size = Math.max(rect.width, rect.height);
+                    const x = e.clientX - rect.left - size / 2;
+                    const y = e.clientY - rect.top - size / 2;
+                    
+                    ripple.style.cssText = `
+                        position: absolute;
+                        top: ${y}px;
+                        left: ${x}px;
+                        width: ${size}px;
+                        height: ${size}px;
+                        border-radius: 50%;
+                        background: rgba(255,255,255,0.4);
+                        transform: scale(0);
+                        animation: ripple 0.6s linear;
+                    `;
+                    
+                    btn.appendChild(ripple);
+                    setTimeout(() => ripple.remove(), 600);
+                });
+            });
+            
+            // اضافه کردن استایل ripple
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes ripple {
+                    to {
+                        transform: scale(4);
+                        opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        initMouseParallax() {
+            document.addEventListener('mousemove', (e) => {
+                const hearts = document.querySelectorAll('.floating-heart');
+                const mouseX = e.clientX / window.innerWidth;
+                const mouseY = e.clientY / window.innerHeight;
+                
+                hearts.forEach(heart => {
+                    const speed = 0.5;
+                    const x = (mouseX - 0.5) * speed * 100;
+                    const y = (mouseY - 0.5) * speed * 100;
+                    
+                    heart.style.transform += ` translate(${x}px, ${y}px)`;
+                });
+            });
+        }
+    }
+
+    // راه‌اندازی انیمیشن‌ها
+    document.addEventListener('DOMContentLoaded', () => {
+        const charityAnimations = new CharityCategoriesAnimations();
+        
+        // بارگذاری فونت فارسی برای اعداد
+        const style = document.createElement('style');
+        style.textContent = `
+            @font-face {
+                font-family: 'Vazir';
+                src: url('https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/Vazir-Regular.woff2') format('woff2');
+            }
+            .stat-number {
+                font-family: 'Vazir', sans-serif;
+            }
+            
+            @keyframes slideIn {
+                from {
+                    opacity: 0;
+                    transform: translateX(-50px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateX(0);
+                }
+            }
+            
+            .category-card {
+                animation: slideIn 0.8s ease-out forwards;
+            }
+        `;
+        document.head.appendChild(style);
+    });
+</script>
+{% endblock %}

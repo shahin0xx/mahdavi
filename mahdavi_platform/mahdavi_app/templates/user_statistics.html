@@ -1,0 +1,832 @@
+<!-- mahdavi_app/templates/user_statistics.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card fade-in">
+    <div class="card-header" style="text-align: center; border-bottom: none; padding: 20px;">
+        <div style="margin-bottom: 10px;">
+            <i class="fas fa-chart-bar" style="font-size: 2.5rem; color: var(--gold);"></i>
+        </div>
+        <h1 class="card-title" style="font-size: 1.8rem; margin-bottom: 8px; font-family: 'Lateef', serif;">
+            آمار و عملکرد من
+        </h1>
+        <p style="font-size: 1rem; opacity: 0.8; margin: 0; line-height: 1.5;">
+            بررسی پیشرفت و دستاوردهای شما در مسیر مهدوی
+        </p>
+    </div>
+</div>
+
+<!-- آمار کلی -->
+<div class="card fade-in">
+    <div class="card-header">
+        <h2 class="card-title">
+            <i class="fas fa-tachometer-alt card-icon"></i>
+            آمار کلی
+        </h2>
+    </div>
+    <div class="stats-grid-main">
+        <div class="stat-card-main">
+            <div class="stat-icon-main">
+                <i class="fas fa-trophy"></i>
+            </div>
+            <div class="stat-content-main">
+                <div class="stat-number-main">{{ total_points }}</div>
+                <div class="stat-label-main">امتیاز کل</div>
+            </div>
+        </div>
+        <div class="stat-card-main">
+            <div class="stat-icon-main">
+                <i class="fas fa-route"></i>
+            </div>
+            <div class="stat-content-main">
+                <div class="stat-number-main">{{ completed_stations }}/{{ total_stations }}</div>
+                <div class="stat-label-main">ایستگاه‌های تکمیل شده</div>
+            </div>
+        </div>
+        <div class="stat-card-main">
+            <div class="stat-icon-main">
+                <i class="fas fa-user-tie"></i>
+            </div>
+            <div class="stat-content-main">
+                <div class="stat-level-main">{{ spiritual_level }}</div>
+                <div class="stat-label-main">سطح معنوی</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- آمار جزئی محتواها -->
+<div class="card fade-in">
+    <div class="card-header">
+        <h2 class="card-title">
+            <i class="fas fa-book-open card-icon"></i>
+            آمار محتواهای تکمیل شده
+        </h2>
+    </div>
+    <div class="content-stats-grid">
+        <div class="content-stat-item">
+            <div class="content-stat-icon story">
+                <i class="fas fa-book"></i>
+            </div>
+            <div class="content-stat-info">
+                <div class="content-stat-number">{{ completed_stories }}</div>
+                <div class="content-stat-label">داستان‌ها</div>
+            </div>
+        </div>
+        <div class="content-stat-item">
+            <div class="content-stat-icon prayer">
+                <i class="fas fa-hands-praying"></i>
+            </div>
+            <div class="content-stat-info">
+                <div class="content-stat-number">{{ completed_prayers }}</div>
+                <div class="content-stat-label">دعاها</div>
+            </div>
+        </div>
+        <div class="content-stat-item">
+            <div class="content-stat-icon article">
+                <i class="fas fa-newspaper"></i>
+            </div>
+            <div class="content-stat-info">
+                <div class="content-stat-number">{{ completed_articles }}</div>
+                <div class="content-stat-label">مطالب</div>
+            </div>
+        </div>
+        <div class="content-stat-item">
+            <div class="content-stat-icon video">
+                <i class="fas fa-video"></i>
+            </div>
+            <div class="content-stat-info">
+                <div class="content-stat-number">{{ completed_videos }}</div>
+                <div class="content-stat-label">ویدیوها</div>
+            </div>
+        </div>
+        <div class="content-stat-item">
+            <div class="content-stat-icon quiz">
+                <i class="fas fa-question-circle"></i>
+            </div>
+            <div class="content-stat-info">
+                <div class="content-stat-number">{{ completed_quizzes }}</div>
+                <div class="content-stat-label">آزمون‌ها</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- نمودار پیشرفت -->
+<div class="card fade-in">
+    <div class="card-header">
+        <h2 class="card-title">
+            <i class="fas fa-chart-line card-icon"></i>
+            نمودار پیشرفت
+        </h2>
+    </div>
+    <div class="progress-chart">
+        <div class="chart-container">
+            <div class="chart-bar">
+                <div class="chart-label">پیشرفت کلی</div>
+                <div class="chart-progress">
+                    <div class="chart-fill" style="width: {{ progress_percentage }}%"></div>
+                </div>
+                <div class="chart-percentage">{{ progress_percentage }}%</div>
+            </div>
+        </div>
+        <div class="chart-stats">
+            <div class="chart-stat">
+                <span class="stat-value">{{ completed_stations }}</span>
+                <span class="stat-label">ایستگاه تکمیل شده</span>
+            </div>
+            <div class="chart-stat">
+                <span class="stat-value">{{ total_stations }}</span>
+                <span class="stat-label">کل ایستگاه‌ها</span>
+            </div>
+            <div class="chart-stat">
+                <span class="stat-value">{{ progress_percentage }}%</span>
+                <span class="stat-label">درصد پیشرفت</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- تاریخچه فعالیت -->
+<div class="card fade-in">
+    <div class="card-header">
+        <h2 class="card-title">
+            <i class="fas fa-history card-icon"></i>
+            تاریخچه فعالیت‌های اخیر
+        </h2>
+    </div>
+    <div class="activity-list">
+        {% for progress in recent_progress %}
+        <div class="activity-item">
+            <div class="activity-icon">
+                <i class="fas fa-{{ progress.icon }}"></i>
+            </div>
+            <div class="activity-content">
+                <div class="activity-title">{{ progress.title }}</div>
+                <div class="activity-description">{{ progress.description }}</div>
+                <div class="activity-date">{{ progress.date }}</div>
+            </div>
+            <div class="activity-points">+{{ progress.points }}</div>
+        </div>
+        {% empty %}
+        <div class="empty-activity">
+            <i class="fas fa-inbox"></i>
+            <p>هنوز فعالیتی ثبت نشده است</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+    /* آمار اصلی */
+    .stats-grid-main {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        padding: 20px;
+    }
+
+    .stat-card-main {
+        background: linear-gradient(145deg, rgba(30,30,30,0.9), rgba(40,40,40,0.9));
+        border-radius: 16px;
+        padding: 25px;
+        border: 1px solid var(--border-gold);
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+    }
+
+    .stat-card-main::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(212,175,55,0.1), transparent);
+        transition: left 0.8s ease;
+    }
+
+    .stat-card-main:hover::before {
+        left: 100%;
+    }
+
+    .stat-card-main:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 15px 35px rgba(212, 175, 55, 0.25),
+                   0 5px 15px rgba(0,0,0,0.3);
+        border-color: rgba(212,175,55,0.6);
+    }
+
+    .stat-icon-main {
+        width: 65px;
+        height: 65px;
+        background: linear-gradient(135deg, var(--gold), var(--dark-gold));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #000;
+        font-size: 1.6rem;
+        flex-shrink: 0;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(212,175,55,0.4);
+    }
+
+    .stat-card-main:hover .stat-icon-main {
+        transform: rotate(10deg) scale(1.1);
+        box-shadow: 0 6px 20px rgba(212,175,55,0.6);
+    }
+
+    .stat-content-main {
+        flex: 1;
+    }
+
+    .stat-number-main {
+        font-size: 2.2rem;
+        color: var(--gold);
+        font-weight: bold;
+        margin-bottom: 5px;
+        line-height: 1;
+        text-shadow: 0 2px 4px rgba(212,175,55,0.3);
+        transition: all 0.3s ease;
+    }
+
+    .stat-card-main:hover .stat-number-main {
+        text-shadow: 0 4px 8px rgba(212,175,55,0.5);
+    }
+
+    .stat-level-main {
+        font-size: 1.7rem;
+        color: var(--gold);
+        font-weight: bold;
+        margin-bottom: 5px;
+        line-height: 1;
+        text-shadow: 0 2px 4px rgba(212,175,55,0.3);
+    }
+
+    .stat-label-main {
+        font-size: 0.95rem;
+        opacity: 0.9;
+        transition: all 0.3s ease;
+    }
+
+    .stat-card-main:hover .stat-label-main {
+        opacity: 1;
+        transform: translateX(5px);
+    }
+
+    /* آمار محتواها */
+    .content-stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 18px;
+        padding: 25px;
+    }
+
+    .content-stat-item {
+        background: linear-gradient(145deg, rgba(25,25,25,0.95), rgba(35,35,35,0.95));
+        border-radius: 14px;
+        padding: 25px 20px;
+        border: 1px solid rgba(212,175,55,0.2);
+        text-align: center;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(8px);
+    }
+
+    .content-stat-item::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(212,175,55,0.1) 0%, transparent 70%);
+        opacity: 0;
+        transition: opacity 0.4s ease;
+    }
+
+    .content-stat-item:hover::before {
+        opacity: 1;
+    }
+
+    .content-stat-item:hover {
+        transform: translateY(-6px) scale(1.05);
+        box-shadow: 0 12px 25px rgba(0,0,0,0.4);
+        border-color: rgba(212,175,55,0.4);
+    }
+
+    .content-stat-icon {
+        width: 55px;
+        height: 55px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 15px;
+        font-size: 1.4rem;
+        transition: all 0.3s ease;
+        position: relative;
+        z-index: 2;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    .content-stat-item:hover .content-stat-icon {
+        transform: scale(1.15) rotate(5deg);
+        box-shadow: 0 6px 18px rgba(0,0,0,0.4);
+    }
+
+    .content-stat-icon.story {
+        background: linear-gradient(135deg, #3498db, #2980b9);
+        color: white;
+    }
+
+    .content-stat-icon.prayer {
+        background: linear-gradient(135deg, #9b59b6, #8e44ad);
+        color: white;
+    }
+
+    .content-stat-icon.article {
+        background: linear-gradient(135deg, #e67e22, #d35400);
+        color: white;
+    }
+
+    .content-stat-icon.video {
+        background: linear-gradient(135deg, #e74c3c, #c0392b);
+        color: white;
+    }
+
+    .content-stat-icon.quiz {
+        background: linear-gradient(135deg, #27ae60, #229954);
+        color: white;
+    }
+
+    .content-stat-number {
+        font-size: 1.7rem;
+        color: var(--gold);
+        font-weight: bold;
+        margin-bottom: 8px;
+        transition: all 0.3s ease;
+        position: relative;
+        z-index: 2;
+        text-shadow: 0 2px 4px rgba(212,175,55,0.3);
+    }
+
+    .content-stat-item:hover .content-stat-number {
+        transform: scale(1.1);
+        text-shadow: 0 4px 8px rgba(212,175,55,0.5);
+    }
+
+    .content-stat-label {
+        font-size: 0.85rem;
+        opacity: 0.9;
+        transition: all 0.3s ease;
+        position: relative;
+        z-index: 2;
+    }
+
+    .content-stat-item:hover .content-stat-label {
+        opacity: 1;
+        transform: translateY(2px);
+    }
+
+    /* نمودار پیشرفت */
+    .progress-chart {
+        padding: 25px;
+    }
+
+    .chart-container {
+        margin-bottom: 30px;
+    }
+
+    .chart-bar {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
+    .chart-label {
+        width: 130px;
+        font-size: 1rem;
+        color: var(--text-light);
+        flex-shrink: 0;
+        font-weight: 600;
+    }
+
+    .chart-progress {
+        flex: 1;
+        height: 24px;
+        background: rgba(25,25,25,0.9);
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid var(--border-gold);
+        box-shadow: inset 0 2px 8px rgba(0,0,0,0.4);
+        position: relative;
+    }
+
+    .chart-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--gold), var(--dark-gold), var(--gold));
+        background-size: 200% 100%;
+        border-radius: 12px;
+        transition: width 1.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        position: relative;
+        animation: shimmer 3s infinite;
+    }
+
+    .chart-fill::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        animation: shine 2s infinite;
+    }
+
+    .chart-percentage {
+        width: 70px;
+        font-size: 1rem;
+        color: var(--gold);
+        font-weight: bold;
+        text-align: center;
+        flex-shrink: 0;
+        text-shadow: 0 2px 4px rgba(212,175,55,0.3);
+    }
+
+    .chart-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+    }
+
+    .chart-stat {
+        text-align: center;
+        padding: 20px 15px;
+        background: rgba(35,35,35,0.8);
+        border-radius: 12px;
+        border: 1px solid rgba(212,175,55,0.3);
+        transition: all 0.3s ease;
+        backdrop-filter: blur(5px);
+    }
+
+    .chart-stat:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(212,175,55,0.2);
+        border-color: rgba(212,175,55,0.5);
+    }
+
+    .stat-value {
+        display: block;
+        font-size: 1.5rem;
+        color: var(--gold);
+        font-weight: bold;
+        margin-bottom: 8px;
+        text-shadow: 0 2px 4px rgba(212,175,55,0.3);
+    }
+
+    .stat-label {
+        font-size: 0.85rem;
+        opacity: 0.9;
+        transition: all 0.3s ease;
+    }
+
+    .chart-stat:hover .stat-label {
+        opacity: 1;
+        transform: translateY(2px);
+    }
+
+    /* تاریخچه فعالیت */
+    .activity-list {
+        padding: 15px;
+    }
+
+    .activity-item {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        padding: 18px;
+        background: rgba(30,30,30,0.8);
+        border-radius: 12px;
+        margin-bottom: 12px;
+        border: 1px solid rgba(212,175,55,0.15);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .activity-item::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 4px;
+        background: linear-gradient(to bottom, var(--gold), var(--dark-gold));
+        transform: scaleY(0);
+        transition: transform 0.3s ease;
+    }
+
+    .activity-item:hover::before {
+        transform: scaleY(1);
+    }
+
+    .activity-item:hover {
+        background: rgba(40,40,40,0.9);
+        border-color: var(--border-gold);
+        transform: translateX(8px) scale(1.02);
+        box-shadow: 0 8px 25px rgba(212,175,55,0.15);
+    }
+
+    .activity-icon {
+        width: 45px;
+        height: 45px;
+        background: linear-gradient(135deg, var(--gold), var(--dark-gold));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #000;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(212,175,55,0.3);
+    }
+
+    .activity-item:hover .activity-icon {
+        transform: scale(1.1) rotate(8deg);
+        box-shadow: 0 6px 18px rgba(212,175,55,0.5);
+    }
+
+    .activity-content {
+        flex: 1;
+    }
+
+    .activity-title {
+        color: var(--text-light);
+        font-weight: bold;
+        margin-bottom: 6px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+    }
+
+    .activity-item:hover .activity-title {
+        color: var(--gold);
+        transform: translateX(3px);
+    }
+
+    .activity-description {
+        color: var(--text-light);
+        opacity: 0.9;
+        font-size: 0.85rem;
+        margin-bottom: 4px;
+        transition: all 0.3s ease;
+    }
+
+    .activity-item:hover .activity-description {
+        opacity: 1;
+        transform: translateX(3px);
+    }
+
+    .activity-date {
+        color: var(--text-light);
+        opacity: 0.7;
+        font-size: 0.8rem;
+        transition: all 0.3s ease;
+    }
+
+    .activity-item:hover .activity-date {
+        opacity: 0.9;
+        transform: translateX(3px);
+    }
+
+    .activity-points {
+        background: linear-gradient(135deg, var(--gold), var(--dark-gold));
+        color: #000;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-weight: bold;
+        font-size: 0.85rem;
+        flex-shrink: 0;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(212,175,55,0.3);
+    }
+
+    .activity-item:hover .activity-points {
+        transform: scale(1.1);
+        box-shadow: 0 6px 18px rgba(212,175,55,0.5);
+    }
+
+    .empty-activity {
+        text-align: center;
+        padding: 50px 20px;
+        opacity: 0.7;
+        transition: all 0.3s ease;
+    }
+
+    .empty-activity:hover {
+        opacity: 1;
+        transform: scale(1.02);
+    }
+
+    .empty-activity i {
+        font-size: 3.5rem;
+        color: var(--gold);
+        margin-bottom: 20px;
+        opacity: 0.6;
+        transition: all 0.3s ease;
+    }
+
+    .empty-activity:hover i {
+        opacity: 0.8;
+        transform: scale(1.1);
+    }
+
+    .empty-activity p {
+        color: var(--text-light);
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .empty-activity:hover p {
+        transform: translateY(3px);
+    }
+
+    /* انیمیشن‌های جدید */
+    @keyframes shimmer {
+        0% { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
+    }
+
+    @keyframes shine {
+        0% { left: -100%; }
+        20% { left: 100%; }
+        100% { left: 100%; }
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+
+    @keyframes pulse-glow {
+        0%, 100% { box-shadow: 0 0 20px rgba(212,175,55,0.4); }
+        50% { box-shadow: 0 0 30px rgba(212,175,55,0.8); }
+    }
+
+    /* اعمال انیمیشن‌های شناور روی کارت‌ها */
+    .card:nth-child(odd) {
+        animation: float 6s ease-in-out infinite;
+    }
+
+    .card:nth-child(even) {
+        animation: float 6s ease-in-out infinite 1s;
+    }
+
+    /* رسپانسیو */
+    @media (max-width: 768px) {
+        .stats-grid-main {
+            grid-template-columns: 1fr;
+            gap: 15px;
+            padding: 15px;
+        }
+
+        .stat-card-main {
+            padding: 20px;
+        }
+
+        .content-stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            padding: 15px;
+        }
+
+        .chart-bar {
+            flex-direction: column;
+            gap: 12px;
+            text-align: center;
+        }
+
+        .chart-label {
+            width: auto;
+        }
+
+        .chart-stats {
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .activity-item {
+            flex-direction: column;
+            text-align: center;
+            gap: 12px;
+        }
+
+        .activity-content {
+            text-align: center;
+        }
+
+        /* کاهش انیمیشن‌ها در موبایل */
+        .card {
+            animation: none !important;
+        }
+        
+        .stat-card-main:hover {
+            transform: translateY(-3px) scale(1.01);
+        }
+    }
+
+    @media (max-width: 480px) {
+        .content-stats-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .stat-number-main {
+            font-size: 1.8rem;
+        }
+        
+        .content-stat-number {
+            font-size: 1.5rem;
+        }
+    }
+
+    /* انیمیشن‌های اصلی */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .fade-in {
+        animation: fadeInUp 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    /* بهبود scroll behavior */
+    html {
+        scroll-behavior: smooth;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // انیمیشن برای نمودار پیشرفت
+        const chartFill = document.querySelector('.chart-fill');
+        const computedStyle = getComputedStyle(chartFill);
+        const finalWidth = computedStyle.width;
+        
+        chartFill.style.width = '0%';
+        setTimeout(() => {
+            chartFill.style.transition = 'width 2s cubic-bezier(0.34, 1.56, 0.64, 1)';
+            chartFill.style.width = finalWidth;
+        }, 500);
+
+        // انیمیشن برای کارت‌های آمار
+        const statCards = document.querySelectorAll('.stat-card-main');
+        statCards.forEach((card, index) => {
+            card.style.animationDelay = `${index * 0.2}s`;
+        });
+
+        // انیمیشن برای آیتم‌های فعالیت
+        const activityItems = document.querySelectorAll('.activity-item');
+        activityItems.forEach((item, index) => {
+            item.style.animationDelay = `${index * 0.1}s`;
+        });
+
+        // افکت hover پیشرفته برای کارت‌های محتوا
+        const contentItems = document.querySelectorAll('.content-stat-item');
+        contentItems.forEach(item => {
+            item.addEventListener('mouseenter', function() {
+                this.style.zIndex = '10';
+            });
+            
+            item.addEventListener('mouseleave', function() {
+                this.style.zIndex = '1';
+            });
+        });
+
+        // پالس دوره‌ای برای کارت‌های مهم
+        setInterval(() => {
+            const mainCards = document.querySelectorAll('.stat-card-main');
+            mainCards.forEach(card => {
+                card.classList.add('pulse-glow');
+                setTimeout(() => {
+                    card.classList.remove('pulse-glow');
+                }, 1000);
+            });
+        }, 10000);
+    });
+</script>
+{% endblock %}

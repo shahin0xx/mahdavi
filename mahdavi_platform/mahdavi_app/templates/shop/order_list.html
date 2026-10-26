@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}سفارشات من - نور مهدی{% endblock %}
+
+{% block extra_css %}
+<style>
+    .orders-section {
+        padding: 2rem 0;
+    }
+
+    .orders-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: var(--card-bg);
+        border-radius: 15px;
+        overflow: hidden;
+        border: 1px solid var(--border-gold);
+    }
+
+    .orders-table th {
+        background: rgba(212, 175, 55, 0.1);
+        padding: 1.5rem;
+        text-align: right;
+        color: var(--primary-gold);
+        font-weight: 600;
+        border-bottom: 2px solid var(--border-gold);
+    }
+
+    .orders-table td {
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--border-gold);
+        vertical-align: middle;
+    }
+
+    .order-row:hover {
+        background: rgba(212, 175, 55, 0.05);
+    }
+
+    .empty-orders {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: var(--text-secondary);
+    }
+
+    .empty-orders-icon {
+        font-size: 4rem;
+        color: var(--border-gold);
+        margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .orders-table {
+            display: block;
+            overflow-x: auto;
+        }
+        
+        .orders-table th,
+        .orders-table td {
+            padding: 1rem 0.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="orders-section fade-in">
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <i class="fas fa-history card-icon"></i>
+                    سفارشات من
+                </h2>
+            </div>
+
+            {% if orders %}
+            <div class="table-container">
+                <table class="orders-table">
+                    <thead>
+                        <tr>
+                            <th>شماره سفارش</th>
+                            <th>تاریخ</th>
+                            <th>مبلغ</th>
+                            <th>وضعیت</th>
+                            <th>عملیات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                        <tr class="order-row">
+                            <td>
+                                <strong>{{ order.order_number }}</strong>
+                            </td>
+                            <td class="text-center">
+                                {{ order.created_at|date:"Y/m/d" }}
+                            </td>
+                            <td class="text-center price">
+                                {{ order.total_amount|floatformat:0 }} تومان
+                            </td>
+                            <td class="text-center">
+                                {% if order.status == 'pending' %}
+                                <span class="status-badge status-pending">
+                                    <i class="fas fa-clock"></i>
+                                    در انتظار پرداخت
+                                </span>
+                                {% elif order.status == 'paid' %}
+                                <span class="status-badge status-paid">
+                                    <i class="fas fa-check"></i>
+                                    پرداخت شده
+                                </span>
+                                {% elif order.status == 'processing' %}
+                                <span class="status-badge status-processing">
+                                    <i class="fas fa-cog"></i>
+                                    در حال پردازش
+                                </span>
+                                {% elif order.status == 'shipped' %}
+                                <span class="status-badge status-shipped">
+                                    <i class="fas fa-shipping-fast"></i>
+                                    ارسال شده
+                                </span>
+                                {% elif order.status == 'delivered' %}
+                                <span class="status-badge status-delivered">
+                                    <i class="fas fa-box-open"></i>
+                                    تحویل داده شده
+                                </span>
+                                {% elif order.status == 'cancelled' %}
+                                <span class="status-badge status-cancelled">
+                                    <i class="fas fa-times"></i>
+                                    لغو شده
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                <a href="{% url 'order_detail' order.id %}" class="btn btn-secondary btn-sm">
+                                    <i class="fas fa-eye"></i>
+                                    مشاهده
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-orders">
+                <i class="fas fa-clipboard-list empty-orders-icon"></i>
+                <h3 style="color: var(--primary-gold); margin-bottom: 1rem;">هنوز سفارشی ثبت نکرده‌اید</h3>
+                <p style="margin-bottom: 1.5rem;">می‌توانید از فروشگاه محصولات مورد نظر خود را انتخاب و خریداری کنید.</p>
+                <a href="{% url 'shop_home' %}" class="btn btn-primary">
+                    <i class="fas fa-store"></i>
+                    رفتن به فروشگاه
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,317 @@
+{% extends 'social/base.html' %}
+{% load static %}
+
+{% block title %}ایجاد استوری - نور مهدی{% endblock %}
+
+{% block content %}
+<div class="create-story">
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">
+                <i class="fas fa-circle-plus card-icon"></i>
+                ایجاد استوری جدید
+            </h2>
+            <a href="{% url 'social_home' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-right"></i>
+                بازگشت
+            </a>
+        </div>
+        
+        <div class="story-form">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label class="form-label">انتخاب محتوا</label>
+                    <div class="media-upload-area" id="media-upload-area">
+                        <div class="upload-placeholder">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p>عکس یا ویدیوی خود را اینجا رها کنید</p>
+                            <span>یا کلیک کنید برای انتخاب فایل</span>
+                        </div>
+                        <input type="file" name="image" id="media-input" accept="image/*,video/*" style="display: none;">
+                        <input type="file" name="video" id="video-input" accept="video/*" style="display: none;">
+                    </div>
+                    <div class="media-preview" id="media-preview" style="display: none;">
+                        <div class="preview-container">
+                            <img id="image-preview" style="display: none;">
+                            <video id="video-preview" style="display: none;" controls></video>
+                            <button type="button" class="remove-media" id="remove-media">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">کپشن (اختیاری)</label>
+                    <textarea name="caption" class="form-control" rows="3" placeholder="کپشن استوری...">{{ form.caption.value|default:'' }}</textarea>
+                </div>
+                
+                <div class="story-info">
+                    <div class="info-item">
+                        <i class="fas fa-clock"></i>
+                        <span>استوری شما 24 ساعت نمایش داده می‌شود</span>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-eye"></i>
+                        <span>دنبال‌کنندگان شما می‌توانند استوری را ببینند</span>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary" id="submit-btn" disabled>
+                        <i class="fas fa-share"></i>
+                        انتشار استوری
+                    </button>
+                    <a href="{% url 'social_home' %}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i>
+                        انصراف
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.create-story {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.story-form {
+    padding: 20px 0;
+}
+
+.media-upload-area {
+    border: 2px dashed var(--border-gold);
+    border-radius: 12px;
+    padding: 40px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: rgba(30, 30, 30, 0.5);
+}
+
+.media-upload-area:hover {
+    border-color: var(--gold);
+    background: rgba(212, 175, 55, 0.1);
+}
+
+.media-upload-area.dragover {
+    border-color: var(--gold);
+    background: rgba(212, 175, 55, 0.2);
+}
+
+.upload-placeholder i {
+    font-size: 3rem;
+    color: var(--gold);
+    margin-bottom: 15px;
+}
+
+.upload-placeholder p {
+    font-size: 1.1rem;
+    color: var(--text-light);
+    margin-bottom: 8px;
+}
+
+.upload-placeholder span {
+    font-size: 0.9rem;
+    color: var(--text-light);
+    opacity: 0.7;
+}
+
+.media-preview {
+    margin-top: 20px;
+}
+
+.preview-container {
+    position: relative;
+    max-width: 400px;
+    margin: 0 auto;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 2px solid var(--gold);
+}
+
+.preview-container img,
+.preview-container video {
+    width: 100%;
+    max-height: 400px;
+    object-fit: contain;
+    display: block;
+}
+
+.remove-media {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: rgba(0, 0, 0, 0.7);
+    border: none;
+    color: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.remove-media:hover {
+    background: rgba(231, 76, 60, 0.8);
+    transform: scale(1.1);
+}
+
+.story-info {
+    background: rgba(30, 30, 30, 0.5);
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid var(--border-gold);
+    margin: 20px 0;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+    color: var(--text-light);
+}
+
+.info-item:last-child {
+    margin-bottom: 0;
+}
+
+.info-item i {
+    color: var(--gold);
+    width: 16px;
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 30px;
+}
+
+@media (max-width: 768px) {
+    .media-upload-area {
+        padding: 30px 15px;
+    }
+    
+    .upload-placeholder i {
+        font-size: 2.5rem;
+    }
+    
+    .preview-container {
+        max-width: 100%;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const mediaUploadArea = document.getElementById('media-upload-area');
+    const mediaInput = document.getElementById('media-input');
+    const videoInput = document.getElementById('video-input');
+    const mediaPreview = document.getElementById('media-preview');
+    const imagePreview = document.getElementById('image-preview');
+    const videoPreview = document.getElementById('video-preview');
+    const removeMedia = document.getElementById('remove-media');
+    const submitBtn = document.getElementById('submit-btn');
+    
+    // کلیک روی area برای انتخاب فایل
+    mediaUploadArea.addEventListener('click', function() {
+        mediaInput.click();
+    });
+    
+    // تغییر فایل انتخاب شده
+    mediaInput.addEventListener('change', function(e) {
+        handleFileSelect(e.target.files[0]);
+    });
+    
+    // Drag and drop
+    mediaUploadArea.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        this.classList.add('dragover');
+    });
+    
+    mediaUploadArea.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        this.classList.remove('dragover');
+    });
+    
+    mediaUploadArea.addEventListener('drop', function(e) {
+        e.preventDefault();
+        this.classList.remove('dragover');
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            handleFileSelect(files[0]);
+        }
+    });
+    
+    // حذف فایل انتخاب شده
+    removeMedia.addEventListener('click', function(e) {
+        e.stopPropagation();
+        resetMediaInput();
+    });
+    
+    function handleFileSelect(file) {
+        if (!file) return;
+        
+        // بررسی نوع فایل
+        if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
+            alert('لطفاً فقط عکس یا ویدیو انتخاب کنید');
+            return;
+        }
+        
+        // بررسی حجم فایل (حداکثر 50MB)
+        if (file.size > 50 * 1024 * 1024) {
+            alert('حجم فایل نباید بیشتر از 50 مگابایت باشد');
+            return;
+        }
+        
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            if (file.type.startsWith('image/')) {
+                imagePreview.src = e.target.result;
+                imagePreview.style.display = 'block';
+                videoPreview.style.display = 'none';
+                // تنظیم input مناسب
+                mediaInput.files = new DataTransfer().files;
+                const dt = new DataTransfer();
+                dt.items.add(file);
+                mediaInput.files = dt.files;
+            } else if (file.type.startsWith('video/')) {
+                videoPreview.src = e.target.result;
+                videoPreview.style.display = 'block';
+                imagePreview.style.display = 'none';
+                // تنظیم input مناسب
+                videoInput.files = new DataTransfer().files;
+                const dt = new DataTransfer();
+                dt.items.add(file);
+                videoInput.files = dt.files;
+            }
+            
+            mediaPreview.style.display = 'block';
+            mediaUploadArea.style.display = 'none';
+            submitBtn.disabled = false;
+        };
+        
+        reader.readAsDataURL(file);
+    }
+    
+    function resetMediaInput() {
+        mediaInput.value = '';
+        videoInput.value = '';
+        mediaPreview.style.display = 'none';
+        mediaUploadArea.style.display = 'block';
+        submitBtn.disabled = true;
+    }
+});
+</script>
+{% endblock %}

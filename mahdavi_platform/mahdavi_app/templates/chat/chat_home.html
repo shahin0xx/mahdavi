@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>پیام‌رسان - نور مهدی</title>
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/font-face.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --telegram-bg: #0e1621;
+            --telegram-secondary: #17212b;
+            --telegram-accent: #2b5278;
+            --telegram-green: #00af9c;
+            --telegram-text: #e6eaed;
+            --telegram-text-secondary: #7f91a4;
+            --gold: #d4af37;
+            --dark-gold: #b8941f;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Vazir', sans-serif;
+        }
+
+        body {
+            background: var(--telegram-bg);
+            color: var(--telegram-text);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .top-nav {
+            background: var(--telegram-secondary);
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--telegram-accent);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin: 0;
+            color: var(--telegram-text);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            color: var(--telegram-text-secondary);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-btn:hover {
+            background: rgba(255,255,255,0.1);
+            color: var(--telegram-text);
+        }
+
+        .chats-container {
+            height: calc(100vh - 60px);
+            overflow-y: auto;
+            background: var(--telegram-bg);
+        }
+
+        .search-container {
+            padding: 16px;
+            background: var(--telegram-secondary);
+            border-bottom: 1px solid var(--telegram-accent);
+            position: sticky;
+            top: 0;
+            z-index: 90;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--telegram-accent);
+            border: none;
+            border-radius: 20px;
+            color: var(--telegram-text);
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-input::placeholder {
+            color: var(--telegram-text-secondary);
+        }
+
+        .search-input:focus {
+            outline: none;
+            background: var(--telegram-accent);
+            box-shadow: 0 0 0 2px var(--telegram-green);
+        }
+
+        .chats-list {
+            background: var(--telegram-bg);
+        }
+
+        .chat-item {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            border-bottom: 1px solid var(--telegram-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: inherit;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chat-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: right 0.5s ease;
+        }
+
+        .chat-item:hover::before {
+            right: 100%;
+        }
+
+        .chat-item:hover {
+            background: var(--telegram-secondary);
+            transform: translateX(-5px);
+        }
+
+        .chat-avatar {
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #000;
+            font-size: 1.2rem;
+            margin-left: 16px;
+            position: relative;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+        }
+
+        .chat-item:hover .chat-avatar {
+            transform: scale(1.1);
+        }
+
+        .chat-avatar i {
+            font-size: 1.4rem;
+        }
+
+        .chat-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .chat-name {
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 6px;
+            color: var(--telegram-text);
+            transition: color 0.3s ease;
+        }
+
+        .chat-last-message {
+            font-size: 0.85rem;
+            color: var(--telegram-text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.4;
+        }
+
+        .chat-meta {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 6px;
+        }
+
+        .chat-time {
+            font-size: 0.75rem;
+            color: var(--telegram-text-secondary);
+            white-space: nowrap;
+        }
+
+        .chat-badge {
+            background: var(--telegram-green);
+            color: white;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: bold;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: var(--telegram-text-secondary);
+        }
+
+        .empty-icon {
+            font-size: 5rem;
+            margin-bottom: 24px;
+            opacity: 0.5;
+            color: var(--telegram-green);
+        }
+
+        .empty-title {
+            font-size: 1.4rem;
+            margin-bottom: 12px;
+            color: var(--telegram-text);
+            font-weight: 600;
+        }
+
+        .empty-description {
+            font-size: 1rem;
+            margin-bottom: 40px;
+            line-height: 1.6;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 24px;
+            background: var(--telegram-accent);
+            color: var(--telegram-text);
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .action-btn:hover {
+            background: var(--telegram-green);
+            color: white;
+            text-decoration: none;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 175, 156, 0.3);
+        }
+
+        .fab-button {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            width: 64px;
+            height: 64px;
+            background: var(--telegram-green);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            box-shadow: 0 6px 25px rgba(0, 175, 156, 0.4);
+            z-index: 1000;
+            transition: all 0.3s ease;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .fab-button:hover {
+            background: #009688;
+            transform: scale(1.1) rotate(90deg);
+            box-shadow: 0 8px 30px rgba(0, 175, 156, 0.6);
+        }
+
+        .group-avatar {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+
+        .private-avatar {
+            background: linear-gradient(135deg, var(--gold), #f093fb);
+        }
+
+        .online-indicator {
+            position: absolute;
+            bottom: 2px;
+            left: 2px;
+            width: 12px;
+            height: 12px;
+            background: var(--telegram-green);
+            border: 2px solid var(--telegram-bg);
+            border-radius: 50%;
+        }
+
+        .chats-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .chats-container::-webkit-scrollbar-track {
+            background: var(--telegram-secondary);
+            border-radius: 4px;
+        }
+
+        .chats-container::-webkit-scrollbar-thumb {
+            background: var(--telegram-accent);
+            border-radius: 4px;
+            transition: background 0.3s ease;
+        }
+
+        .chats-container::-webkit-scrollbar-thumb:hover {
+            background: var(--telegram-green);
+        }
+
+        @media (max-width: 768px) {
+            .top-nav {
+                padding: 10px 12px;
+            }
+            
+            .fab-button {
+                bottom: 20px;
+                left: 20px;
+                width: 56px;
+                height: 56px;
+                font-size: 1.4rem;
+            }
+            
+            .chat-item {
+                padding: 14px 12px;
+            }
+            
+            .chat-avatar {
+                width: 48px;
+                height: 48px;
+                font-size: 1.1rem;
+                margin-left: 12px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .action-btn {
+                width: 200px;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="top-nav">
+        <h1 class="nav-title">
+            <i class="fas fa-comments"></i>
+            پیام‌رسان
+        </h1>
+        <div class="nav-actions">
+            <a href="{% url 'search_users' %}" class="nav-btn">
+                <i class="fas fa-search"></i>
+            </a>
+            <a href="{% url 'index' %}" class="nav-btn">
+                <i class="fas fa-home"></i>
+            </a>
+        </div>
+    </div>
+
+    <div class="chats-container">
+        <div class="search-container">
+            <input type="text" placeholder="🔍 جستجو در گفتگوها..." class="search-input" id="search-input">
+        </div>
+
+        <div class="chats-list">
+            {% if rooms_with_unread %}
+                {% for room_data in rooms_with_unread %}
+                {% with room=room_data.room unread_count=room_data.unread_count %}
+                <a href="{% url 'chat_room' room.id %}" class="chat-item">
+                    <div class="chat-avatar {% if room.room_type == 'group' %}group-avatar{% else %}private-avatar{% endif %}">
+                        {% if room.room_type == 'private' %}
+                            {% for participant in room.participants.all %}
+                                {% if participant != request.user %}
+                                    {{ participant.first_name|first }}
+                                    <div class="online-indicator"></div>
+                                {% endif %}
+                            {% endfor %}
+                        {% else %}
+                            <i class="fas fa-users"></i>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="chat-info">
+                        <div class="chat-name">
+                            {{ room.name }}
+                        </div>
+                        <div class="chat-last-message">
+                            {% with last_message=room.messages.last %}
+                                {% if last_message %}
+                                    {% if last_message.message_type == 'text' %}
+                                        {{ last_message.content|truncatechars:60 }}
+                                    {% elif last_message.message_type == 'image' %}
+                                        📷 عکس
+                                    {% elif last_message.message_type == 'file' %}
+                                        📎 فایل
+                                    {% elif last_message.message_type == 'audio' %}
+                                        🎵 صوت
+                                    {% elif last_message.message_type == 'video' %}
+                                        🎬 ویدیو
+                                    {% elif last_message.message_type == 'sticker' %}
+                                        {{ last_message.sticker }}
+                                    {% endif %}
+                                {% else %}
+                                    <span style="color: var(--telegram-text-secondary); font-style: italic;">
+                                        گفتگو را شروع کنید...
+                                    </span>
+                                {% endif %}
+                            {% endwith %}
+                        </div>
+                    </div>
+                    
+                    <div class="chat-meta">
+                        <div class="chat-time">
+                            {% with last_message=room.messages.last %}
+                                {% if last_message %}
+                                    {{ last_message.created_date|timesince }}
+                                {% else %}
+                                    {{ room.created_date|timesince }}
+                                {% endif %}
+                            {% endwith %}
+                        </div>
+                        {% if unread_count > 0 %}
+                            <div class="chat-badge">
+                                {{ unread_count }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </a>
+                {% endwith %}
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <div class="empty-title">گفتگویی برای نمایش وجود ندارد</div>
+                    <div class="empty-description">
+                        برای شروع تجربه پیام‌رسانی، یک گروه جدید ایجاد کنید یا با کاربران دیگر گفتگو را آغاز نمایید
+                    </div>
+                    <div class="action-buttons">
+                        <a href="{% url 'create_chat_room' %}" class="action-btn">
+                            <i class="fas fa-plus-circle"></i>
+                            ایجاد گروه جدید
+                        </a>
+                        <a href="{% url 'search_users' %}" class="action-btn">
+                            <i class="fas fa-user-plus"></i>
+                            جستجوی کاربران
+                        </a>
+                        <a href="{% url 'index' %}" class="action-btn" style="background: var(--gold); color: #000;">
+                            <i class="fas fa-home"></i>
+                            بازگشت به سایت
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <button class="fab-button" onclick="location.href='{% url 'create_chat_room' %}'">
+        <i class="fas fa-plus"></i>
+    </button>
+
+    <script>
+    document.getElementById('search-input').addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const chatItems = document.querySelectorAll('.chat-item');
+        let hasVisibleItems = false;
+        
+        chatItems.forEach(item => {
+            const chatName = item.querySelector('.chat-name').textContent.toLowerCase();
+            const lastMessage = item.querySelector('.chat-last-message').textContent.toLowerCase();
+            
+            if (chatName.includes(searchTerm) || lastMessage.includes(searchTerm)) {
+                item.style.display = 'flex';
+                hasVisibleItems = true;
+            } else {
+                item.style.display = 'none';
+            }
+        });
+        
+        const emptyState = document.querySelector('.empty-state');
+        if (!hasVisibleItems && searchTerm) {
+            if (!emptyState) {
+                const chatsList = document.querySelector('.chats-list');
+                const noResultsHtml = `
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <div class="empty-title">نتیجه‌ای یافت نشد</div>
+                        <div class="empty-description">
+                            هیچ گفتگویی با عبارت "${searchTerm}" پیدا نشد
+                        </div>
+                        <button class="action-btn" onclick="document.getElementById('search-input').value = ''; document.getElementById('search-input').focus(); location.reload();">
+                            <i class="fas fa-redo"></i>
+                            نمایش همه گفتگوها
+                        </button>
+                    </div>
+                `;
+                chatsList.innerHTML = noResultsHtml;
+            }
+        } else if (hasVisibleItems && emptyState && emptyState.querySelector('.fa-search')) {
+            location.reload();
+        }
+    });
+
+    setInterval(function() {
+        location.reload();
+    }, 30000);
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const chatItems = document.querySelectorAll('.chat-item');
+        chatItems.forEach((item, index) => {
+            item.style.opacity = '0';
+            item.style.transform = 'translateX(20px)';
+            
+            setTimeout(() => {
+                item.style.transition = 'all 0.5s ease';
+                item.style.opacity = '1';
+                item.style.transform = 'translateX(0)';
+            }, index * 100);
+        });
+
+        const emptyState = document.querySelector('.empty-state');
+        if (emptyState) {
+            emptyState.style.opacity = '0';
+            emptyState.style.transform = 'translateY(20px)';
+            
+            setTimeout(() => {
+                emptyState.style.transition = 'all 0.8s ease';
+                emptyState.style.opacity = '1';
+                emptyState.style.transform = 'translateY(0)';
+            }, 300);
+        }
+    });
+
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.search-container') && !e.target.closest('.chats-list')) {
+            const searchInput = document.getElementById('search-input');
+            if (searchInput.value === '') {
+                searchInput.blur();
+            }
+        }
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey && e.key === '/') {
+            e.preventDefault();
+            document.getElementById('search-input').focus();
+        }
+        
+        if (e.key === 'Escape') {
+            const searchInput = document.getElementById('search-input');
+            if (searchInput.value) {
+                searchInput.value = '';
+                searchInput.focus();
+                const chatItems = document.querySelectorAll('.chat-item');
+                chatItems.forEach(item => {
+                    item.style.display = 'flex';
+                });
+                
+                const emptyState = document.querySelector('.empty-state');
+                if (emptyState && emptyState.querySelector('.fa-search')) {
+                    location.reload();
+                }
+            }
+        }
+    });
+
+    setTimeout(() => {
+        console.log('💡 راهنمای میانبر:\n• Ctrl+/ : جستجو\n• Escape : پاک کردن جستجو');
+    }, 2000);
+    </script>
+</body>
+</html>

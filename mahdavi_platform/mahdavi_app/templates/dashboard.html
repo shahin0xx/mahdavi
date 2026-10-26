@@ -1,0 +1,842 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}داشبورد - پلتفرم مهدوی{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* استایل‌های اختصاصی داشبورد */
+    .dashboard-hero {
+        background: linear-gradient(135deg, 
+            rgba(212, 175, 55, 0.1) 0%, 
+            rgba(26, 26, 46, 0.8) 50%, 
+            rgba(15, 15, 26, 0.9) 100%);
+        padding: 3rem 0;
+        border-bottom: 1px solid var(--border-gold);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .dashboard-hero::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="rgba(212,175,55,0.05)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+        opacity: 0.3;
+    }
+
+    .user-welcome {
+        text-align: center;
+        margin-bottom: 3rem;
+        position: relative;
+        z-index: 2;
+    }
+
+    .welcome-title {
+        font-size: 2.5rem;
+        color: var(--primary-gold);
+        margin-bottom: 1rem;
+        font-weight: 700;
+        animation: fadeInUp 1s ease-out;
+    }
+
+    .welcome-subtitle {
+        font-size: 1.2rem;
+        color: var(--text-secondary);
+        animation: fadeInUp 1s ease-out 0.3s both;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+    }
+
+    .stat-card {
+        background: rgba(212, 175, 55, 0.1);
+        border: 1px solid var(--border-gold);
+        border-radius: 20px;
+        padding: 2rem;
+        text-align: center;
+        transition: all var(--transition-fast);
+        position: relative;
+        overflow: hidden;
+        animation: fadeInUp 1s ease-out;
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.1), transparent);
+        transition: right var(--transition-slow);
+    }
+
+    .stat-card:hover::before {
+        right: 100%;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--glow-gold);
+    }
+
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, var(--primary-gold), var(--light-gold));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        font-size: 1.5rem;
+        color: var(--dark-bg);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--primary-gold);
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .stat-label {
+        color: var(--text-secondary);
+        font-size: 1rem;
+        font-weight: 500;
+    }
+
+    /* بخش اصلی داشبورد */
+    .dashboard-main {
+        padding: 3rem 0;
+    }
+
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 2rem;
+    }
+
+    .section-title {
+        font-size: 1.8rem;
+        color: var(--primary-gold);
+        margin-bottom: 2rem;
+        font-weight: 600;
+        position: relative;
+        padding-bottom: 0.5rem;
+    }
+
+    .section-title::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 60px;
+        height: 3px;
+        background: linear-gradient(90deg, var(--primary-gold), transparent);
+        border-radius: 2px;
+    }
+
+    /* پیشرفت ایستگاه‌ها */
+    .stations-progress {
+        background: var(--card-bg);
+        border: 1px solid var(--border-gold);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        animation: fadeInLeft 1s ease-out;
+    }
+
+    .progress-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--border-gold);
+        transition: all var(--transition-fast);
+        border-radius: 12px;
+    }
+
+    .progress-item:last-child {
+        border-bottom: none;
+    }
+
+    .progress-item:hover {
+        background: rgba(212, 175, 55, 0.05);
+        transform: translateX(-5px);
+    }
+
+    .station-icon {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, var(--primary-gold), var(--light-gold));
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        color: var(--dark-bg);
+        flex-shrink: 0;
+    }
+
+    .station-info {
+        flex: 1;
+    }
+
+    .station-name {
+        font-size: 1.1rem;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
+
+    .progress-bar-container {
+        background: var(--darker-bg);
+        border-radius: 10px;
+        height: 8px;
+        overflow: hidden;
+        margin-bottom: 0.5rem;
+    }
+
+    .progress-bar {
+        height: 100%;
+        background: linear-gradient(135deg, var(--primary-gold), var(--light-gold));
+        border-radius: 10px;
+        transition: width var(--transition-slow);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .progress-bar::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+        animation: shimmer 2s infinite;
+    }
+
+    .progress-text {
+        display: flex;
+        justify-content: space-between;
+        color: var(--text-muted);
+        font-size: 0.9rem;
+    }
+
+    /* کارت‌های سریع */
+    .quick-actions {
+        display: grid;
+        gap: 1.5rem;
+    }
+
+    .quick-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border-gold);
+        border-radius: 20px;
+        padding: 2rem;
+        text-align: center;
+        transition: all var(--transition-fast);
+        position: relative;
+        overflow: hidden;
+        animation: fadeInRight 1s ease-out;
+    }
+
+    .quick-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.1), transparent);
+        transition: right var(--transition-slow);
+    }
+
+    .quick-card:hover::before {
+        right: 100%;
+    }
+
+    .quick-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--primary-gold);
+        box-shadow: var(--shadow-xl);
+    }
+
+    .quick-icon {
+        width: 70px;
+        height: 70px;
+        background: linear-gradient(135deg, var(--primary-gold), var(--light-gold));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        font-size: 1.8rem;
+        color: var(--dark-bg);
+        box-shadow: var(--glow-gold);
+        transition: all var(--transition-normal);
+    }
+
+    .quick-card:hover .quick-icon {
+        transform: scale(1.1) rotate(10deg);
+    }
+
+    .quick-title {
+        font-size: 1.3rem;
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+        font-weight: 600;
+    }
+
+    .quick-description {
+        color: var(--text-secondary);
+        margin-bottom: 1.5rem;
+        line-height: 1.6;
+    }
+
+    /* درجه معنوی */
+    .spiritual-grade {
+        background: linear-gradient(135deg, var(--primary-gold), var(--dark-gold));
+        border-radius: 20px;
+        padding: 2.5rem;
+        text-align: center;
+        color: var(--dark-bg);
+        position: relative;
+        overflow: hidden;
+        animation: fadeInUp 1s ease-out 0.5s both;
+    }
+
+    .spiritual-grade::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="stars" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="20" cy="20" r="1" fill="rgba(255,255,255,0.3)"/><circle cx="50" cy="50" r="0.8" fill="rgba(255,255,255,0.2)"/><circle cx="80" cy="80" r="1.2" fill="rgba(255,255,255,0.4)"/></pattern></defs><rect width="100" height="100" fill="url(%23stars)"/></svg>');
+        opacity: 0.1;
+    }
+
+    .grade-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        animation: float 3s ease-in-out infinite;
+    }
+
+    .grade-title {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+        font-weight: 700;
+    }
+
+    .grade-level {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        opacity: 0.9;
+    }
+
+    .grade-description {
+        font-size: 1rem;
+        opacity: 0.8;
+        line-height: 1.6;
+    }
+
+    /* نشان‌ها */
+    .badges-section {
+        background: var(--card-bg);
+        border: 1px solid var(--border-gold);
+        border-radius: 20px;
+        padding: 2rem;
+        animation: fadeInUp 1s ease-out 0.7s both;
+    }
+
+    .badges-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .badge-item {
+        text-align: center;
+        transition: all var(--transition-fast);
+    }
+
+    .badge-item:hover {
+        transform: translateY(-5px);
+    }
+
+    .badge-icon {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, var(--primary-gold), var(--light-gold));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        font-size: 2rem;
+        color: var(--dark-bg);
+        box-shadow: var(--shadow-lg);
+        transition: all var(--transition-normal);
+    }
+
+    .badge-item:hover .badge-icon {
+        transform: scale(1.1);
+        box-shadow: var(--glow-gold);
+    }
+
+    .badge-name {
+        font-size: 0.9rem;
+        color: var(--text-primary);
+        font-weight: 600;
+        margin-bottom: 0.3rem;
+    }
+
+    .badge-status {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+    }
+
+    .badge-earned {
+        color: var(--primary-gold);
+        font-weight: 600;
+    }
+
+    /* انیمیشن‌های اختصاصی */
+    @keyframes fadeInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes fadeInRight {
+        from {
+            opacity: 0;
+            transform: translateX(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+    }
+
+    /* رسپانسیو */
+    @media (max-width: 1024px) {
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .quick-actions {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .welcome-title {
+            font-size: 2rem;
+        }
+        
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .quick-actions {
+            grid-template-columns: 1fr;
+        }
+        
+        .badges-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    @media (max-width: 480px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .progress-item {
+            flex-direction: column;
+            text-align: center;
+            gap: 1rem;
+        }
+        
+        .badges-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .spiritual-grade {
+            padding: 2rem 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- هیرو داشبورد -->
+<section class="dashboard-hero">
+    <div class="container">
+        <div class="user-welcome">
+            <h1 class="welcome-title">خوش آمدید، {{ user.get_full_name|default:user.username }}! 🌟</h1>
+            <p class="welcome-subtitle">مسیر معنوی شما در پلتفرم مهدوی ادامه دارد...</p>
+        </div>
+
+        <!-- آمار سریع -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <span class="stat-number">{{ user.points|default:0 }}</span>
+                <div class="stat-label">امتیاز کل</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-flag-checkered"></i>
+                </div>
+                <span class="stat-number">{{ completed_stations|default:0 }}/{{ total_stations|default:0 }}</span>
+                <div class="stat-label">ایستگاه‌های تکمیل شده</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-medal"></i>
+                </div>
+                <span class="stat-number">{{ badges_count|default:0 }}</span>
+                <div class="stat-label">نشان‌های کسب شده</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-fire"></i>
+                </div>
+                <span class="stat-number">{{ today_completions|default:0 }}</span>
+                <div class="stat-label">فعالیت امروز</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- بخش اصلی داشبورد -->
+<section class="dashboard-main">
+    <div class="container">
+        <div class="dashboard-grid">
+            <!-- ستون سمت راست - محتوای اصلی -->
+            <div class="dashboard-content">
+                <!-- پیشرفت در ایستگاه‌ها -->
+                <div class="stations-progress">
+                    <h2 class="section-title">پیشرفت شما در ایستگاه‌ها</h2>
+                    
+                    <div class="progress-list">
+                        {% for progress in station_progress %}
+                        <div class="progress-item">
+                            <div class="station-icon">
+                                <i class="fas fa-{{ progress.station.icon|default:'compass' }}"></i>
+                            </div>
+                            <div class="station-info">
+                                <div class="station-name">{{ progress.station.name }}</div>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar" style="width: {{ progress.percentage }}%"></div>
+                                </div>
+                                <div class="progress-text">
+                                    <span>{{ progress.completed }}/{{ progress.total }} محتوا</span>
+                                    <span>{{ progress.percentage|floatformat:0 }}%</span>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="progress-item">
+                            <div class="station-icon">
+                                <i class="fas fa-compass"></i>
+                            </div>
+                            <div class="station-info">
+                                <div class="station-name">هنوز در ایستگاه‌ها مشارکت نکرده‌اید</div>
+                                <div class="progress-text">
+                                    <span>شروع کنید و اولین ایستگاه را کامل کنید!</span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- اقدامات سریع -->
+                <h2 class="section-title">اقدامات سریع</h2>
+                <div class="quick-actions">
+                    <div class="quick-card">
+                        <div class="quick-icon">
+                            <i class="fas fa-play"></i>
+                        </div>
+                        <h3 class="quick-title">ادامه یادگیری</h3>
+                        <p class="quick-description">
+                            به آخرین ایستگاه فعال خود بازگردید و مسیر یادگیری را ادامه دهید
+                        </p>
+                        <a href="{% url 'index' %}" class="btn btn-primary">
+                            ادامه مسیر
+                        </a>
+                    </div>
+                    
+                    <div class="quick-card">
+                        <div class="quick-icon">
+                            <i class="fas fa-book-open"></i>
+                        </div>
+                        <h3 class="quick-title">کتابخانه</h3>
+                        <p class="quick-description">
+                            دسترسی به منابع آموزشی و کتاب‌های ارزشمند در حوزه مهدویت
+                        </p>
+                        <a href="{% url 'library_home' %}" class="btn btn-outline">
+                            مشاهده کتابخانه
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ستون سمت چپ - اطلاعات جانبی -->
+            <div class="dashboard-sidebar">
+                <!-- درجه معنوی -->
+                <div class="spiritual-grade">
+                    <div class="grade-icon">👑</div>
+                    <h3 class="grade-title">{{ spiritual_grade.title|default:'علاقه‌مند' }}</h3>
+                    <div class="grade-level">درجه {{ spiritual_grade.grade|default:'D' }}</div>
+                    <p class="grade-description">
+                        شما {{ spiritual_grade.percentage|default:0 }}% از مسیر مهدوی را طی کرده‌اید
+                    </p>
+                </div>
+
+                <!-- نشان‌ها -->
+                <div class="badges-section">
+                    <h2 class="section-title">نشان‌های شما</h2>
+                    <div class="badges-grid">
+                        {% for badge in badges %}
+                        <div class="badge-item">
+                            <div class="badge-icon">
+                                <i class="fas fa-{{ badge.badge.icon|default:'award' }}"></i>
+                            </div>
+                            <div class="badge-name">{{ badge.badge.name }}</div>
+                            <div class="badge-status badge-earned">کسب شده</div>
+                        </div>
+                        {% empty %}
+                        <div class="badge-item">
+                            <div class="badge-icon">
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <div class="badge-name">هنوز نشان‌ای ندارید</div>
+                            <div class="badge-status">در حال پیشرفت</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- لینک‌های مفید -->
+                <div class="quick-card" style="margin-top: 2rem;">
+                    <div class="quick-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3 class="quick-title">آمار پیشرفت</h3>
+                    <p class="quick-description">
+                        مشاهده آمار دقیق پیشرفت و عملکرد خود در پلتفرم
+                    </p>
+                    <a href="{% url 'user_statistics' %}" class="btn btn-outline" style="width: 100%;">
+                        مشاهده آمار کامل
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // انیمیشن‌های پیشرفته داشبورد
+    class DashboardAnimations {
+        constructor() {
+            this.init();
+        }
+
+        init() {
+            this.initCounterAnimations();
+            this.initProgressBars();
+            this.initHoverEffects();
+            this.initScrollAnimations();
+        }
+
+        // انیمیشن شمارنده‌ها
+        initCounterAnimations() {
+            const counters = document.querySelectorAll('.stat-number');
+            counters.forEach(counter => {
+                const target = parseInt(counter.textContent);
+                const duration = 2000;
+                const step = target / (duration / 16);
+                let current = 0;
+                
+                const timer = setInterval(() => {
+                    current += step;
+                    if (current >= target) {
+                        current = target;
+                        clearInterval(timer);
+                    }
+                    counter.textContent = Math.floor(current);
+                }, 16);
+            });
+        }
+
+        // انیمیشن نوارهای پیشرفت
+        initProgressBars() {
+            const progressBars = document.querySelectorAll('.progress-bar');
+            progressBars.forEach(bar => {
+                const width = bar.style.width;
+                bar.style.width = '0%';
+                
+                setTimeout(() => {
+                    bar.style.width = width;
+                }, 500);
+            });
+        }
+
+        // افکت‌های hover پیشرفته
+        initHoverEffects() {
+            const cards = document.querySelectorAll('.stat-card, .quick-card, .badge-item');
+            
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-8px) scale(1.02)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0) scale(1)';
+                });
+            });
+
+            // افکت پارالکس برای درجه معنوی
+            const spiritualGrade = document.querySelector('.spiritual-grade');
+            if (spiritualGrade) {
+                spiritualGrade.addEventListener('mousemove', (e) => {
+                    const x = (e.clientX / window.innerWidth) * 20 - 10;
+                    const y = (e.clientY / window.innerHeight) * 20 - 10;
+                    spiritualGrade.style.transform = `perspective(1000px) rotateX(${y}deg) rotateY(${x}deg)`;
+                });
+
+                spiritualGrade.addEventListener('mouseleave', () => {
+                    spiritualGrade.style.transform = 'perspective(1000px) rotateX(0) rotateY(0)';
+                });
+            }
+        }
+
+        // انیمیشن‌های اسکرول
+        initScrollAnimations() {
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                        
+                        // انیمیشن ویژه برای کارت‌ها
+                        if (entry.target.classList.contains('quick-card')) {
+                            this.animateCard(entry.target);
+                        }
+                    }
+                });
+            }, observerOptions);
+
+            // مشاهده عناصر برای انیمیشن
+            document.querySelectorAll('.quick-card, .badges-section').forEach(element => {
+                element.style.opacity = '0';
+                element.style.transform = 'translateY(30px)';
+                element.style.transition = 'all 0.6s ease';
+                observer.observe(element);
+            });
+        }
+
+        // انیمیشن کارت
+        animateCard(card) {
+            const icon = card.querySelector('.quick-icon');
+            if (icon) {
+                icon.style.animation = 'bounce 0.6s ease';
+                setTimeout(() => {
+                    icon.style.animation = '';
+                }, 600);
+            }
+        }
+    }
+
+    // راه‌اندازی انیمیشن‌ها
+    document.addEventListener('DOMContentLoaded', () => {
+        new DashboardAnimations();
+        
+        // اضافه کردن انیمیشن bounce
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes bounce {
+                0%, 20%, 53%, 80%, 100% {
+                    transform: translate3d(0,0,0);
+                }
+                40%, 43% {
+                    transform: translate3d(0,-15px,0);
+                }
+                70% {
+                    transform: translate3d(0,-7px,0);
+                }
+                90% {
+                    transform: translate3d(0,-3px,0);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    });
+
+    // به‌روزرسانی زنده آمار
+    function updateLiveStats() {
+        // شبیه‌سازی به‌روزرسانی آمار
+        setInterval(() => {
+            const activityElement = document.querySelector('.stat-card:last-child .stat-number');
+            if (activityElement) {
+                const current = parseInt(activityElement.textContent);
+                activityElement.textContent = current + Math.floor(Math.random() * 2);
+            }
+        }, 10000);
+    }
+
+    // شروع به‌روزرسانی‌های زنده
+    setTimeout(updateLiveStats, 5000);
+
+    // مدیریت رویدادهای تعاملی
+    document.addEventListener('click', function(e) {
+        // افکت کلیک روی کارت‌ها
+        if (e.target.closest('.stat-card, .quick-card')) {
+            const card = e.target.closest('.stat-card, .quick-card');
+            card.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                card.style.transform = '';
+            }, 150);
+        }
+    });
+</script>
+{% endblock %}

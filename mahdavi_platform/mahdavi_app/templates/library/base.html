@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نور مهدی - پایگاه تخصصی مهدویت</title>
+    
+    <!-- فونت‌ها -->
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/font-face.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.9.96/css/materialdesignicons.min.css" rel="stylesheet">
+    
+    <!-- استایل‌ها -->
+    <style>
+        :root {
+            --primary-gold: #D4AF37;
+            --secondary-gold: #F7EF8A;
+            --dark-green: #1A472A;
+            --light-green: #2E8B57;
+            --dark-blue: #1E3A5F;
+            --light-blue: #3498DB;
+            --text-dark: #2C3E50;
+            --text-light: #7F8C8D;
+            --bg-light: #F8F9FA;
+            --bg-white: #FFFFFF;
+            --shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Vazir', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-light) 0%, #E8F4F8 100%);
+            min-height: 100vh;
+            color: var(--text-dark);
+        }
+
+        /* هدر و ناوبری */
+        .header {
+            background: linear-gradient(135deg, var(--dark-green) 0%, var(--dark-blue) 100%);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .nav-main {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: white;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            font-size: 2rem;
+            color: var(--primary-gold);
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .logo-subtitle {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-link:hover {
+            background: rgba(212, 175, 55, 0.2);
+            color: var(--primary-gold);
+        }
+
+        .nav-link.active {
+            background: var(--primary-gold);
+            color: var(--dark-blue);
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 0.5rem 1.5rem;
+            border: none;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: var(--transition);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary-gold);
+            color: var(--dark-blue);
+        }
+
+        .btn-primary:hover {
+            background: var(--secondary-gold);
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            border: 2px solid var(--primary-gold);
+            color: var(--primary-gold);
+            background: transparent;
+        }
+
+        .btn-outline:hover {
+            background: var(--primary-gold);
+            color: var(--dark-blue);
+        }
+
+        /* محتوای اصلی */
+        .main-content {
+            min-height: calc(100vh - 200px);
+            padding: 2rem 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* فوتر */
+        .footer {
+            background: linear-gradient(135deg, var(--dark-blue) 0%, var(--dark-green) 100%);
+            color: white;
+            padding: 3rem 0 1rem;
+            margin-top: 4rem;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-section h3 {
+            color: var(--primary-gold);
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-links a {
+            color: #ccc;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .footer-links a:hover {
+            color: var(--primary-gold);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #ccc;
+        }
+
+        /* بخش ویژه مهدوی */
+        .mahdavi-banner {
+            background: linear-gradient(135deg, var(--primary-gold) 0%, var(--secondary-gold) 100%);
+            padding: 3rem 0;
+            text-align: center;
+            margin: 2rem 0;
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mahdavi-banner::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23ffffff' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E");
+            opacity: 0.1;
+        }
+
+        .banner-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .banner-title {
+            font-size: 2.5rem;
+            color: var(--dark-blue);
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .banner-subtitle {
+            font-size: 1.2rem;
+            color: var(--dark-green);
+            margin-bottom: 2rem;
+        }
+
+        /* کارت‌ها */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+
+        .card {
+            background: var(--bg-white);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-icon {
+            font-size: 3rem;
+            color: var(--primary-gold);
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            color: var(--dark-blue);
+            margin-bottom: 1rem;
+        }
+
+        .card-text {
+            color: var(--text-light);
+            line-height: 1.6;
+        }
+
+        /* بخش کتابخانه */
+        .library-nav {
+            background: var(--bg-white);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .library-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .library-title {
+            color: var(--dark-blue);
+            font-size: 1.5rem;
+        }
+
+        .back-to-site {
+            background: var(--light-green);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .back-to-site:hover {
+            background: var(--dark-green);
+        }
+
+        /* رسپانسیو */
+        @media (max-width: 768px) {
+            .nav-menu {
+                display: none;
+            }
+            
+            .nav-main {
+                flex-wrap: wrap;
+            }
+            
+            .banner-title {
+                font-size: 2rem;
+            }
+            
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- هدر -->
+    <header class="header">
+        <div class="nav-container">
+            <nav class="nav-main">
+                <a href="{% url 'index' %}" class="logo">
+                    <span class="mdi mdi-mosque logo-icon"></span>
+                    <div>
+                        <div class="logo-text">نور مهدی</div>
+                        <div class="logo-subtitle">پایگاه تخصصی مهدویت</div>
+                    </div>
+                </a>
+                
+                <ul class="nav-menu">
+                    <li><a href="{% url 'index' %}" class="nav-link active">
+                        <span class="mdi mdi-home"></span>
+                        خانه
+                    </a></li>
+                    <li><a href="{% url 'library_home' %}" class="nav-link">
+                        <span class="mdi mdi-book-open-variant"></span>
+                        کتابخانه مهدوی
+                    </a></li>
+                    <li><a href="{% url 'station_detail' 1 %}" class="nav-link">
+                        <span class="mdi mdi-map-marker-path"></span>
+                        ایستگاه‌های معرفت
+                    </a></li>
+                    <li><a href="{% url 'quran' %}" class="nav-link">
+                        <span class="mdi mdi-book-open-page-variant"></span>
+                        قرآن کریم
+                    </a></li>
+                    <li><a href="{% url 'games_list' %}" class="nav-link">
+                        <span class="mdi mdi-gamepad-variant"></span>
+                        بازی‌های مهدوی
+                    </a></li>
+                </ul>
+                
+                <div class="nav-actions">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'dashboard' %}" class="btn btn-outline">
+                            <span class="mdi mdi-account"></span>
+                            پنل کاربری
+                        </a>
+                        <a href="{% url 'logout' %}" class="btn btn-primary">
+                            <span class="mdi mdi-logout"></span>
+                            خروج
+                        </a>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="btn btn-outline">
+                            <span class="mdi mdi-login"></span>
+                            ورود
+                        </a>
+                        <a href="{% url 'register' %}" class="btn btn-primary">
+                            <span class="mdi mdi-account-plus"></span>
+                            ثبت نام
+                        </a>
+                    {% endif %}
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- محتوای اصلی -->
+    <main class="main-content">
+        {% block content %}
+        <!-- محتوای صفحات مختلف اینجا قرار می‌گیرد -->
+        {% endblock %}
+    </main>
+
+    <!-- فوتر -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>نور مهدی</h3>
+                    <p>پایگاه تخصصی معارف مهدویت و انتظار فرج</p>
+                    <div style="margin-top: 1rem;">
+                        <span class="mdi mdi-phone" style="margin-right: 0.5rem;"></span>
+                        تلفن: ۰۲۱-۱۲۳۴۵۶۷۸
+                    </div>
+                    <div>
+                        <span class="mdi mdi-email" style="margin-right: 0.5rem;"></span>
+                        ایمیل: info@nooremehdi.ir
+                    </div>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>لینک‌های سریع</h3>
+                    <ul class="footer-links">
+                        <li><a href="{% url 'index' %}">صفحه اصلی</a></li>
+                        <li><a href="{% url 'library_home' %}">کتابخانه</a></li>
+                        <li><a href="{% url 'quran' %}">قرآن کریم</a></li>
+                        <li><a href="{% url 'games_list' %}">بازی‌ها</a></li>
+                        <li><a href="{% url 'station_leaderboard' %}">جدول امتیازات</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>خدمات</h3>
+                    <ul class="footer-links">
+                        <li><a href="{% url 'user_achievements' %}">دستاوردها</a></li>
+                        <li><a href="{% url 'user_statistics' %}">آمار کاربری</a></li>
+                        <li><a href="{% url 'chat_home' %}">چت و گفتگو</a></li>
+                        <li><a href="{% url 'social_home' %}">شبکه اجتماعی</a></li>
+                        <li><a href="{% url 'shop_home' %}">فروشگاه</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>اشتراک در خبرنامه</h3>
+                    <p>برای دریافت جدیدترین مطالب مهدوی در خبرنامه ما عضو شوید</p>
+                    <form style="margin-top: 1rem;">
+                        <input type="email" placeholder="ایمیل خود را وارد کنید" 
+                               style="width: 100%; padding: 0.5rem; border: none; border-radius: 5px; margin-bottom: 0.5rem;">
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">
+                            <span class="mdi mdi-send"></span>
+                            اشتراک
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>© ۱۴۰۳ پایگاه نور مهدی. تمام حقوق محفوظ است.</p>
+                <p style="margin-top: 0.5rem; font-size: 0.9rem;">
+                    "اللهم عجل لولیک الفرج"
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // اسکریپت برای تعاملات
+        document.addEventListener('DOMContentLoaded', function() {
+            // افزودن انیمیشن به کارت‌ها
+            const cards = document.querySelectorAll('.card');
+            cards.forEach((card, index) => {
+                card.style.animationDelay = `${index * 0.1}s`;
+            });
+            
+            // مدیریت منوی موبایل
+            const mobileMenuBtn = document.createElement('button');
+            mobileMenuBtn.innerHTML = '<span class="mdi mdi-menu"></span>';
+            mobileMenuBtn.style.background = 'none';
+            mobileMenuBtn.style.border = 'none';
+            mobileMenuBtn.style.color = 'white';
+            mobileMenuBtn.style.fontSize = '1.5rem';
+            mobileMenuBtn.style.cursor = 'pointer';
+            mobileMenuBtn.style.display = 'none';
+            
+            mobileMenuBtn.addEventListener('click', function() {
+                const navMenu = document.querySelector('.nav-menu');
+                navMenu.style.display = navMenu.style.display === 'flex' ? 'none' : 'flex';
+            });
+            
+            document.querySelector('.nav-main').appendChild(mobileMenuBtn);
+            
+            // بررسی اندازه صفحه برای نمایش دکمه منوی موبایل
+            function checkScreenSize() {
+                if (window.innerWidth <= 768) {
+                    mobileMenuBtn.style.display = 'block';
+                    document.querySelector('.nav-menu').style.display = 'none';
+                } else {
+                    mobileMenuBtn.style.display = 'none';
+                    document.querySelector('.nav-menu').style.display = 'flex';
+                }
+            }
+            
+            checkScreenSize();
+            window.addEventListener('resize', checkScreenSize);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>جستجوی کاربران - پیام‌رسان</title>
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/font-face.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --telegram-bg: #0e1621;
+            --telegram-secondary: #17212b;
+            --telegram-accent: #2b5278;
+            --telegram-green: #00af9c;
+            --telegram-text: #e6eaed;
+            --telegram-text-secondary: #7f91a4;
+            --gold: #d4af37;
+            --dark-gold: #b8941f;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Vazir', sans-serif;
+        }
+
+        body {
+            background: var(--telegram-bg);
+            color: var(--telegram-text);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .top-nav {
+            background: var(--telegram-secondary);
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--telegram-accent);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .back-button {
+            background: none;
+            border: none;
+            color: var(--telegram-text);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: background 0.3s ease;
+        }
+
+        .back-button:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .nav-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin: 0;
+            color: var(--telegram-text);
+        }
+
+        .search-container {
+            padding: 20px;
+            background: var(--telegram-bg);
+        }
+
+        .search-form {
+            display: flex;
+            gap: 12px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 12px 16px;
+            background: var(--telegram-secondary);
+            border: 1px solid var(--telegram-accent);
+            border-radius: 20px;
+            color: var(--telegram-text);
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-input::placeholder {
+            color: var(--telegram-text-secondary);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--telegram-green);
+            box-shadow: 0 0 0 2px rgba(0, 175, 156, 0.2);
+        }
+
+        .search-btn {
+            padding: 12px 20px;
+            background: var(--telegram-green);
+            border: none;
+            border-radius: 20px;
+            color: white;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .search-btn:hover {
+            background: #009688;
+            transform: translateY(-1px);
+        }
+
+        .users-container {
+            height: calc(100vh - 160px);
+            overflow-y: auto;
+            padding: 0 20px 20px;
+            background: var(--telegram-bg);
+        }
+
+        .user-item {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            border-bottom: 1px solid var(--telegram-secondary);
+            transition: all 0.3s ease;
+        }
+
+        .user-item:hover {
+            background: var(--telegram-secondary);
+            transform: translateX(-5px);
+        }
+
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--gold), var(--dark-gold));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #000;
+            font-size: 1.1rem;
+            margin-left: 16px;
+        }
+
+        .user-info {
+            flex: 1;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 4px;
+            color: var(--telegram-text);
+        }
+
+        .user-phone {
+            font-size: 0.85rem;
+            color: var(--telegram-text-secondary);
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            padding: 8px 16px;
+            background: var(--telegram-accent);
+            border: none;
+            border-radius: 6px;
+            color: var(--telegram-text);
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .action-btn:hover {
+            background: var(--telegram-green);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: var(--telegram-text-secondary);
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+            color: var(--telegram-green);
+        }
+
+        .empty-title {
+            font-size: 1.3rem;
+            margin-bottom: 12px;
+            color: var(--telegram-text);
+            font-weight: 600;
+        }
+
+        .empty-description {
+            font-size: 1rem;
+            line-height: 1.6;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .users-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .users-container::-webkit-scrollbar-track {
+            background: var(--telegram-secondary);
+        }
+
+        .users-container::-webkit-scrollbar-thumb {
+            background: var(--telegram-accent);
+            border-radius: 3px;
+        }
+
+        .users-container::-webkit-scrollbar-thumb:hover {
+            background: var(--telegram-green);
+        }
+
+        @media (max-width: 768px) {
+            .top-nav {
+                padding: 10px 12px;
+            }
+            
+            .search-container {
+                padding: 15px;
+            }
+            
+            .users-container {
+                padding: 0 15px 15px;
+            }
+            
+            .user-item {
+                padding: 12px;
+                flex-direction: column;
+                gap: 12px;
+                align-items: flex-start;
+            }
+            
+            .user-actions {
+                width: 100%;
+                justify-content: flex-end;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="top-nav">
+        <button class="back-button" onclick="location.href='{% url 'chat_home' %}'">
+            <i class="fas fa-arrow-right"></i>
+        </button>
+        <h1 class="nav-title">جستجوی کاربران</h1>
+    </div>
+
+    <div class="search-container">
+        <form method="get" class="search-form">
+            <input type="text" name="q" class="search-input" placeholder="شماره تلفن کاربر را وارد کنید (09xxxxxxxxx)" value="{{ query }}" maxlength="11">
+            <button type="submit" class="search-btn">
+                <i class="fas fa-search"></i>
+                جستجو
+            </button>
+        </form>
+    </div>
+
+    <div class="users-container">
+        {% if users %}
+            {% for user in users %}
+            <div class="user-item">
+                <div class="user-avatar">
+                    {{ user.first_name|first }}
+                </div>
+                <div class="user-info">
+                    <div class="user-name">{{ user.get_full_name }}</div>
+                    <div class="user-phone">{{ user.phone }}</div>
+                </div>
+                <div class="user-actions">
+                    <a href="{% url 'create_private_chat' user.id %}" class="action-btn">
+                        <i class="fas fa-comment"></i>
+                        گفتگو
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        {% elif query %}
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="fas fa-user-slash"></i>
+                </div>
+                <div class="empty-title">کاربری یافت نشد</div>
+                <div class="empty-description">
+                    کاربری با شماره تلفن "{{ query }}" پیدا نشد. لطفاً شماره را بررسی کنید و مجدداً تلاش نمایید.
+                </div>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+                <div class="empty-title">جستجوی کاربران</div>
+                <div class="empty-description">
+                    برای شروع گفتگو با کاربران دیگر، شماره تلفن آن‌ها را در کادر بالا وارد کنید و جستجو را بزنید.
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <script>
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const query = document.querySelector('input[name="q"]').value.trim();
+            if (!query) {
+                e.preventDefault();
+                alert('لطفاً شماره تلفن را وارد کنید');
+                return;
+            }
+            
+            if (!query.startsWith('09') || query.length !== 11) {
+                e.preventDefault();
+                alert('شماره تلفن باید با 09 شروع شود و 11 رقم باشد');
+                return;
+            }
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                location.href = '{% url 'chat_home' %}';
+            }
+        });
+    </script>
+</body>
+</html>

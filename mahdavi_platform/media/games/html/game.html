@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بازی نمونه مهدوی</title>
+    <style>
+        body {
+            font-family: 'Vazir', Tahoma, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            color: white;
+            text-align: center;
+        }
+        
+        .game-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        h1 {
+            color: #ffd700;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .question {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        
+        .options {
+            display: grid;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .option {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .option:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: #ffd700;
+            transform: translateY(-2px);
+        }
+        
+        .option.correct {
+            background: #27ae60;
+            border-color: #2ecc71;
+        }
+        
+        .option.wrong {
+            background: #e74c3c;
+            border-color: #c0392b;
+        }
+        
+        .score {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #ffd700;
+            margin: 20px 0;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #ffd700, #f39c12);
+            color: #000;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+            font-family: 'Vazir', Tahoma, sans-serif;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .result {
+            font-size: 1.3em;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .game-info {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>🎮 بازی شناخت امام زمان(عج)</h1>
+        
+        <div class="game-info">
+            <strong>امتیاز جایزه: {{ game.points_reward }}</strong> | 
+            <strong>تکمیل شده: {% if user_progress.completed %}✅{% else %}❌{% endif %}</strong>
+        </div>
+        
+        <div id="gameScreen">
+            <div class="question" id="question">
+                سوالات مربوط به امام زمان(عج) را پاسخ دهید
+            </div>
+            
+            <div class="options" id="options">
+                <!-- گزینه‌ها اینجا نمایش داده می‌شوند -->
+            </div>
+            
+            <div class="score" id="score">
+                امتیاز بازی: <span id="scoreValue">0</span>
+            </div>
+            
+            <button class="btn" id="startBtn" onclick="startGame()">شروع بازی</button>
+            <button class="btn" id="nextBtn" onclick="nextQuestion()" style="display: none;">سوال بعدی</button>
+        </div>
+        
+        <div id="resultScreen" style="display: none;">
+            <div class="result" id="finalResult"></div>
+            <button class="btn" onclick="restartGame()">بازی مجدد</button>
+            <button class="btn" id="submitBtn" onclick="submitScore()">ثبت امتیاز و دریافت {{ game.points_reward }} امتیاز</button>
+        </div>
+    </div>
+
+    <script>
+        // سوالات بازی
+        const questions = [
+            {
+                question: "امام زمان(عج) چندمین امام شیعیان هستند؟",
+                options: ["دوازدهم", "یازدهم", "دهم", "نهم"],
+                correct: 0
+            },
+            {
+                question: "القاب امام زمان(عج) کدام است؟",
+                options: ["قائم", "مهدی", "صاحب الزمان", "همه موارد"],
+                correct: 3
+            },
+            {
+                question: "امام زمان(عج) در کدام شهر متولد شدند؟",
+                options: ["مکه", "مدینه", "سامرا", "کوفه"],
+                correct: 2
+            },
+            {
+                question: "دوران غیبت صغری چند سال طول کشید؟",
+                options: ["۷۰ سال", "۶۹ سال", "۷۴ سال", "۷۲ سال"],
+                correct: 1
+            },
+            {
+                question: "نایب خاص امام زمان در دوران غیبت صغری کیست؟",
+                options: ["شیخ مفید", "شیخ صدوق", "نواب اربعه", "شیخ طوسی"],
+                correct: 2
+            }
+        ];
+
+        let currentQuestion = 0;
+        let gameScore = 0;
+        let gameStarted = false;
+
+        function startGame() {
+            gameStarted = true;
+            document.getElementById('startBtn').style.display = 'none';
+            document.getElementById('nextBtn').style.display = 'inline-block';
+            showQuestion();
+        }
+
+        function showQuestion() {
+            if (currentQuestion >= questions.length) {
+                endGame();
+                return;
+            }
+
+            const q = questions[currentQuestion];
+            document.getElementById('question').textContent = `سوال ${currentQuestion + 1}: ${q.question}`;
+            
+            const optionsDiv = document.getElementById('options');
+            optionsDiv.innerHTML = '';
+            
+            q.options.forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'option';
+                optionDiv.textContent = option;
+                optionDiv.onclick = () => checkAnswer(index);
+                optionsDiv.appendChild(optionDiv);
+            });
+        }
+
+        function checkAnswer(selectedIndex) {
+            const q = questions[currentQuestion];
+            const options = document.querySelectorAll('.option');
+            
+            options.forEach((option, index) => {
+                if (index === q.correct) {
+                    option.classList.add('correct');
+                } else if (index === selectedIndex && index !== q.correct) {
+                    option.classList.add('wrong');
+                }
+                option.style.pointerEvents = 'none';
+            });
+
+            if (selectedIndex === q.correct) {
+                gameScore += 20;
+                document.getElementById('scoreValue').textContent = gameScore;
+            }
+
+            document.getElementById('nextBtn').disabled = false;
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            document.getElementById('nextBtn').disabled = true;
+            showQuestion();
+        }
+
+        function endGame() {
+            document.getElementById('gameScreen').style.display = 'none';
+            document.getElementById('resultScreen').style.display = 'block';
+            
+            const resultDiv = document.getElementById('finalResult');
+            let message = '';
+            
+            if (gameScore >= 80) {
+                message = `عالی! 🎉 شما ${gameScore} امتیاز کسب کردید! درک خوبی از امام زمان(عج) دارید.`;
+            } else if (gameScore >= 60) {
+                message = `خوب! 👍 شما ${gameScore} امتیاز کسب کردید. اطلاعات خوبی دارید.`;
+            } else {
+                message = `قابل قبول! 📚 شما ${gameScore} امتیاز کسب کردید. مطالعه بیشتری داشته باشید.`;
+            }
+            
+            resultDiv.textContent = message;
+            
+            // اگر قبلاً تکمیل شده، دکمه ثبت را غیرفعال کن
+            {% if user_progress.completed %}
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('submitBtn').innerHTML = '✅ قبلاً تکمیل شده';
+            {% endif %}
+        }
+
+        function restartGame() {
+            currentQuestion = 0;
+            gameScore = 0;
+            gameStarted = false;
+            document.getElementById('scoreValue').textContent = '0';
+            document.getElementById('gameScreen').style.display = 'block';
+            document.getElementById('resultScreen').style.display = 'none';
+            document.getElementById('startBtn').style.display = 'inline-block';
+            document.getElementById('nextBtn').style.display = 'none';
+            document.getElementById('nextBtn').disabled = true;
+        }
+
+        function submitScore() {
+            console.log('ارسال امتیاز:', gameScore);
+            
+            // ارسال امتیاز به صفحه اصلی
+            if (window.sendGameScore) {
+                window.sendGameScore(gameScore);
+                document.getElementById('submitBtn').disabled = true;
+                document.getElementById('submitBtn').innerHTML = '⏳ در حال ثبت...';
+            } else {
+                alert(`امتیاز شما: ${gameScore}\n\nتابع ارسال امتیاز یافت نشد!`);
+            }
+        }
+
+        // اطلاع از آماده بودن بازی
+        console.log('بازی آماده است');
+        if (window.gameReady) {
+            window.gameReady();
+        }
+    </script>
+</body>
+</html>

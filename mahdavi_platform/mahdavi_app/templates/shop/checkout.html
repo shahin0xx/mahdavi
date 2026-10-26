@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}تکمیل سفارش - نور مهدی{% endblock %}
+
+{% block extra_css %}
+<style>
+    .checkout-section {
+        padding: 2rem 0;
+        min-height: 70vh;
+    }
+
+    .checkout-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+    }
+
+    .order-summary {
+        background: var(--card-bg);
+        border: 2px solid var(--border-gold);
+        border-radius: 20px;
+        padding: 2rem;
+    }
+
+    .payment-guide {
+        background: rgba(212, 175, 55, 0.1);
+        border: 1px solid var(--border-gold);
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-top: 1.5rem;
+    }
+
+    .card-number {
+        background: rgba(0, 0, 0, 0.5);
+        padding: 1rem;
+        border-radius: 12px;
+        text-align: center;
+        border: 1px solid var(--border-gold);
+        font-family: monospace;
+        font-size: 1.3rem;
+        color: var(--primary-gold);
+        letter-spacing: 2px;
+        margin: 1rem 0;
+    }
+
+    @media (max-width: 768px) {
+        .checkout-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="checkout-section fade-in">
+    <div class="container">
+        <div class="checkout-grid">
+            <!-- فرم اطلاعات -->
+            <div class="card">
+                <h2 class="card-title">
+                    <i class="fas fa-user card-icon"></i>
+                    اطلاعات سفارش
+                </h2>
+
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="form-group">
+                        <label class="form-label">نام و نام خانوادگی *</label>
+                        {{ form.customer_name }}
+                        {% if form.customer_name.errors %}
+                        <div class="error-message">
+                            {{ form.customer_name.errors }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">شماره تلفن *</label>
+                        {{ form.customer_phone }}
+                        {% if form.customer_phone.errors %}
+                        <div class="error-message">
+                            {{ form.customer_phone.errors }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">آدرس پستی *</label>
+                        {{ form.customer_address }}
+                        {% if form.customer_address.errors %}
+                        <div class="error-message">
+                            {{ form.customer_address.errors }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">کد پستی *</label>
+                        {{ form.customer_postal_code }}
+                        {% if form.customer_postal_code.errors %}
+                        <div class="error-message">
+                            {{ form.customer_postal_code.errors }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">روش پرداخت *</label>
+                        <div class="payment-options">
+                            {% for choice in form.payment_method %}
+                            <label class="payment-option">
+                                {{ choice.tag }}
+                                <i class="fas fa-{% if choice.choice_value == 'card_to_card' %}credit-card{% else %}globe{% endif %}"></i>
+                                {{ choice.choice_label }}
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 2rem;">
+                        <i class="fas fa-check-circle"></i>
+                        ثبت سفارش
+                    </button>
+                </form>
+            </div>
+
+            <!-- خلاصه سفارش -->
+            <div class="order-summary">
+                <h2 class="card-title">
+                    <i class="fas fa-receipt card-icon"></i>
+                    خلاصه سفارش
+                </h2>
+
+                <div class="order-items">
+                    {% for item in cart_items %}
+                    <div class="order-item">
+                        <div class="product-info">
+                            {% if item.product.main_image %}
+                            <img src="{{ item.product.main_image.url }}" alt="{{ item.product.name }}" class="product-thumb">
+                            {% else %}
+                            <div class="product-thumb placeholder">
+                                <i class="fas fa-image"></i>
+                            </div>
+                            {% endif %}
+                            <div class="product-details">
+                                <div class="product-name">{{ item.product.name }}</div>
+                                <small class="product-quantity">{{ item.quantity }} عدد</small>
+                            </div>
+                        </div>
+                        <div class="product-total">
+                            {{ item.total_price|floatformat:0 }} تومان
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="order-total">
+                    <div class="total-row">
+                        <span>جمع کل:</span>
+                        <span class="total-amount">{{ total_price|floatformat:0 }} تومان</span>
+                    </div>
+                </div>
+
+                <!-- اطلاعات پرداخت -->
+                <div class="payment-guide">
+                    <h4 style="color: var(--primary-gold); margin-bottom: 1rem;">
+                        <i class="fas fa-info-circle"></i>
+                        راهنمای پرداخت
+                    </h4>
+                    <p style="color: var(--text-secondary); line-height: 1.6;">
+                        پس از ثبت سفارش، به صفحه پرداخت هدایت می‌شوید. لطفاً مبلغ سفارش را به شماره کارت اعلام شده واریز کرده و رسید پرداخت را آپلود کنید.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,684 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <!-- هدر صفحه قرآن -->
+    <div class="card golden-border pulse-gold" style="margin-bottom: 30px;">
+        <div class="card-header">
+            <h1 class="card-title">
+                <i class="fas fa-book-quran card-icon"></i>
+                قرآن کریم
+            </h1>
+            <div style="color: var(--gold); font-size: 0.9rem;">
+                <i class="fas fa-star"></i>
+                متن کامل قرآن با ترجمه فارسی
+            </div>
+        </div>
+        <div class="text-center readable-text" style="padding: 0 20px;">
+            <p>«إِنَّ هَٰذَا الْقُرْآنَ يَهْدِي لِلَّتِي هِيَ أَقْوَمُ»</p>
+            <p style="font-size: 0.9rem; opacity: 0.8; margin-top: 10px;">بی‌گمان این قرآن به استوارترین راه رهنمون می‌سازد</p>
+        </div>
+    </div>
+
+    <!-- کنترل‌های جستجو و فیلتر -->
+    <div class="card" style="margin-bottom: 25px;">
+        <div class="grid grid-2" style="gap: 15px;">
+            <!-- جستجو -->
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-search"></i>
+                    جستجو در قرآن
+                </label>
+                <input type="text" id="search-input" class="form-control" placeholder="عبارت مورد نظر را وارد کنید...">
+            </div>
+            
+            <!-- انتخاب سوره -->
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-list"></i>
+                    انتخاب سوره
+                </label>
+                <select id="surah-select" class="form-control">
+                    <option value="">لطفاً یک سوره انتخاب کنید...</option>
+                </select>
+            </div>
+        </div>
+        
+        <div style="display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap;">
+            <button onclick="loadSurah()" class="btn btn-primary">
+                <i class="fas fa-book-open"></i>
+                بارگذاری سوره
+            </button>
+            <button onclick="showBookmarks()" class="btn btn-secondary">
+                <i class="fas fa-bookmark"></i>
+                نشان‌های من
+            </button>
+            <button onclick="clearSearch()" class="btn btn-secondary">
+                <i class="fas fa-times"></i>
+                پاک کردن جستجو
+            </button>
+        </div>
+    </div>
+
+    <!-- محتوای قرآن -->
+    <div class="card">
+        <div id="quran-content">
+            <div class="empty-state text-center" style="padding: 60px 20px;">
+                <i class="fas fa-quran" style="font-size: 4rem; color: var(--gold); margin-bottom: 20px;"></i>
+                <h3 style="color: var(--gold); margin-bottom: 15px;">قرآن کریم</h3>
+                <p class="readable-text">لطفاً یک سوره از لیست بالا انتخاب کنید یا در قرآن جستجو کنید</p>
+                <div class="hadith" style="margin-top: 30px; max-width: 600px; margin-left: auto; margin-right: auto;">
+                    <i class="fas fa-quote-right" style="color: var(--gold);"></i>
+                    «اِنَّ هذَا القُرآنَ هُوَ النّورُ المُبينُ وَ الشَّفاءُ النّافعُ»
+                    <br>
+                    <span style="font-size: 0.9rem; opacity: 0.8;">این قرآن نور آشکار و شفای سودمند است</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- پنل نشان‌ها -->
+    <div class="card" id="bookmarks-panel" style="display: none;">
+        <div class="card-header">
+            <h2 class="card-title">
+                <i class="fas fa-bookmark card-icon"></i>
+                نشان‌های شما
+            </h2>
+            <button onclick="hideBookmarks()" class="btn btn-secondary">
+                <i class="fas fa-arrow-right"></i>
+                بازگشت
+            </button>
+        </div>
+        <div id="bookmarks-list"></div>
+    </div>
+</div>
+
+<style>
+    /* استایل‌های اختصاصی صفحه قرآن */
+    .verse {
+        background: rgba(20, 20, 20, 0.6);
+        border: 1px solid var(--border-gold);
+        border-radius: 12px;
+        padding: 25px;
+        margin-bottom: 25px;
+        transition: all 0.3s ease;
+        position: relative;
+        backdrop-filter: blur(10px);
+    }
+
+    .verse:hover {
+        background: rgba(30, 30, 30, 0.8);
+        border-color: rgba(212, 175, 55, 0.6);
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .verse-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid var(--border-gold);
+    }
+
+    .verse-number {
+        background: linear-gradient(135deg, var(--gold), var(--dark-gold));
+        color: #000;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 1rem;
+        box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+    }
+
+    .verse-controls {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .bookmark-btn {
+        background: rgba(40, 40, 40, 0.8);
+        border: 1px solid var(--border-gold);
+        color: var(--text-light);
+        padding: 8px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .bookmark-btn:hover {
+        background: rgba(212, 175, 55, 0.1);
+        transform: translateY(-2px);
+    }
+
+    .bookmarked {
+        background: linear-gradient(135deg, var(--gold), var(--dark-gold));
+        color: #000;
+        font-weight: bold;
+    }
+
+    .arabic-text {
+        font-family: 'Scheherazade New', serif;
+        font-size: 2rem;
+        line-height: 2.2;
+        text-align: right;
+        margin-bottom: 20px;
+        color: var(--text-lighter);
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+    }
+
+    .translation {
+        font-size: 1.1rem;
+        line-height: 1.8;
+        color: var(--text-light);
+        padding-top: 15px;
+        border-top: 1px solid rgba(212, 175, 55, 0.2);
+        background: rgba(0, 0, 0, 0.2);
+        padding: 15px;
+        border-radius: 8px;
+    }
+
+    .search-results {
+        background: rgba(212, 175, 55, 0.1);
+        border: 1px solid var(--border-gold);
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 25px;
+    }
+
+    .bookmark-item {
+        background: rgba(20, 20, 20, 0.6);
+        border: 1px solid var(--border-gold);
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 15px;
+        transition: all 0.3s ease;
+    }
+
+    .bookmark-item:hover {
+        background: rgba(30, 30, 30, 0.8);
+        transform: translateY(-2px);
+    }
+
+    .bookmark-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--border-gold);
+    }
+
+    .bookmark-reference {
+        color: var(--gold);
+        font-weight: bold;
+        font-size: 1.1rem;
+    }
+
+    .bookmark-date {
+        color: var(--text-light);
+        opacity: 0.7;
+        font-size: 0.9rem;
+    }
+
+    .loading {
+        text-align: center;
+        padding: 60px 20px;
+        color: var(--text-light);
+    }
+
+    .loading i {
+        font-size: 2rem;
+        color: var(--gold);
+        margin-bottom: 15px;
+    }
+
+    .empty-state {
+        padding: 60px 20px;
+        text-align: center;
+        color: var(--text-light);
+    }
+
+    @media (max-width: 768px) {
+        .arabic-text {
+            font-size: 1.6rem;
+            line-height: 2;
+        }
+        
+        .verse {
+            padding: 20px 15px;
+        }
+        
+        .verse-header {
+            flex-direction: column;
+            gap: 15px;
+            align-items: flex-start;
+        }
+        
+        .verse-controls {
+            align-self: flex-end;
+        }
+    }
+</style>
+
+<script>
+    // API قرآن
+    const QURAN_API = 'https://api.alquran.cloud/v1';
+    
+    let currentSurah = null;
+    let bookmarks = JSON.parse(localStorage.getItem('quranBookmarks')) || [];
+
+    // بارگذاری لیست سوره‌ها
+    async function loadSurahs() {
+        try {
+            const response = await fetch(`${QURAN_API}/surah`);
+            const data = await response.json();
+            
+            const select = document.getElementById('surah-select');
+            data.data.forEach(surah => {
+                const option = document.createElement('option');
+                option.value = surah.number;
+                option.textContent = `${surah.number}. ${surah.name} - ${surah.englishName} (${surah.numberOfAyahs} آیه)`;
+                select.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Error loading surahs:', error);
+            loadFallbackSurahs();
+        }
+    }
+
+    // Fallback برای زمانی که API در دسترس نیست
+    function loadFallbackSurahs() {
+        const fallbackSurahs = [
+            { number: 1, name: "الفاتحة", englishName: "Al-Fatiha", numberOfAyahs: 7 },
+            { number: 2, name: "البقرة", englishName: "Al-Baqara", numberOfAyahs: 286 },
+            { number: 36, name: "يس", englishName: "Yaseen", numberOfAyahs: 83 },
+            { number: 55, name: "الرحمن", englishName: "Ar-Rahman", numberOfAyahs: 78 },
+            { number: 67, name: "الملك", englishName: "Al-Mulk", numberOfAyahs: 30 },
+            { number: 112, name: "الإخلاص", englishName: "Al-Ikhlas", numberOfAyahs: 4 }
+        ];
+        
+        const select = document.getElementById('surah-select');
+        fallbackSurahs.forEach(surah => {
+            const option = document.createElement('option');
+            option.value = surah.number;
+            option.textContent = `${surah.number}. ${surah.name} - ${surah.englishName} (${surah.numberOfAyahs} آیه)`;
+            select.appendChild(option);
+        });
+    }
+
+    // بارگذاری سوره انتخاب شده
+    async function loadSurah() {
+        const surahNumber = document.getElementById('surah-select').value;
+        if (!surahNumber) {
+            showMessage('لطفاً یک سوره انتخاب کنید', 'error');
+            return;
+        }
+
+        const content = document.getElementById('quran-content');
+        content.innerHTML = `
+            <div class="loading">
+                <i class="fas fa-spinner fa-spin"></i>
+                <div style="margin-top: 15px;">در حال بارگذاری سوره...</div>
+            </div>
+        `;
+
+        try {
+            // دریافت متن عربی
+            const arabicResponse = await fetch(`${QURAN_API}/surah/${surahNumber}/ar.alafasy`);
+            const arabicData = await arabicResponse.json();
+
+            // دریافت ترجمه فارسی
+            const translationResponse = await fetch(`${QURAN_API}/surah/${surahNumber}/fa.ayati`);
+            const translationData = await translationResponse.json();
+
+            currentSurah = {
+                number: surahNumber,
+                name: arabicData.data.englishName,
+                arabicName: arabicData.data.name,
+                verses: []
+            };
+
+            let html = `
+                <div class="card-header" style="margin-bottom: 30px;">
+                    <h2 class="card-title">
+                        <i class="fas fa-star"></i>
+                        سوره ${arabicData.data.name}
+                    </h2>
+                    <div style="color: var(--gold);">
+                        ${arabicData.data.englishName} - ${arabicData.data.numberOfAyahs} آیه
+                    </div>
+                </div>
+            `;
+            
+            arabicData.data.ayahs.forEach((ayah, index) => {
+                const translation = translationData.data.ayahs[index]?.text || 'ترجمه در دسترس نیست';
+                const isBookmarked = bookmarks.some(b => 
+                    b.surah == surahNumber && b.ayah == ayah.numberInSurah
+                );
+
+                currentSurah.verses.push({
+                    number: ayah.numberInSurah,
+                    arabic: ayah.text,
+                    translation: translation
+                });
+
+                html += `
+                    <div class="verse" id="verse-${surahNumber}-${ayah.numberInSurah}">
+                        <div class="verse-header">
+                            <div class="verse-number">${ayah.numberInSurah}</div>
+                            <div class="verse-controls">
+                                <button class="bookmark-btn ${isBookmarked ? 'bookmarked' : ''}" 
+                                        onclick="toggleBookmark(${surahNumber}, ${ayah.numberInSurah})">
+                                    <i class="fas fa-bookmark"></i>
+                                    ${isBookmarked ? 'نشان شده' : 'نشان کردن'}
+                                </button>
+                            </div>
+                        </div>
+                        <div class="arabic-text">${ayah.text}</div>
+                        <div class="translation">${translation}</div>
+                    </div>
+                `;
+            });
+
+            content.innerHTML = html;
+            document.getElementById('bookmarks-panel').style.display = 'none';
+            content.scrollTop = 0;
+            showMessage(`سوره ${arabicData.data.name} با موفقیت بارگذاری شد`, 'success');
+
+        } catch (error) {
+            console.error('Error loading surah:', error);
+            content.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h3 style="color: var(--gold); margin: 15px 0;">خطا در بارگذاری سوره</h3>
+                    <p>لطفاً اتصال اینترنت خود را بررسی کنید و دوباره تلاش نمایید</p>
+                    <button onclick="loadSurah()" class="btn btn-primary" style="margin-top: 20px;">
+                        <i class="fas fa-redo"></i> تلاش مجدد
+                    </button>
+                </div>
+            `;
+        }
+    }
+
+    // جستجو در قرآن
+    function setupSearch() {
+        const searchInput = document.getElementById('search-input');
+        let searchTimeout;
+        
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            const query = this.value.trim();
+            
+            if (query.length < 2) {
+                if (query.length === 0) {
+                    clearSearch();
+                }
+                return;
+            }
+            
+            searchTimeout = setTimeout(() => {
+                performSearch(query);
+            }, 500);
+        });
+    }
+
+    // اجرای جستجو
+    async function performSearch(query) {
+        const content = document.getElementById('quran-content');
+        content.innerHTML = `
+            <div class="loading">
+                <i class="fas fa-search fa-spin"></i>
+                <div style="margin-top: 15px;">در حال جستجو...</div>
+            </div>
+        `;
+        
+        try {
+            const searchResponse = await fetch(`${QURAN_API}/search/${query}/all/fa.ayati`);
+            const searchData = await searchResponse.json();
+            
+            let html = '';
+            
+            if (searchData.data && searchData.data.matches && searchData.data.matches.length > 0) {
+                html += `
+                    <div class="search-results">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                            <i class="fas fa-search" style="color: var(--gold);"></i>
+                            <h3 style="color: var(--gold); margin: 0;">نتایج جستجو</h3>
+                        </div>
+                        <p>عبارت: "<strong style="color: var(--gold);">${query}</strong>" - 
+                           ${searchData.data.matches.length} نتیجه یافت شد</p>
+                    </div>
+                `;
+                
+                // گروه‌بندی نتایج بر اساس سوره
+                const resultsBySurah = {};
+                searchData.data.matches.forEach(match => {
+                    if (!resultsBySurah[match.surah.number]) {
+                        resultsBySurah[match.surah.number] = {
+                            surahName: match.surah.name,
+                            englishName: match.surah.englishName,
+                            verses: []
+                        };
+                    }
+                    resultsBySurah[match.surah.number].verses.push(match);
+                });
+                
+                // نمایش نتایج
+                Object.keys(resultsBySurah).forEach(surahNumber => {
+                    const surah = resultsBySurah[surahNumber];
+                    html += `
+                        <div class="verse" style="background: rgba(212, 175, 55, 0.05); cursor: pointer;" 
+                             onclick="document.getElementById('surah-select').value = ${surahNumber}; loadSurah();">
+                            <div class="verse-header">
+                                <div class="verse-number">${surahNumber}</div>
+                                <div style="color: var(--gold); font-weight: bold; font-size: 1.1rem;">
+                                    سوره ${surah.surahName}
+                                </div>
+                            </div>
+                            <div style="color: var(--text-light); opacity: 0.8; margin-top: 10px;">
+                                <i class="fas fa-info-circle"></i>
+                                ${surah.englishName} - ${surah.verses.length} آیه یافت شد
+                            </div>
+                        </div>
+                    `;
+                    
+                    // نمایش آیات پیدا شده
+                    surah.verses.forEach(verse => {
+                        html += `
+                            <div class="verse">
+                                <div class="verse-header">
+                                    <div class="verse-number">${verse.numberInSurah}</div>
+                                    <div style="color: var(--gold); font-weight: bold;">
+                                        سوره ${surah.surahName}
+                                    </div>
+                                </div>
+                                <div class="arabic-text">${verse.text}</div>
+                                <div class="translation">${verse.translation}</div>
+                            </div>
+                        `;
+                    });
+                });
+            } else {
+                html = `
+                    <div class="empty-state">
+                        <i class="fas fa-search" style="font-size: 3rem; color: var(--gold); margin-bottom: 20px;"></i>
+                        <h3 style="color: var(--gold); margin-bottom: 15px;">نتیجه‌ای یافت نشد</h3>
+                        <p>لطفاً عبارت جستجوی خود را تغییر دهید</p>
+                    </div>
+                `;
+            }
+            
+            content.innerHTML = html;
+            
+        } catch (error) {
+            console.error('Error searching:', error);
+            content.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h3 style="color: var(--gold); margin: 15px 0;">خطا در جستجو</h3>
+                    <p>لطفاً دوباره تلاش کنید</p>
+                </div>
+            `;
+        }
+    }
+
+    // مدیریت نشان‌ها
+    function toggleBookmark(surah, ayah) {
+        const index = bookmarks.findIndex(b => b.surah == surah && b.ayah == ayah);
+        const button = document.querySelector(`#verse-${surah}-${ayah} .bookmark-btn`);
+        
+        if (index > -1) {
+            // حذف نشان
+            bookmarks.splice(index, 1);
+            button.classList.remove('bookmarked');
+            button.innerHTML = '<i class="fas fa-bookmark"></i> نشان کردن';
+            showMessage('نشان حذف شد', 'success');
+        } else {
+            // اضافه کردن نشان
+            const verse = currentSurah.verses.find(v => v.number == ayah);
+            bookmarks.push({
+                surah: surah,
+                ayah: ayah,
+                arabic: verse.arabic,
+                translation: verse.translation,
+                surahName: currentSurah.arabicName,
+                timestamp: new Date().toLocaleDateString('fa-IR')
+            });
+            button.classList.add('bookmarked');
+            button.innerHTML = '<i class="fas fa-bookmark"></i> نشان شده';
+            showMessage('آیه نشاندار شد', 'success');
+        }
+        
+        localStorage.setItem('quranBookmarks', JSON.stringify(bookmarks));
+    }
+
+    // نمایش نشان‌ها
+    function showBookmarks() {
+        const content = document.getElementById('quran-content');
+        const bookmarksPanel = document.getElementById('bookmarks-panel');
+        
+        if (bookmarks.length === 0) {
+            showMessage('هیچ نشان‌ای وجود ندارد', 'info');
+            return;
+        }
+
+        content.style.display = 'none';
+        bookmarksPanel.style.display = 'block';
+        
+        let html = '';
+        bookmarks.forEach(bookmark => {
+            html += `
+                <div class="bookmark-item">
+                    <div class="bookmark-header">
+                        <div class="bookmark-reference">
+                            <i class="fas fa-bookmark" style="color: var(--gold);"></i>
+                            سوره ${bookmark.surahName} - آیه ${bookmark.ayah}
+                        </div>
+                        <div class="bookmark-date">${bookmark.timestamp}</div>
+                    </div>
+                    <div class="arabic-text" style="font-size: 1.6rem;">${bookmark.arabic}</div>
+                    <div class="translation">${bookmark.translation}</div>
+                    <div style="display: flex; gap: 10px; margin-top: 15px;">
+                        <button class="btn btn-primary" onclick="loadBookmarkedSurah(${bookmark.surah}, ${bookmark.ayah})">
+                            <i class="fas fa-eye"></i>
+                            مشاهده در سوره
+                        </button>
+                        <button class="btn btn-secondary" onclick="removeBookmark(${bookmark.surah}, ${bookmark.ayah})">
+                            <i class="fas fa-trash"></i>
+                            حذف نشان
+                        </button>
+                    </div>
+                </div>
+            `;
+        });
+        
+        document.getElementById('bookmarks-list').innerHTML = html;
+    }
+
+    // مخفی کردن پنل نشان‌ها
+    function hideBookmarks() {
+        document.getElementById('bookmarks-panel').style.display = 'none';
+        document.getElementById('quran-content').style.display = 'block';
+    }
+
+    // حذف نشان خاص
+    function removeBookmark(surah, ayah) {
+        bookmarks = bookmarks.filter(b => !(b.surah == surah && b.ayah == ayah));
+        localStorage.setItem('quranBookmarks', JSON.stringify(bookmarks));
+        showBookmarks();
+        showMessage('نشان حذف شد', 'success');
+    }
+
+    // بارگذاری سوره از روی نشان
+    function loadBookmarkedSurah(surah, ayah) {
+        document.getElementById('surah-select').value = surah;
+        loadSurah().then(() => {
+            setTimeout(() => {
+                const element = document.getElementById(`verse-${surah}-${ayah}`);
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    element.style.background = 'rgba(212, 175, 55, 0.1)';
+                    setTimeout(() => {
+                        element.style.background = '';
+                    }, 2000);
+                }
+            }, 500);
+        });
+    }
+
+    // پاک کردن جستجو
+    function clearSearch() {
+        document.getElementById('search-input').value = '';
+        document.getElementById('quran-content').innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-quran" style="font-size: 4rem; color: var(--gold); margin-bottom: 20px;"></i>
+                <h3 style="color: var(--gold); margin-bottom: 15px;">قرآن کریم</h3>
+                <p>لطفاً یک سوره از لیست بالا انتخاب کنید یا در قرآن جستجو کنید</p>
+            </div>
+        `;
+    }
+
+    // نمایش پیام
+    function showMessage(message, type) {
+        // استفاده از سیستم پیام‌های base.html
+        const messagesDiv = document.querySelector('.messages');
+        if (messagesDiv) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} fade-in`;
+            alertDiv.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                ${message}
+            `;
+            messagesDiv.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                alertDiv.style.opacity = '0';
+                setTimeout(() => alertDiv.remove(), 300);
+            }, 4000);
+        }
+    }
+
+    // مقداردهی اولیه
+    document.addEventListener('DOMContentLoaded', function() {
+        loadSurahs();
+        setupSearch();
+        
+        // افزودن استایل به عناصر
+        document.querySelectorAll('.btn').forEach(btn => {
+            btn.classList.add('readable-text');
+        });
+    });
+</script>
+{% endblock %}

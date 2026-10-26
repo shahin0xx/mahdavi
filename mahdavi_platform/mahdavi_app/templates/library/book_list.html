@@ -1,0 +1,471 @@
+{% extends "base.html" %}
+
+{% block title %}لیست کتاب‌ها - کتابخانه مهدوی{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Search and Filter Section */
+    .search-container {
+        background: var(--card-bg);
+        border-radius: 20px;
+        border: 1px solid var(--border-gold);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .search-form-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr auto;
+        gap: 1rem;
+        align-items: end;
+    }
+
+    .form-group {
+        margin-bottom: 0;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: var(--text-secondary);
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .form-input, .form-select {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border-gold);
+        border-radius: 12px;
+        color: var(--text-primary);
+        font-family: inherit;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-input:focus, .form-select:focus {
+        outline: none;
+        border-color: var(--primary-gold);
+        box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    /* Results Header */
+    .results-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        background: var(--card-bg);
+        border-radius: 15px;
+        border: 1px solid var(--border-gold);
+    }
+
+    .results-count {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+    }
+
+    .sort-select {
+        padding: 0.75rem 1rem;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border-gold);
+        border-radius: 10px;
+        color: var(--text-primary);
+        font-family: inherit;
+        font-size: 0.9rem;
+        cursor: pointer;
+    }
+
+    /* Book Grid */
+    .book-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+    }
+
+    .book-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border-gold);
+        border-radius: 15px;
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .book-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--primary-gold);
+        box-shadow: 0 15px 35px rgba(212, 175, 55, 0.2);
+    }
+
+    .book-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.05), transparent);
+        transition: right 0.6s ease;
+    }
+
+    .book-card:hover::before {
+        right: 100%;
+    }
+
+    .book-card-header {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .book-cover-small {
+        width: 70px;
+        height: 100px;
+        background: var(--gold-gradient);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--dark-bg);
+        font-size: 1.8rem;
+        box-shadow: 0 8px 20px rgba(212, 175, 55, 0.3);
+        transition: all 0.3s ease;
+        flex-shrink: 0;
+    }
+
+    .book-card:hover .book-cover-small {
+        transform: scale(1.05);
+        box-shadow: 0 12px 25px rgba(212, 175, 55, 0.4);
+    }
+
+    .book-badges {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        margin-bottom: 1rem;
+    }
+
+    .book-badge {
+        padding: 0.4rem 0.8rem;
+        border-radius: 15px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+
+    .badge-type {
+        background: rgba(212, 175, 55, 0.1);
+        color: var(--primary-gold);
+        border: 1px solid rgba(212, 175, 55, 0.3);
+    }
+
+    .badge-free {
+        background: rgba(40, 167, 69, 0.1);
+        color: #28a745;
+        border: 1px solid rgba(40, 167, 69, 0.3);
+    }
+
+    .badge-premium {
+        background: rgba(0, 123, 255, 0.1);
+        color: #007bff;
+        border: 1px solid rgba(0, 123, 255, 0.3);
+    }
+
+    /* Pagination */
+    .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-top: 3rem;
+    }
+
+    .page-btn {
+        padding: 0.75rem 1rem;
+        border: 1px solid var(--border-gold);
+        border-radius: 10px;
+        color: var(--text-primary);
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        min-width: 45px;
+        text-align: center;
+    }
+
+    .page-btn:hover {
+        background: rgba(212, 175, 55, 0.1);
+        border-color: var(--primary-gold);
+        text-decoration: none;
+    }
+
+    .page-btn.active {
+        background: var(--primary-gold);
+        color: var(--dark-bg);
+        border-color: var(--primary-gold);
+    }
+
+    .page-btn.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: var(--card-bg);
+        border-radius: 20px;
+        border: 2px dashed var(--border-gold);
+        grid-column: 1 / -1;
+    }
+
+    /* Responsive */
+    @media (max-width: 992px) {
+        .search-form-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+        
+        .book-grid {
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        }
+    }
+
+    @media (max-width: 768px) {
+        .search-form-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .book-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .results-header {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+        
+        .book-card-header {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .book-cover-small {
+            align-self: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <h1 class="page-title">لیست کتاب‌ها</h1>
+        <p class="page-subtitle">جستجو و فیلتر در بین منابع کتابخانه</p>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Search and Filter Section -->
+    <div class="search-container">
+        <form method="get" class="search-form">
+            <div class="search-form-grid">
+                <div class="form-group">
+                    <label class="form-label">جستجو</label>
+                    <input type="text" name="q" value="{{ search_query }}" 
+                           class="form-input" placeholder="عنوان کتاب، نویسنده یا توضیحات...">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">دسته‌بندی</label>
+                    <select name="category" class="form-select">
+                        <option value="">همه دسته‌بندی‌ها</option>
+                        {% for cat in categories %}
+                        <option value="{{ cat.id }}" {% if cat.id == selected_category %}selected{% endif %}>
+                            {{ cat.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">نوع کتاب</label>
+                    <select name="type" class="form-select">
+                        <option value="">همه انواع</option>
+                        <option value="religious" {% if book_type == 'religious' %}selected{% endif %}>مذهبی</option>
+                        <option value="historical" {% if book_type == 'historical' %}selected{% endif %}>تاریخی</option>
+                        <option value="educational" {% if book_type == 'educational' %}selected{% endif %}>آموزشی</option>
+                        <option value="story" {% if book_type == 'story' %}selected{% endif %}>داستانی</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary" style="height: 48px; min-width: 120px;">
+                        <i class="fas fa-search"></i>
+                        جستجو
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Results Header -->
+    <div class="results-header">
+        <div class="results-count">
+            {{ books.paginator.count }} کتاب یافت شد
+        </div>
+        
+        <div>
+            <select id="sortSelect" class="sort-select">
+                <option value="newest" {% if sort_by == 'newest' %}selected{% endif %}>جدیدترین</option>
+                <option value="title" {% if sort_by == 'title' %}selected{% endif %}>عنوان</option>
+                <option value="author" {% if sort_by == 'author' %}selected{% endif %}>نویسنده</option>
+                <option value="price" {% if sort_by == 'price' %}selected{% endif %}>قیمت</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Books Grid -->
+    <div class="book-grid">
+        {% for book in books %}
+        <div class="book-card">
+            <div class="book-card-header">
+                <div class="book-cover-small">
+                    <i class="fas fa-book"></i>
+                </div>
+                <div style="flex: 1;">
+                    <h3 style="color: var(--text-primary); margin-bottom: 0.5rem; font-weight: 600; font-size: 1.1rem; line-height: 1.4;">
+                        {{ book.title }}
+                    </h3>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.5rem;">
+                        <i class="fas fa-user-edit"></i>
+                        {{ book.author }}
+                    </p>
+                </div>
+            </div>
+            
+            <p style="color: var(--text-secondary); font-size: 0.85rem; line-height: 1.5; margin-bottom: 1rem;">
+                {{ book.short_description|truncatewords:15 }}
+            </p>
+            
+            <div class="book-badges">
+                <span class="book-badge badge-type">
+                    {{ book.get_book_type_display }}
+                </span>
+                {% if book.is_free %}
+                <span class="book-badge badge-free">
+                    <i class="fas fa-gift"></i>
+                    رایگان
+                </span>
+                {% else %}
+                <span class="book-badge badge-premium">
+                    <i class="fas fa-tag"></i>
+                    {{ book.final_price }} تومان
+                </span>
+                {% endif %}
+            </div>
+            
+            <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                <a href="{% url 'book_detail' book.id %}" class="btn btn-outline" style="flex: 1; justify-content: center; font-size: 0.85rem;">
+                    <i class="fas fa-eye"></i>
+                    مشاهده
+                </a>
+                {% if book.is_free %}
+                <a href="{% url 'download_book' book.id %}" class="btn btn-primary" style="flex: 1; justify-content: center; font-size: 0.85rem;">
+                    <i class="fas fa-download"></i>
+                    دانلود
+                </a>
+                {% else %}
+                <a href="{% url 'add_book_to_cart' book.id %}" class="btn btn-primary" style="flex: 1; justify-content: center; font-size: 0.85rem;">
+                    <i class="fas fa-cart-plus"></i>
+                    افزودن به سبد
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <div class="empty-state">
+            <i class="fas fa-search" style="font-size: 4rem; margin-bottom: 1rem; color: var(--primary-gold);"></i>
+            <h3 style="color: var(--text-secondary); margin-bottom: 1rem; font-weight: 600;">
+                کتابی یافت نشد
+            </h3>
+            <p style="color: var(--text-muted); margin-bottom: 2rem; line-height: 1.6;">
+                لطفاً فیلترهای جستجو را تغییر دهید
+            </p>
+            <a href="{% url 'book_list' %}" class="btn btn-primary">
+                <i class="fas fa-times"></i>
+                حذف فیلترها
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if books.has_other_pages %}
+    <div class="pagination">
+        {% if books.has_previous %}
+        <a href="?page={{ books.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if book_type %}&type={{ book_type }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}" 
+           class="page-btn">
+            <i class="fas fa-chevron-right"></i>
+        </a>
+        {% else %}
+        <span class="page-btn disabled">
+            <i class="fas fa-chevron-right"></i>
+        </span>
+        {% endif %}
+        
+        {% for num in books.paginator.page_range %}
+            {% if books.number == num %}
+            <span class="page-btn active">{{ num }}</span>
+            {% else %}
+            <a href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if book_type %}&type={{ book_type }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}" 
+               class="page-btn">{{ num }}</a>
+            {% endif %}
+        {% endfor %}
+        
+        {% if books.has_next %}
+        <a href="?page={{ books.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if book_type %}&type={{ book_type }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}" 
+           class="page-btn">
+            <i class="fas fa-chevron-left"></i>
+        </a>
+        {% else %}
+        <span class="page-btn disabled">
+            <i class="fas fa-chevron-left"></i>
+        </span>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    // Auto-sort when select changes
+    document.getElementById('sortSelect').addEventListener('change', function() {
+        const url = new URL(window.location);
+        url.searchParams.set('sort', this.value);
+        window.location.href = url.toString();
+    });
+
+    // Add animation for book cards
+    document.addEventListener('DOMContentLoaded', function() {
+        const bookCards = document.querySelectorAll('.book-card');
+        bookCards.forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            
+            setTimeout(() => {
+                card.style.transition = 'all 0.5s ease';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, index * 100);
+        });
+    });
+</script>
+{% endblock %}

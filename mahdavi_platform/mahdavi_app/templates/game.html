@@ -1,0 +1,616 @@
+{% extends 'base.html' %}
+
+{% block title %}بوم نقاشی مهدوی - پلتفرم مهدوی{% endblock %}
+
+{% block extra_css %}
+<style>
+    .game-container {
+        padding-top: 100px;
+        min-height: 100vh;
+        background: var(--dark-bg);
+    }
+
+    .game-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .game-title {
+        color: var(--primary-gold);
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        font-family: 'Lateef', serif;
+    }
+
+    .game-subtitle {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+    }
+
+    .tools-container {
+        background: var(--card-bg);
+        border: 1px solid var(--border-gold);
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-lg);
+    }
+
+    .tools-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .tools-section:last-child {
+        margin-bottom: 0;
+    }
+
+    .color-palette {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .color-option {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        cursor: pointer;
+        border: 3px solid transparent;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .color-option:hover {
+        transform: scale(1.1);
+        border-color: var(--primary-gold);
+    }
+
+    .color-option.active {
+        border-color: var(--primary-gold);
+        box-shadow: var(--glow-gold);
+    }
+
+    .color-option.active::after {
+        content: '✓';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: white;
+        font-weight: bold;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+    }
+
+    .brush-controls {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .brush-size {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-secondary);
+    }
+
+    .size-preview {
+        width: 20px;
+        height: 20px;
+        background: var(--primary-gold);
+        border-radius: 50%;
+        transition: all 0.3s ease;
+    }
+
+    input[type="range"] {
+        width: 120px;
+        background: var(--hover-bg);
+        border-radius: 10px;
+        outline: none;
+    }
+
+    .canvas-container {
+        background: var(--card-bg);
+        border: 2px solid var(--border-gold);
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-xl);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .canvas-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(45deg, transparent 98%, var(--primary-gold) 98%),
+                    linear-gradient(-45deg, transparent 98%, var(--primary-gold) 98%);
+        background-size: 20px 20px;
+        opacity: 0.1;
+        pointer-events: none;
+    }
+
+    #paintCanvas {
+        display: block;
+        background: white;
+        border-radius: 8px;
+        cursor: crosshair;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        width: 100%;
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+
+    .game-actions {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .action-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        min-width: 140px;
+        justify-content: center;
+    }
+
+    .game-stats {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        margin-top: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .stat-item {
+        text-align: center;
+        padding: 1rem 1.5rem;
+        background: var(--card-bg);
+        border: 1px solid var(--border-gold);
+        border-radius: 12px;
+        min-width: 120px;
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary-gold);
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+
+    .instructions {
+        background: var(--card-bg);
+        border: 1px solid var(--border-gold);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-top: 2rem;
+        text-align: center;
+    }
+
+    .instructions h4 {
+        color: var(--primary-gold);
+        margin-bottom: 1rem;
+    }
+
+    .instructions-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+        color: var(--text-secondary);
+    }
+
+    .instruction-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.5rem;
+    }
+
+    .instruction-item i {
+        color: var(--primary-gold);
+        width: 20px;
+    }
+
+    /* ریسپانسیو */
+    @media (max-width: 768px) {
+        .game-container {
+            padding-top: 80px;
+        }
+
+        .game-title {
+            font-size: 2rem;
+        }
+
+        .tools-section {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .color-palette {
+            justify-content: center;
+        }
+
+        .brush-controls {
+            justify-content: center;
+        }
+
+        .game-actions {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .action-btn {
+            width: 100%;
+            max-width: 300px;
+        }
+
+        #paintCanvas {
+            height: 400px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .game-title {
+            font-size: 1.8rem;
+        }
+
+        .color-option {
+            width: 35px;
+            height: 35px;
+        }
+
+        .stat-item {
+            min-width: 100px;
+            padding: 0.75rem 1rem;
+        }
+
+        #paintCanvas {
+            height: 300px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="game-container">
+    <div class="container">
+        <!-- هدر بازی -->
+        <div class="game-header">
+            <h1 class="game-title">بوم نقاشی مهدوی</h1>
+            <p class="game-subtitle">نقاشی خود را خلق کنید و امتیاز کسب نمایید</p>
+        </div>
+
+        <!-- ابزارها -->
+        <div class="tools-container">
+            <div class="tools-section">
+                <!-- پالت رنگ -->
+                <div class="color-palette">
+                    <div class="color-option active" style="background-color: #000000;" data-color="#000000"></div>
+                    <div class="color-option" style="background-color: #D4AF37;" data-color="#D4AF37"></div>
+                    <div class="color-option" style="background-color: #ff0000;" data-color="#ff0000"></div>
+                    <div class="color-option" style="background-color: #0000ff;" data-color="#0000ff"></div>
+                    <div class="color-option" style="background-color: #008000;" data-color="#008000"></div>
+                    <div class="color-option" style="background-color: #ffff00;" data-color="#ffff00"></div>
+                    <div class="color-option" style="background-color: #ffa500;" data-color="#ffa500"></div>
+                    <div class="color-option" style="background-color: #800080;" data-color="#800080"></div>
+                    <div class="color-option" style="background-color: #ffc0cb;" data-color="#ffc0cb"></div>
+                    <div class="color-option" style="background-color: #ffffff; border: 1px solid var(--border-gold);" data-color="#ffffff"></div>
+                </div>
+
+                <!-- کنترل قلم مو -->
+                <div class="brush-controls">
+                    <div class="brush-size">
+                        <span>اندازه قلم:</span>
+                        <div class="size-preview" id="sizePreview"></div>
+                        <input type="range" id="brushSize" min="1" max="20" value="3">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- بوم نقاشی -->
+        <div class="canvas-container">
+            <canvas id="paintCanvas" width="1000" height="600"></canvas>
+        </div>
+
+        <!-- دکمه‌های اقدام -->
+        <div class="game-actions">
+            <button id="clearBtn" class="btn btn-error action-btn">
+                <i class="fas fa-trash"></i>
+                پاک کردن بوم
+            </button>
+            <button id="saveBtn" class="btn btn-success action-btn">
+                <i class="fas fa-download"></i>
+                ذخیره نقاشی
+            </button>
+            <button id="submitBtn" class="btn btn-primary action-btn">
+                <i class="fas fa-trophy"></i>
+                ارسال و کسب امتیاز
+            </button>
+        </div>
+
+        <!-- آمار -->
+        <div class="game-stats">
+            <div class="stat-item">
+                <div class="stat-value" id="drawingTime">00:00</div>
+                <div class="stat-label">زمان نقاشی</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="strokeCount">0</div>
+                <div class="stat-label">تعداد ضربه‌ها</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="potentialPoints">50</div>
+                <div class="stat-label">امتیاز بالقوه</div>
+            </div>
+        </div>
+
+        <!-- راهنما -->
+        <div class="instructions">
+            <h4><i class="fas fa-info-circle"></i> راهنمای نقاشی</h4>
+            <div class="instructions-list">
+                <div class="instruction-item">
+                    <i class="fas fa-mouse-pointer"></i>
+                    <span>برای نقاشی کردن، کلیک کنید و موس را حرکت دهید</span>
+                </div>
+                <div class="instruction-item">
+                    <i class="fas fa-palette"></i>
+                    <span>برای تغییر رنگ، روی رنگ مورد نظر کلیک کنید</span>
+                </div>
+                <div class="instruction-item">
+                    <i class="fas fa-arrows-alt-h"></i>
+                    <span>از اسلایدر برای تغییر اندازه قلم استفاده کنید</span>
+                </div>
+                <div class="instruction-item">
+                    <i class="fas fa-mobile-alt"></i>
+                    <span>در دستگاه‌های لمسی نیز قابل استفاده است</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    class MahdaviPaintingGame {
+        constructor() {
+            this.canvas = document.getElementById('paintCanvas');
+            this.ctx = this.canvas.getContext('2d');
+            this.isDrawing = false;
+            this.lastX = 0;
+            this.lastY = 0;
+            this.currentColor = '#000000';
+            this.brushSize = 3;
+            this.strokeCount = 0;
+            this.startTime = null;
+            this.timerInterval = null;
+
+            this.initializeGame();
+        }
+
+        initializeGame() {
+            this.setupCanvas();
+            this.setupEventListeners();
+            this.startTimer();
+            this.updateSizePreview();
+        }
+
+        setupCanvas() {
+            // تنظیمات اولیه بوم
+            this.ctx.lineJoin = 'round';
+            this.ctx.lineCap = 'round';
+            this.ctx.lineWidth = this.brushSize;
+            this.ctx.strokeStyle = this.currentColor;
+            
+            // پس‌زمینه سفید
+            this.ctx.fillStyle = '#ffffff';
+            this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        }
+
+        setupEventListeners() {
+            // رویدادهای موس
+            this.canvas.addEventListener('mousedown', this.startDrawing.bind(this));
+            this.canvas.addEventListener('mousemove', this.draw.bind(this));
+            this.canvas.addEventListener('mouseup', this.stopDrawing.bind(this));
+            this.canvas.addEventListener('mouseout', this.stopDrawing.bind(this));
+
+            // رویدادهای لمسی
+            this.canvas.addEventListener('touchstart', this.handleTouchStart.bind(this));
+            this.canvas.addEventListener('touchmove', this.handleTouchMove.bind(this));
+            this.canvas.addEventListener('touchend', this.stopDrawing.bind(this));
+
+            // رنگ‌ها
+            document.querySelectorAll('.color-option').forEach(color => {
+                color.addEventListener('click', this.changeColor.bind(this));
+            });
+
+            // کنترل قلم مو
+            document.getElementById('brushSize').addEventListener('input', this.changeBrushSize.bind(this));
+
+            // دکمه‌ها
+            document.getElementById('clearBtn').addEventListener('click', this.clearCanvas.bind(this));
+            document.getElementById('saveBtn').addEventListener('click', this.saveDrawing.bind(this));
+            document.getElementById('submitBtn').addEventListener('click', this.submitDrawing.bind(this));
+        }
+
+        startDrawing(e) {
+            this.isDrawing = true;
+            [this.lastX, this.lastY] = this.getCoordinates(e);
+            this.strokeCount++;
+            document.getElementById('strokeCount').textContent = this.strokeCount;
+        }
+
+        draw(e) {
+            if (!this.isDrawing) return;
+
+            const [x, y] = this.getCoordinates(e);
+
+            this.ctx.beginPath();
+            this.ctx.moveTo(this.lastX, this.lastY);
+            this.ctx.lineTo(x, y);
+            this.ctx.stroke();
+
+            [this.lastX, this.lastY] = [x, y];
+        }
+
+        stopDrawing() {
+            this.isDrawing = false;
+        }
+
+        getCoordinates(e) {
+            let x, y;
+            
+            if (e.type.includes('touch')) {
+                const touch = e.touches[0];
+                const rect = this.canvas.getBoundingClientRect();
+                x = touch.clientX - rect.left;
+                y = touch.clientY - rect.top;
+            } else {
+                x = e.offsetX;
+                y = e.offsetY;
+            }
+
+            // تطبیق مختصات با اندازه واقعی کانواس
+            const scaleX = this.canvas.width / this.canvas.offsetWidth;
+            const scaleY = this.canvas.height / this.canvas.offsetHeight;
+            
+            return [x * scaleX, y * scaleY];
+        }
+
+        changeColor(e) {
+            // حذف کلاس active از همه رنگ‌ها
+            document.querySelectorAll('.color-option').forEach(color => {
+                color.classList.remove('active');
+            });
+
+            // اضافه کردن کلاس active به رنگ انتخاب شده
+            e.target.classList.add('active');
+
+            // تغییر رنگ فعلی
+            this.currentColor = e.target.getAttribute('data-color');
+            this.ctx.strokeStyle = this.currentColor;
+        }
+
+        changeBrushSize(e) {
+            this.brushSize = parseInt(e.target.value);
+            this.ctx.lineWidth = this.brushSize;
+            this.updateSizePreview();
+        }
+
+        updateSizePreview() {
+            const preview = document.getElementById('sizePreview');
+            preview.style.width = `${this.brushSize * 2}px`;
+            preview.style.height = `${this.brushSize * 2}px`;
+        }
+
+        clearCanvas() {
+            if (confirm('آیا از پاک کردن کل بوم اطمینان دارید؟')) {
+                this.ctx.fillStyle = '#ffffff';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                this.strokeCount = 0;
+                document.getElementById('strokeCount').textContent = '0';
+                
+                if (window.MahdaviApp) {
+                    window.MahdaviApp.showNotification('بوم نقاشی پاک شد', 'info');
+                }
+            }
+        }
+
+        saveDrawing() {
+            const dataURL = this.canvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.download = `نقاشی-مهدوی-${new Date().toLocaleDateString('fa-IR')}.png`;
+            link.href = dataURL;
+            link.click();
+
+            if (window.MahdaviApp) {
+                window.MahdaviApp.showNotification('نقاشی با موفقیت ذخیره شد', 'success');
+            }
+        }
+
+        submitDrawing() {
+            // شبیه‌سازی ارسال به سرور و کسب امتیاز
+            const points = Math.min(50, Math.floor(this.strokeCount / 2));
+            
+            if (window.MahdaviApp) {
+                window.MahdaviApp.showNotification(
+                    `تبریک! ${points} امتیاز کسب کردید`, 
+                    'success'
+                );
+            }
+
+            // نمایش انیمیشن موفقیت
+            this.showSuccessAnimation();
+        }
+
+        showSuccessAnimation() {
+            const submitBtn = document.getElementById('submitBtn');
+            const originalHTML = submitBtn.innerHTML;
+            
+            submitBtn.innerHTML = '<i class="fas fa-check"></i> امتیاز کسب شد!';
+            submitBtn.style.background = 'linear-gradient(135deg, var(--success), #059669)';
+            
+            setTimeout(() => {
+                submitBtn.innerHTML = originalHTML;
+                submitBtn.style.background = '';
+            }, 3000);
+        }
+
+        startTimer() {
+            this.startTime = new Date();
+            this.timerInterval = setInterval(() => {
+                const now = new Date();
+                const diff = Math.floor((now - this.startTime) / 1000);
+                const minutes = Math.floor(diff / 60).toString().padStart(2, '0');
+                const seconds = (diff % 60).toString().padStart(2, '0');
+                document.getElementById('drawingTime').textContent = `${minutes}:${seconds}`;
+            }, 1000);
+        }
+
+        handleTouchStart(e) {
+            e.preventDefault();
+            this.startDrawing(e);
+        }
+
+        handleTouchMove(e) {
+            e.preventDefault();
+            this.draw(e);
+        }
+    }
+
+    // مقداردهی اولیه بازی وقتی DOM لود شد
+    document.addEventListener('DOMContentLoaded', function() {
+        new MahdaviPaintingGame();
+        
+        // انیمیشن ورود
+        const gameElements = document.querySelectorAll('.tools-container, .canvas-container, .game-actions');
+        gameElements.forEach((el, index) => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            
+            setTimeout(() => {
+                el.style.transition = 'all 0.6s ease';
+                el.style.opacity = '1';
+                el.style.transform = 'translateY(0)';
+            }, (index + 1) * 200);
+        });
+    });
+</script>
+{% endblock %}

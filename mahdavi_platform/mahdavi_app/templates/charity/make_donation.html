@@ -1,0 +1,1251 @@
+[file name]: home.html
+[file content begin]
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}پلتفرم جامع مهدوی | وصل‌کننده‌ی دلها به امام زمان(عج){% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ===== متغیرهای اصلی پلتفرم مهدوی ===== */
+    :root {
+        --mahdavi-primary: #1a5fb4;      /* آبی امامتی */
+        --mahdavi-secondary: #26a269;    /* سبز امید */
+        --mahdavi-accent: #c64600;       /* نارنجی شوق */
+        --mahdavi-gold: #f5c211;         /* طلایی نور */
+        --mahdavi-purple: #9141ac;       /* بنفش معنویت */
+        --mahdavi-dark: #0f0f1a;         /* پس‌زمینه تاریک */
+        --mahdavi-gradient: linear-gradient(135deg, var(--mahdavi-primary), var(--mahdavi-secondary));
+        --mahdavi-gradient-gold: linear-gradient(135deg, var(--mahdavi-gold), #ffd166);
+        --mahdavi-gradient-holy: linear-gradient(135deg, var(--mahdavi-purple), var(--mahdavi-primary));
+    }
+
+    /* ===== استایل‌های اصلی صفحه ===== */
+    .mahdavi-home {
+        background: linear-gradient(180deg, 
+            var(--mahdavi-dark) 0%,
+            #1a1a2e 50%,
+            #16213e 100%);
+        min-height: 100vh;
+        position: relative;
+        overflow-x: hidden;
+        font-family: 'Vazirmatn', 'IranSans', sans-serif;
+    }
+
+    /* ===== هیرو سکشن (Hero Section) ===== */
+    .mahdavi-hero {
+        min-height: 100vh;
+        position: relative;
+        display: flex;
+        align-items: center;
+        padding: 6rem 0;
+        background: 
+            radial-gradient(circle at 20% 30%, rgba(26, 95, 180, 0.15) 0%, transparent 50%),
+            radial-gradient(circle at 80% 70%, rgba(38, 162, 105, 0.1) 0%, transparent 50%);
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 10;
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 2rem;
+    }
+
+    /* عنوان اصلی با افکت نورانی */
+    .hero-title {
+        font-size: 4.5rem;
+        font-weight: 900;
+        text-align: center;
+        margin-bottom: 2rem;
+        line-height: 1.1;
+        position: relative;
+    }
+
+    .title-gradient {
+        background: linear-gradient(135deg, 
+            #ffffff 0%,
+            var(--mahdavi-gold) 25%,
+            var(--mahdavi-primary) 50%,
+            var(--mahdavi-secondary) 75%,
+            #ffffff 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        display: block;
+        animation: titleGlow 8s infinite linear;
+        background-size: 300% 300%;
+    }
+
+    .title-sub {
+        font-size: 1.8rem;
+        color: rgba(255, 255, 255, 0.85);
+        text-align: center;
+        max-width: 800px;
+        margin: 0 auto 3rem;
+        line-height: 1.6;
+        font-weight: 300;
+        padding: 2rem;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 20px;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* شعارهای چرخان (Rotating Taglines) */
+    .rotating-taglines {
+        height: 100px;
+        overflow: hidden;
+        position: relative;
+        margin: 3rem auto;
+        max-width: 900px;
+    }
+
+    .tagline-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        animation: rotateTaglines 15s infinite ease-in-out;
+    }
+
+    .tagline {
+        font-size: 2rem;
+        font-weight: 700;
+        color: transparent;
+        background: var(--mahdavi-gradient);
+        -webkit-background-clip: text;
+        background-clip: text;
+        height: 100px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 0 2rem;
+    }
+
+    /* کارت‌های معرفی بخش‌های پلتفرم */
+    .platform-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2.5rem;
+        margin: 5rem auto;
+        max-width: 1400px;
+        padding: 0 2rem;
+    }
+
+    .platform-card {
+        background: linear-gradient(145deg, 
+            rgba(255, 255, 255, 0.05) 0%,
+            rgba(255, 255, 255, 0.02) 100%);
+        border-radius: 25px;
+        padding: 3rem 2.5rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+    }
+
+    .platform-card:hover {
+        transform: translateY(-20px) scale(1.03);
+        border-color: var(--mahdavi-primary);
+        box-shadow: 
+            0 30px 60px rgba(26, 95, 180, 0.3),
+            0 0 100px rgba(38, 162, 105, 0.2),
+            inset 0 0 30px rgba(255, 255, 255, 0.05);
+    }
+
+    .platform-icon-wrapper {
+        width: 120px;
+        height: 120px;
+        margin: 0 auto 2rem;
+        position: relative;
+    }
+
+    .platform-icon {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        border-radius: 50%;
+        position: relative;
+        z-index: 2;
+        transition: all 0.5s ease;
+    }
+
+    /* رنگ‌های مختلف برای آیکون‌ها */
+    .card-charity .platform-icon {
+        background: var(--mahdavi-gradient);
+        color: white;
+        box-shadow: 0 15px 30px rgba(26, 95, 180, 0.4);
+    }
+
+    .card-prayer .platform-icon {
+        background: var(--mahdavi-gradient-holy);
+        color: white;
+        box-shadow: 0 15px 30px rgba(145, 65, 172, 0.4);
+    }
+
+    .card-community .platform-icon {
+        background: var(--mahdavi-gradient-gold);
+        color: var(--mahdavi-dark);
+        box-shadow: 0 15px 30px rgba(245, 194, 17, 0.4);
+    }
+
+    .card-knowledge .platform-icon {
+        background: linear-gradient(135deg, #26a269, #1a5fb4);
+        color: white;
+        box-shadow: 0 15px 30px rgba(38, 162, 105, 0.4);
+    }
+
+    .platform-card:hover .platform-icon {
+        transform: rotate(15deg) scale(1.1);
+        box-shadow: 
+            0 20px 40px rgba(0, 0, 0, 0.3),
+            inset 0 5px 20px rgba(255, 255, 255, 0.2);
+    }
+
+    .platform-icon-wrapper::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 140px;
+        height: 140px;
+        border-radius: 50%;
+        opacity: 0.3;
+        animation: pulsePlatform 3s infinite;
+    }
+
+    .card-charity .platform-icon-wrapper::before {
+        background: var(--mahdavi-primary);
+    }
+
+    .card-prayer .platform-icon-wrapper::before {
+        background: var(--mahdavi-purple);
+    }
+
+    .card-community .platform-icon-wrapper::before {
+        background: var(--mahdavi-gold);
+    }
+
+    .card-knowledge .platform-icon-wrapper::before {
+        background: var(--mahdavi-secondary);
+    }
+
+    .platform-card h3 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        color: white;
+    }
+
+    .platform-card p {
+        color: rgba(255, 255, 255, 0.7);
+        line-height: 1.6;
+        margin-bottom: 2rem;
+        font-size: 1rem;
+    }
+
+    .platform-stats {
+        display: flex;
+        justify-content: space-around;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .stat {
+        text-align: center;
+    }
+
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 800;
+        display: block;
+        margin-bottom: 0.5rem;
+    }
+
+    .card-charity .stat-number { color: var(--mahdavi-primary); }
+    .card-prayer .stat-number { color: var(--mahdavi-purple); }
+    .card-community .stat-number { color: var(--mahdavi-gold); }
+    .card-knowledge .stat-number { color: var(--mahdavi-secondary); }
+
+    .stat-label {
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.6);
+    }
+
+    /* ===== بخش ویژگی‌های متمایز (USP) ===== */
+    .usp-section {
+        padding: 8rem 2rem;
+        background: linear-gradient(180deg, #16213e 0%, #0f0f1a 100%);
+        position: relative;
+    }
+
+    .usp-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 3rem;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .usp-card {
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 20px;
+        padding: 2.5rem;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        transition: all 0.4s ease;
+    }
+
+    .usp-card:hover {
+        background: rgba(255, 255, 255, 0.05);
+        transform: translateY(-10px);
+        border-color: var(--mahdavi-primary);
+    }
+
+    .usp-icon {
+        width: 70px;
+        height: 70px;
+        background: var(--mahdavi-gradient);
+        border-radius: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        color: white;
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .usp-card:hover .usp-icon {
+        transform: rotate(15deg) scale(1.1);
+    }
+
+    .usp-card h4 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: white;
+        margin-bottom: 1rem;
+    }
+
+    .usp-card p {
+        color: rgba(255, 255, 255, 0.7);
+        line-height: 1.6;
+    }
+
+    /* ===== CTA اصلی ===== */
+    .main-cta-section {
+        padding: 8rem 2rem;
+        background: linear-gradient(135deg, 
+            rgba(26, 95, 180, 0.9) 0%,
+            rgba(38, 162, 105, 0.85) 100%);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .main-cta-content {
+        text-align: center;
+        max-width: 800px;
+        margin: 0 auto;
+        position: relative;
+        z-index: 10;
+    }
+
+    .main-cta-title {
+        font-size: 3.5rem;
+        font-weight: 900;
+        color: white;
+        margin-bottom: 1.5rem;
+        text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .main-cta-subtitle {
+        font-size: 1.4rem;
+        color: rgba(255, 255, 255, 0.9);
+        margin-bottom: 3rem;
+        line-height: 1.6;
+    }
+
+    /* دکمه‌های CTA */
+    .cta-button-group {
+        display: flex;
+        gap: 1.5rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .mahdavi-btn {
+        padding: 1.2rem 2.5rem;
+        border-radius: 15px;
+        font-size: 1.2rem;
+        font-weight: 700;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.8rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        border: none;
+        cursor: pointer;
+        min-width: 200px;
+        justify-content: center;
+    }
+
+    .btn-primary {
+        background: white;
+        color: var(--mahdavi-primary);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-5px) scale(1.05);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .btn-secondary {
+        background: transparent;
+        color: white;
+        border: 2px solid white;
+    }
+
+    .btn-secondary:hover {
+        background: white;
+        color: var(--mahdavi-primary);
+        transform: translateY(-5px);
+    }
+
+    /* ===== بخش راهنمای شروع ===== */
+    .getting-started {
+        padding: 8rem 2rem;
+        background: var(--mahdavi-dark);
+    }
+
+    .steps-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 3rem;
+        max-width: 1200px;
+        margin: 4rem auto 0;
+        position: relative;
+    }
+
+    .step {
+        text-align: center;
+        position: relative;
+        padding: 2rem;
+    }
+
+    .step-number {
+        width: 60px;
+        height: 60px;
+        background: var(--mahdavi-gradient);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: white;
+        margin: 0 auto 1.5rem;
+        position: relative;
+        z-index: 2;
+    }
+
+    .step::before {
+        content: '';
+        position: absolute;
+        top: 30px;
+        left: 50%;
+        width: 100%;
+        height: 2px;
+        background: rgba(255, 255, 255, 0.1);
+        transform: translateX(-50%);
+        z-index: 1;
+    }
+
+    .step:last-child::before {
+        display: none;
+    }
+
+    .step h4 {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: white;
+        margin-bottom: 1rem;
+    }
+
+    .step p {
+        color: rgba(255, 255, 255, 0.7);
+        line-height: 1.6;
+    }
+
+    /* ===== انیمیشن‌ها ===== */
+    @keyframes titleGlow {
+        0% {
+            background-position: 0% 50%;
+        }
+        50% {
+            background-position: 100% 50%;
+        }
+        100% {
+            background-position: 0% 50%;
+        }
+    }
+
+    @keyframes rotateTaglines {
+        0%, 25% {
+            transform: translateY(0);
+        }
+        33%, 58% {
+            transform: translateY(-100px);
+        }
+        66%, 91% {
+            transform: translateY(-200px);
+        }
+        100% {
+            transform: translateY(-300px);
+        }
+    }
+
+    @keyframes pulsePlatform {
+        0% {
+            transform: translate(-50%, -50%) scale(0.8);
+            opacity: 0.3;
+        }
+        100% {
+            transform: translate(-50%, -50%) scale(1.2);
+            opacity: 0;
+        }
+    }
+
+    @keyframes float {
+        0%, 100% {
+            transform: translateY(0);
+        }
+        50% {
+            transform: translateY(-20px);
+        }
+    }
+
+    /* ===== المان‌های بصری اضافی ===== */
+    .floating-elements {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    .floating-element {
+        position: absolute;
+        color: rgba(255, 255, 255, 0.1);
+        font-size: 2rem;
+        animation: float 20s infinite linear;
+    }
+
+    /* ===== رسپانسیو ===== */
+    @media (max-width: 1200px) {
+        .hero-title {
+            font-size: 3.8rem;
+        }
+        
+        .main-cta-title {
+            font-size: 3rem;
+        }
+        
+        .platform-cards {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .hero-title {
+            font-size: 2.8rem;
+        }
+        
+        .title-sub {
+            font-size: 1.4rem;
+            padding: 1.5rem;
+        }
+        
+        .tagline {
+            font-size: 1.6rem;
+        }
+        
+        .platform-cards {
+            grid-template-columns: 1fr;
+        }
+        
+        .usp-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .main-cta-title {
+            font-size: 2.5rem;
+        }
+        
+        .cta-button-group {
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .mahdavi-btn {
+            width: 100%;
+            max-width: 300px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .hero-title {
+            font-size: 2.3rem;
+        }
+        
+        .title-sub {
+            font-size: 1.2rem;
+        }
+        
+        .steps-container {
+            grid-template-columns: 1fr;
+        }
+        
+        .main-cta-title {
+            font-size: 2rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="mahdavi-home">
+    <!-- المان‌های شناور -->
+    <div class="floating-elements" id="floatingElements"></div>
+    
+    <!-- هیرو سکشن -->
+    <section class="mahdavi-hero">
+        <div class="hero-content">
+            <h1 class="hero-title">
+                <span class="title-gradient">پلتفرم جامع مهدوی</span>
+            </h1>
+            
+            <p class="title-sub">
+                به‌پیشواز حضرت مهدی(عج)، جامعه‌ای متحد، آگاه و متعهد می‌سازیم. 
+                اینجا همه‌چیز برای رشد معنوی، خدمت‌رسانی و آمادگی برای ظهور فراهم است.
+            </p>
+            
+            <!-- شعارهای چرخان -->
+            <div class="rotating-taglines">
+                <div class="tagline-container">
+                    <div class="tagline">"معرفت، شرط اول انتظار است"</div>
+                    <div class="tagline">"خدمت به خلق، عبادت است"</div>
+                    <div class="tagline">"جامعه‌ی منتظر، جامعه‌ی فعال است"</div>
+                    <div class="tagline">"در مسیر ظهور، دست در دست هم"</div>
+                </div>
+            </div>
+            
+            <!-- کارت‌های معرفی بخش‌ها -->
+            <div class="platform-cards">
+                <!-- کارت خیریه -->
+                <div class="platform-card card-charity">
+                    <div class="platform-icon-wrapper">
+                        <div class="platform-icon">
+                            <i class="fas fa-hands-helping"></i>
+                        </div>
+                    </div>
+                    <h3>دست‌های مهربان</h3>
+                    <p>
+                        پروژه‌های خیریه‌ی هدفمند و شفاف. با کمک شما، زندگی‌ها تغییر می‌کند.
+                        از کمک به تحصیل کودکان تا تأمین نیازهای ضروری خانواده‌ها.
+                    </p>
+                    <div class="platform-stats">
+                        <div class="stat">
+                            <span class="stat-number" data-count="{{ charity_projects_count|default:'50' }}">0</span>
+                            <span class="stat-label">پروژه فعال</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number" data-count="{{ total_beneficiaries|default:'1000' }}">0</span>
+                            <span class="stat-label">بهره‌بردار</span>
+                        </div>
+                    </div>
+                    <a href="{% url 'charity_home' %}" class="mahdavi-btn btn-primary" style="margin-top: 2rem;">
+                        <i class="fas fa-hand-holding-heart"></i>
+                        ورود به بخش خیریه
+                    </a>
+                </div>
+                
+                <!-- کارت نیایش -->
+                <div class="platform-card card-prayer">
+                    <div class="platform-icon-wrapper">
+                        <div class="platform-icon">
+                            <i class="fas fa-pray"></i>
+                        </div>
+                    </div>
+                    <h3>حریم نیایش</h3>
+                    <p>
+                        جامعه‌ی مجازی نماز، دعا و زیارت. همراهی در مراسم معنوی، 
+                        یادگیری احکام و شرکت در دوره‌های تربیت دینی.
+                    </p>
+                    <div class="platform-stats">
+                        <div class="stat">
+                            <span class="stat-number" data-count="{{ prayer_groups|default:'120' }}">0</span>
+                            <span class="stat-label">گروه نیایش</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number" data-count="{{ total_prayers|default:'5000' }}">0</span>
+                            <span class="stat-label">نیایش ثبت‌شده</span>
+                        </div>
+                    </div>
+                    <a href="#" class="mahdavi-btn btn-secondary" style="margin-top: 2rem;">
+                        <i class="fas fa-door-open"></i>
+                        ورود به حریم نیایش
+                    </a>
+                </div>
+                
+                <!-- کارت جامعه -->
+                <div class="platform-card card-community">
+                    <div class="platform-icon-wrapper">
+                        <div class="platform-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                    </div>
+                    <h3>جامعه‌ی منتظران</h3>
+                    <p>
+                        شبکه‌ی اجتماعی ایمانی. گفتگوهای سازنده، تشکیل گروه‌های مطالعاتی، 
+                        همکاری در پروژه‌های فرهنگی و مشارکت در فعالیت‌های اجتماعی.
+                    </p>
+                    <div class="platform-stats">
+                        <div class="stat">
+                            <span class="stat-number" data-count="{{ community_members|default:'5000' }}">0</span>
+                            <span class="stat-label">عضو فعال</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number" data-count="{{ active_groups|default:'80' }}">0</span>
+                            <span class="stat-label">گروه فعال</span>
+                        </div>
+                    </div>
+                    <a href="#" class="mahdavi-btn btn-primary" style="margin-top: 2rem;">
+                        <i class="fas fa-user-friends"></i>
+                        پیوستن به جامعه
+                    </a>
+                </div>
+                
+                <!-- کارت دانش -->
+                <div class="platform-card card-knowledge">
+                    <div class="platform-icon-wrapper">
+                        <div class="platform-icon">
+                            <i class="fas fa-graduation-cap"></i>
+                        </div>
+                    </div>
+                    <h3>آکادمی مهدوی</h3>
+                    <p>
+                        دوره‌های تخصصی مهدویت، کتابخانه‌ی مجازی، وبینارهای علمی 
+                        و تولید محتوای آموزشی برای رشد فکری و معنوی جامعه‌ی منتظر.
+                    </p>
+                    <div class="platform-stats">
+                        <div class="stat">
+                            <span class="stat-number" data-count="{{ courses_count|default:'30' }}">0</span>
+                            <span class="stat-label">دوره آموزشی</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number" data-count="{{ articles_count|default:'500' }}">0</span>
+                            <span class="stat-label">مقاله علمی</span>
+                        </div>
+                    </div>
+                    <a href="#" class="mahdavi-btn btn-secondary" style="margin-top: 2rem;">
+                        <i class="fas fa-book-open"></i>
+                        شروع یادگیری
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- ویژگی‌های متمایز -->
+    <section class="usp-section">
+        <div class="section-header" style="text-align: center; margin-bottom: 5rem;">
+            <h2 class="section-title" style="font-size: 3rem; color: white; margin-bottom: 1rem;">چرا پلتفرم مهدوی؟</h2>
+            <p class="section-subtitle" style="color: rgba(255, 255, 255, 0.7); max-width: 800px; margin: 0 auto; font-size: 1.2rem;">
+                ما با نگاهی نو و متعهد، فضایی امن، مفید و پویا برای منتظران واقعی فراهم کرده‌ایم.
+            </p>
+        </div>
+        
+        <div class="usp-grid">
+            <div class="usp-card">
+                <div class="usp-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h4>محیطی امن و مطمئن</h4>
+                <p>
+                    تمامی تعاملات و تراکنش‌ها با بالاترین استانداردهای امنیتی محافظت می‌شوند.
+                    حریم خصوصی شما برای ما بسیار مهم است.
+                </p>
+            </div>
+            
+            <div class="usp-card">
+                <div class="usp-icon">
+                    <i class="fas fa-eye"></i>
+                </div>
+                <h4>شفافیت کامل</h4>
+                <p>
+                    از مسیر هر کمک مالی تا عملکرد مدیران، همه چیز به‌طور کامل قابل رصد است.
+                    شما دقیقاً می‌دانید کمک‌هایتان به کجا می‌رود.
+                </p>
+            </div>
+            
+            <div class="usp-card">
+                <div class="usp-icon">
+                    <i class="fas fa-hands"></i>
+                </div>
+                <h4>تأثیرگذاری واقعی</h4>
+                <p>
+                    پروژه‌ها بر اساس نیازسنجی دقیق و با همکاری مؤسسات معتبر طراحی می‌شوند.
+                    هر کمک، تغییری ملموس در زندگی افراد ایجاد می‌کند.
+                </p>
+            </div>
+            
+            <div class="usp-card">
+                <div class="usp-icon">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+                <h4>یادگیری مستمر</h4>
+                <p>
+                    در کنار عمل خیر، به رشد فکری و معنوی شما نیز اهمیت می‌دهیم.
+                    دوره‌های آموزشی رایگان برای ارتقای دانش مهدوی.
+                </p>
+            </div>
+            
+            <div class="usp-card">
+                <div class="usp-icon">
+                    <i class="fas fa-network-wired"></i>
+                </div>
+                <h4>شبکه‌سازی مؤمنانه</h4>
+                <p>
+                    با افراد هم‌فکر و متعهد آشنا شوید. پروژه‌های گروهی راه‌اندازی کنید
+                    و در فضایی سالم به تبادل نظر بپردازید.
+                </p>
+            </div>
+            
+            <div class="usp-card">
+                <div class="usp-icon">
+                    <i class="fas fa-mobile-alt"></i>
+                </div>
+                <h4>دستیار همه‌جا حاضر</h4>
+                <p>
+                    از طریق اپلیکیشن موبایل، در هر زمان و مکان به پلتفرم دسترسی داشته باشید.
+                    اطلاع‌رسانی لحظه‌ای و تعامل آسان.
+                </p>
+            </div>
+        </div>
+    </section>
+    
+    <!-- راهنمای شروع -->
+    <section class="getting-started">
+        <div class="section-header" style="text-align: center; margin-bottom: 5rem;">
+            <h2 class="section-title" style="font-size: 3rem; color: white; margin-bottom: 1rem;">چگونه شروع کنیم؟</h2>
+            <p class="section-subtitle" style="color: rgba(255, 255, 255, 0.7); max-width: 800px; margin: 0 auto; font-size: 1.2rem;">
+                تنها در چهار گام ساده، به جمع منتظران فعال بپیوندید.
+            </p>
+        </div>
+        
+        <div class="steps-container">
+            <div class="step">
+                <div class="step-number">۱</div>
+                <h4>ثبت‌نام رایگان</h4>
+                <p>
+                    با چند کلیک و بدون هیچ هزینه‌ای عضو شوید.
+                    اطلاعات شما به صورت کامل محرمانه باقی می‌ماند.
+                </p>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">۲</div>
+                <h4>کامل کردن پروفایل</h4>
+                <p>
+                    علاقه‌مندی‌ها و مهارت‌های خود را مشخص کنید تا
+                    پیشنهادهای متناسب دریافت کنید.
+                </p>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">۳</div>
+                <h4>کشف بخش‌های مختلف</h4>
+                <p>
+                    با چهار بخش اصلی پلتفرم آشنا شوید و بخشی را که
+                    بیشتر با اهداف شما هم‌خوانی دارد انتخاب کنید.
+                </p>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">۴</div>
+                <h4>شروع مشارکت</h4>
+                <p>
+                    اولین پروژه، دوره یا گروه را انتخاب کرده و
+                    سفر معنوی خود را در پلتفرم مهدوی آغاز کنید.
+                </p>
+            </div>
+        </div>
+    </section>
+    
+    <!-- CTA اصلی -->
+    <section class="main-cta-section">
+        <div class="main-cta-content">
+            <h2 class="main-cta-title">همین الان سفر خود را آغاز کنید</h2>
+            <p class="main-cta-subtitle">
+                هزاران نفر پیش از شما این مسیر را آغاز کرده‌اند. به جمع منتظران فعال بپیوندید، 
+                نه تنها منتظر ظهور باشید، که سازنده‌ی شرایط ظهور.
+            </p>
+            
+            <div class="cta-button-group">
+                {% if not user.is_authenticated %}
+                <a href="{% url 'register' %}" class="mahdavi-btn btn-primary">
+                    <i class="fas fa-user-plus"></i>
+                    عضویت رایگان
+                </a>
+                {% endif %}
+                
+                <a href="{% url 'charity_home' %}" class="mahdavi-btn btn-secondary">
+                    <i class="fas fa-play-circle"></i>
+                    شروع بدون ثبت‌نام
+                </a>
+                
+                <a href="#" class="mahdavi-btn btn-secondary">
+                    <i class="fas fa-play"></i>
+                    تماشای تیزر معرفی
+                </a>
+            </div>
+            
+            <div style="margin-top: 3rem; color: rgba(255, 255, 255, 0.7); font-size: 0.9rem;">
+                <i class="fas fa-lock ml-2"></i>
+                تمامی اطلاعات شما مطابق با قوانین جمهوری اسلامی ایران محافظت می‌شود.
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    class MahdaviHomePage {
+        constructor() {
+            this.init();
+        }
+
+        init() {
+            this.initFloatingElements();
+            this.initCounters();
+            this.initScrollAnimations();
+            this.initHoverEffects();
+            this.initObservers();
+        }
+
+        // ایجاد المان‌های شناور
+        initFloatingElements() {
+            const container = document.getElementById('floatingElements');
+            if (!container) return;
+
+            const symbols = ['☪️', '🕌', '📿', '🕋', '🌟', '✨', '💫', '🌙', '📖', '🕯️'];
+            
+            for (let i = 0; i < 25; i++) {
+                this.createFloatingElement(container, symbols);
+            }
+        }
+
+        createFloatingElement(container, symbols) {
+            const element = document.createElement('div');
+            element.className = 'floating-element';
+            element.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+            
+            // موقعیت تصادفی
+            element.style.left = `${Math.random() * 100}%`;
+            element.style.top = `${Math.random() * 100}%`;
+            
+            // اندازه تصادفی
+            const size = Math.random() * 2 + 1;
+            element.style.fontSize = `${size}rem`;
+            
+            // شفافیت
+            element.style.opacity = Math.random() * 0.05 + 0.02;
+            
+            // انیمیشن
+            const duration = Math.random() * 25 + 15;
+            const delay = Math.random() * 5;
+            element.style.animationDuration = `${duration}s`;
+            element.style.animationDelay = `${delay}s`;
+            
+            container.appendChild(element);
+        }
+
+        // شمارنده‌های انیمیشن دار
+        initCounters() {
+            const counters = document.querySelectorAll('.stat-number[data-count]');
+            
+            counters.forEach(counter => {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            this.animateCounter(entry.target);
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                }, { threshold: 0.5 });
+                
+                observer.observe(counter);
+            });
+        }
+
+        animateCounter(element) {
+            const target = parseInt(element.getAttribute('data-count').replace(/,/g, ''));
+            const duration = 1500;
+            const startTime = Date.now();
+            const startValue = 0;
+            
+            const animate = () => {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                // Easing function
+                const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+                const current = Math.floor(easeOutQuart * target);
+                
+                element.textContent = current.toLocaleString('fa-IR');
+                
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                } else {
+                    // افکت تکمیل
+                    this.createConfetti(element);
+                }
+            };
+            
+            animate();
+        }
+
+        // افکت کانفتی
+        createConfetti(element) {
+            const rect = element.getBoundingClientRect();
+            const colors = ['#1a5fb4', '#26a269', '#f5c211', '#9141ac'];
+            
+            for (let i = 0; i < 15; i++) {
+                const confetti = document.createElement('div');
+                confetti.style.cssText = `
+                    position: fixed;
+                    width: 10px;
+                    height: 10px;
+                    background: ${colors[Math.floor(Math.random() * colors.length)]};
+                    border-radius: 50%;
+                    pointer-events: none;
+                    z-index: 1000;
+                    top: ${rect.top + rect.height / 2}px;
+                    left: ${rect.left + rect.width / 2}px;
+                    transform: translate(-50%, -50%);
+                    animation: confettiFall 1s ease-out forwards;
+                `;
+                
+                document.body.appendChild(confetti);
+                
+                setTimeout(() => {
+                    confetti.remove();
+                }, 1000);
+            }
+        }
+
+        // انیمیشن‌های اسکرول
+        initScrollAnimations() {
+            const elements = document.querySelectorAll('.platform-card, .usp-card, .step');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            });
+            
+            elements.forEach(el => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(30px)';
+                el.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+                observer.observe(el);
+            });
+        }
+
+        // افکت‌های hover
+        initHoverEffects() {
+            // افکت ripple
+            const buttons = document.querySelectorAll('.mahdavi-btn');
+            
+            buttons.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    this.createRipple(e, btn);
+                });
+            });
+            
+            // افکت 3D روی کارت‌ها
+            const cards = document.querySelectorAll('.platform-card');
+            
+            cards.forEach(card => {
+                card.addEventListener('mousemove', (e) => {
+                    this.handle3DHover(e, card);
+                });
+                
+                card.addEventListener('mouseleave', () => {
+                    this.reset3DHover(card);
+                });
+            });
+        }
+
+        handle3DHover(e, card) {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            
+            const rotateY = ((x - centerX) / centerX) * 10;
+            const rotateX = ((centerY - y) / centerY) * 10;
+            
+            card.style.transform = `
+                perspective(1000px)
+                rotateX(${rotateX}deg)
+                rotateY(${rotateY}deg)
+                translateY(-20px)
+                scale(1.03)
+            `;
+        }
+
+        reset3DHover(card) {
+            card.style.transform = 'translateY(-20px) scale(1.03)';
+        }
+
+        createRipple(e, element) {
+            const ripple = document.createElement('div');
+            const rect = element.getBoundingClientRect();
+            
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - size / 2;
+            const y = e.clientY - rect.top - size / 2;
+            
+            ripple.style.cssText = `
+                position: absolute;
+                top: ${y}px;
+                left: ${x}px;
+                width: ${size}px;
+                height: ${size}px;
+                border-radius: 50%;
+                background: rgba(255, 255, 255, 0.3);
+                transform: scale(0);
+                animation: ripple 0.6s ease-out;
+                pointer-events: none;
+            `;
+            
+            element.appendChild(ripple);
+            
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        }
+
+        // Observerهای اضافی
+        initObservers() {
+            // انیمیشن برای عنوان اصلی
+            const title = document.querySelector('.hero-title');
+            if (title) {
+                title.style.opacity = '0';
+                title.style.transform = 'translateY(50px)';
+                
+                setTimeout(() => {
+                    title.style.transition = 'all 1s cubic-bezier(0.4, 0, 0.2, 1)';
+                    title.style.opacity = '1';
+                    title.style.transform = 'translateY(0)';
+                }, 300);
+            }
+        }
+    }
+
+    // اضافه کردن استایل‌های CSS داینامیک
+    const dynamicStyles = `
+        @keyframes confettiFall {
+            0% {
+                transform: translate(-50%, -50%) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(
+                    ${Math.random() * 200 - 100}px, 
+                    ${window.innerHeight}px
+                ) rotate(${Math.random() * 360}deg);
+                opacity: 0;
+            }
+        }
+        
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+        
+        .mahdavi-btn {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* بهبود ظاهر اسکرول‌بار */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--mahdavi-dark);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--mahdavi-gradient);
+            border-radius: 5px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--mahdavi-primary);
+        }
+    `;
+
+    // راه‌اندازی صفحه
+    document.addEventListener('DOMContentLoaded', () => {
+        // اضافه کردن استایل‌های داینامیک
+        const styleSheet = document.createElement('style');
+        styleSheet.textContent = dynamicStyles;
+        document.head.appendChild(styleSheet);
+        
+        // راه‌اندازی صفحه اصلی
+        const homePage = new MahdaviHomePage();
+        window.MahdaviHomePage = homePage;
+        
+        // پخش صدای ملایم (در صورت مجوز کاربر)
+        setTimeout(() => {
+            this.playWelcomeSound();
+        }, 1500);
+    });
+
+    // تابع پخش صدا (اختیاری)
+    function playWelcomeSound() {
+        // این تابع می‌تواند یک صدای خوش‌آمدگویی ملایم پخش کند
+        // برای فعال‌سازی نیاز به مجوز کاربر دارد
+    }
+</script>
+{% endblock %}
+[file content end]

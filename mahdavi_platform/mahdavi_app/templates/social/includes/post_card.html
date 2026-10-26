@@ -1,0 +1,205 @@
+<div class="post-card card">
+    <!-- هدر پست -->
+    <div class="post-header">
+        <div class="post-user-info">
+            <div class="user-avatar">
+                {% if post.user.profile_image %}
+                    <img src="{{ post.user.profile_image.url }}" alt="{{ post.user.get_full_name }}">
+                {% else %}
+                    <span>{{ post.user.first_name|first }}</span>
+                {% endif %}
+            </div>
+            <div class="user-details">
+                <a href="{% url 'social_profile' post.user.id %}" class="username">
+                    {{ post.user.get_full_name }}
+                </a>
+                {% if post.location %}
+                <span class="location">{{ post.location }}</span>
+                {% endif %}
+            </div>
+        </div>
+        <div class="post-time">
+            {{ post.created_at|timesince }} قبل
+        </div>
+    </div>
+    
+    <!-- محتوای پست -->
+    <div class="post-content">
+        {% if post.content_type == 'image' and post.image %}
+        <div class="post-media">
+            <img src="{{ post.image.url }}" alt="پست {{ post.user.get_full_name }}" class="post-image" onclick="location.href='{% url 'post_detail' post.id %}'">
+        </div>
+        {% elif post.content_type == 'video' and post.video %}
+        <div class="post-media">
+            <video controls class="post-video" onclick="location.href='{% url 'post_detail' post.id %}'">
+                <source src="{{ post.video.url }}" type="video/mp4">
+            </video>
+        </div>
+        {% elif post.content_type == 'audio' and post.audio %}
+        <div class="post-media">
+            <audio controls class="post-audio">
+                <source src="{{ post.audio.url }}" type="audio/mpeg">
+            </audio>
+        </div>
+        {% endif %}
+        
+        {% if post.caption %}
+        <div class="post-caption">
+            {{ post.caption|linebreaks }}
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- آمار و اقدامات -->
+    <div class="post-actions">
+        <div class="action-buttons">
+            <button class="action-btn like-btn" data-post-id="{{ post.id }}">
+                <i class="far fa-heart"></i>
+                <span class="likes-count">{{ post.likes_count }}</span>
+            </button>
+            <button class="action-btn comment-btn" onclick="location.href='{% url 'post_detail' post.id %}'">
+                <i class="far fa-comment"></i>
+                <span class="comments-count">{{ post.comments_count }}</span>
+            </button>
+            <button class="action-btn share-btn">
+                <i class="far fa-share-square"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+.post-card {
+    margin-bottom: 0;
+}
+
+.post-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--border-gold);
+}
+
+.post-user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold), var(--dark-gold));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: #000;
+    overflow: hidden;
+}
+
+.user-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.user-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.username {
+    font-weight: bold;
+    color: var(--text-light);
+    text-decoration: none;
+}
+
+.username:hover {
+    color: var(--gold);
+}
+
+.location {
+    font-size: 0.8rem;
+    color: var(--text-light);
+    opacity: 0.7;
+}
+
+.post-time {
+    font-size: 0.8rem;
+    color: var(--text-light);
+    opacity: 0.7;
+}
+
+.post-content {
+    padding: 0;
+}
+
+.post-media {
+    cursor: pointer;
+}
+
+.post-image {
+    width: 100%;
+    max-height: 500px;
+    object-fit: contain;
+}
+
+.post-video,
+.post-audio {
+    width: 100%;
+}
+
+.post-caption {
+    padding: 15px 20px;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--text-light);
+}
+
+.post-actions {
+    padding: 12px 20px;
+    border-top: 1px solid var(--border-gold);
+}
+
+.action-buttons {
+    display: flex;
+    gap: 20px;
+}
+
+.action-btn {
+    background: none;
+    border: none;
+    color: var(--text-light);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.action-btn:hover {
+    color: var(--gold);
+}
+
+.action-btn.liked {
+    color: #e74c3c;
+}
+
+@media (max-width: 768px) {
+    .post-header {
+        padding: 12px 15px;
+    }
+    
+    .post-caption {
+        padding: 12px 15px;
+    }
+    
+    .post-actions {
+        padding: 10px 15px;
+    }
+}
+</style>

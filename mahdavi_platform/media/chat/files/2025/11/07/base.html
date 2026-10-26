@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}نور مهدی - سفر معنوی به سوی امام عصر(عج){% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/font-face.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Lateef:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --gold: #d4af37;
+            --dark-gold: #b8941f;
+            --light-gold: #f4e4a9;
+            --dark-green: #1a535c;
+            --darker-green: #0d2b2a;
+            --islamic-green: #0d5e3d;
+            --dark-blue: #1e3d59;
+            --darker-blue: #0f1c2e;
+            --dark-purple: #3d2b56;
+            --darker-purple: #2a1c3d;
+            --text-light: #e8e6e3;
+            --text-lighter: #f0ede5;
+            --bg-dark: #0a0a0a;
+            --bg-darker: #050505;
+            --bg-card: rgba(15, 15, 15, 0.95);
+            --border-gold: rgba(212, 175, 55, 0.3);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Vazir', 'Lateef', Tahoma, sans-serif;
+        }
+
+        /* استایل‌های لودینگ مود */
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 10% 20%, var(--darker-purple) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, var(--islamic-green) 0%, transparent 20%),
+                radial-gradient(circle at 50% 50%, var(--darker-blue) 0%, var(--bg-darker) 100%);
+            color: var(--text-light);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+        
+        .loading-container {
+            text-align: center;
+            padding: 40px;
+            background: var(--bg-card);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            border: 2px solid var(--border-gold);
+            max-width: 500px;
+            width: 90%;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .loading-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+        }
+        
+        .islamic-pattern {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.1;
+            z-index: -1;
+            background-image: 
+                radial-gradient(circle at 25% 25%, var(--gold) 2px, transparent 2px),
+                radial-gradient(circle at 75% 75%, var(--gold) 2px, transparent 2px);
+            background-size: 50px 50px;
+        }
+        
+        .logo-icon {
+            font-size: 3.5rem;
+            color: var(--gold);
+            text-shadow: 0 0 25px rgba(212, 175, 55, 0.6);
+            background: linear-gradient(45deg, var(--gold), var(--light-gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 15px;
+        }
+        
+        .loading-title {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            color: var(--gold);
+            font-weight: 600;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            font-family: 'Lateef', serif;
+        }
+        
+        .loading-subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            color: var(--text-light);
+            opacity: 0.9;
+            font-family: 'Lateef', serif;
+        }
+        
+        .loading-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .moon-loader {
+            width: 150px;
+            height: 150px;
+            position: relative;
+            margin-bottom: 30px;
+        }
+        
+        .moon {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, var(--gold) 0%, var(--dark-gold) 100%);
+            border-radius: 50%;
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            box-shadow: 0 0 25px rgba(212, 175, 55, 0.6);
+            animation: moonGlow 3s infinite alternate;
+        }
+        
+        .moon-crescent {
+            width: 100px;
+            height: 100px;
+            background: var(--darker-blue);
+            border-radius: 50%;
+            position: absolute;
+            top: 25px;
+            left: 0;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .star {
+            position: absolute;
+            background-color: var(--light-gold);
+            border-radius: 50%;
+            animation: twinkle 2s infinite;
+        }
+        
+        .star:nth-child(1) {
+            width: 8px;
+            height: 8px;
+            top: 25px;
+            right: 35px;
+            animation-delay: 0s;
+        }
+        
+        .star:nth-child(2) {
+            width: 6px;
+            height: 6px;
+            top: 60px;
+            right: 15px;
+            animation-delay: 0.5s;
+        }
+        
+        .star:nth-child(3) {
+            width: 7px;
+            height: 7px;
+            bottom: 40px;
+            left: 25px;
+            animation-delay: 1s;
+        }
+        
+        .star:nth-child(4) {
+            width: 5px;
+            height: 5px;
+            bottom: 60px;
+            left: 45px;
+            animation-delay: 1.5s;
+        }
+        
+        .progress-container {
+            width: 100%;
+            height: 10px;
+            background: rgba(30, 30, 30, 0.8);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 25px;
+            border: 1px solid var(--border-gold);
+        }
+        
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--gold), var(--dark-gold));
+            border-radius: 10px;
+            animation: loading 4s ease-in-out infinite;
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                rgba(255,255,255,0.4) 50%, 
+                transparent 100%);
+            animation: shimmer 2s infinite;
+        }
+        
+        .loading-text {
+            font-size: 1.1rem;
+            color: var(--text-light);
+            margin-top: 15px;
+            font-family: 'Lateef', serif;
+            height: 24px;
+        }
+        
+        .islamic-border {
+            width: 100%;
+            height: 20px;
+            margin: 25px 0;
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0,10 Q25,0 50,10 T100,10' stroke='%23d4af37' fill='none' stroke-width='2'/%3E%3C/svg%3E");
+            background-repeat: repeat-x;
+            background-size: 100px 20px;
+            opacity: 0.7;
+        }
+        
+        .arabic-text {
+            font-size: 1.8rem;
+            margin: 20px 0;
+            color: var(--gold);
+            font-family: 'Lateef', serif;
+            text-shadow: 0 0 10px rgba(212, 175, 55, 0.4);
+        }
+        
+        .quote-text {
+            font-size: 1.2rem;
+            margin: 15px 0;
+            color: var(--text-light);
+            font-style: italic;
+            font-family: 'Lateef', serif;
+            line-height: 1.6;
+        }
+        
+        @keyframes moonGlow {
+            0% {
+                box-shadow: 0 0 20px rgba(212, 175, 55, 0.6);
+                transform: scale(1);
+            }
+            100% {
+                box-shadow: 0 0 35px rgba(212, 175, 55, 0.9);
+                transform: scale(1.05);
+            }
+        }
+        
+        @keyframes twinkle {
+            0%, 100% {
+                opacity: 0.3;
+                transform: scale(0.8);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+        }
+        
+        @keyframes loading {
+            0% {
+                width: 0%;
+            }
+            50% {
+                width: 70%;
+            }
+            100% {
+                width: 100%;
+            }
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        .pulse-gold {
+            animation: pulse-gold 3s infinite;
+        }
+        
+        @keyframes pulse-gold {
+            0%, 100% { 
+                box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+            }
+            50% { 
+                box-shadow: 0 0 30px rgba(212, 175, 55, 0.6);
+            }
+        }
+
+        /* استایل‌های صفحه اصلی */
+        body {
+            background: 
+                radial-gradient(circle at 10% 20%, var(--darker-purple) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, var(--islamic-green) 0%, transparent 20%),
+                radial-gradient(circle at 50% 50%, var(--darker-blue) 0%, var(--bg-darker) 100%);
+            color: var(--text-light);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* استایل‌های هدر و نوار همبرگری */
+        .header {
+            background: rgba(10, 10, 10, 0.98);
+            backdrop-filter: blur(20px);
+            border-bottom: 2px solid var(--border-gold);
+            padding: 15px 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.8);
+        }
+        
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo-text h1 {
+            font-size: 1.4rem;
+            margin-bottom: 5px;
+            color: var(--gold);
+            font-family: 'Lateef', serif;
+        }
+        
+        .logo-text p {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            opacity: 0.8;
+            font-family: 'Lateef', serif;
+        }
+        
+        /* دکمه همبرگری - همیشه نمایش داده می‌شود */
+        .hamburger-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            cursor: pointer;
+            padding: 8px;
+            background: rgba(212, 175, 55, 0.1);
+            border-radius: 6px;
+            border: 1px solid var(--border-gold);
+            transition: all 0.3s ease;
+        }
+        
+        .hamburger-menu:hover {
+            background: rgba(212, 175, 55, 0.2);
+            transform: scale(1.05);
+        }
+        
+        .hamburger-line {
+            width: 25px;
+            height: 2px;
+            background: var(--gold);
+            transition: all 0.3s ease;
+        }
+        
+        /* منوی سایدبار */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            right: -350px;
+            width: 320px;
+            height: 100vh;
+            background: rgba(10, 10, 10, 0.98);
+            backdrop-filter: blur(20px);
+            border-left: 2px solid var(--border-gold);
+            transition: right 0.3s ease;
+            z-index: 9999;
+            overflow-y: auto;
+            padding: 20px;
+            box-shadow: -5px 0 30px rgba(0, 0, 0, 0.8);
+        }
+        
+        .sidebar.active {
+            right: 0;
+        }
+        
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-gold);
+        }
+        
+        .close-sidebar {
+            background: none;
+            border: none;
+            color: var(--gold);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .close-sidebar:hover {
+            transform: scale(1.1);
+        }
+        
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 15px;
+            color: var(--text-light);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+            background: rgba(30, 30, 30, 0.7);
+        }
+        
+        .sidebar-link:hover,
+        .sidebar-link.active {
+            background: rgba(212, 175, 55, 0.1);
+            border-color: var(--border-gold);
+            transform: translateX(-5px);
+        }
+        
+        .sidebar-link.active {
+            background: linear-gradient(135deg, var(--gold), var(--dark-gold));
+            color: #000;
+            font-weight: bold;
+        }
+        
+        .user-sidebar-info {
+            background: rgba(30, 30, 30, 0.8);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border-gold);
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--gold), var(--dark-gold));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #000;
+            font-size: 1.2rem;
+            margin: 0 auto 10px;
+        }
+        
+        /* محتوای اصلی */
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            display: none; /* ابتدا مخفی است تا لودینگ تمام شود */
+        }
+        
+        /* کارت‌ها */
+        .card {
+            background: var(--bg-card);
+            backdrop-filter: blur(15px);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-gold);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+        }
+        
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.8);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-gold);
+        }
+        
+        .card-title {
+            font-size: 1.2rem;
+            color: var(--gold);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .card-icon {
+            font-size: 1.3rem;
+        }
+        
+        /* دکمه‌ها */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: center;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--gold), var(--dark-gold));
+            color: #000;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
+        }
+        
+        .btn-secondary {
+            background: rgba(40, 40, 40, 0.8);
+            color: var(--text-light);
+            border: 1px solid var(--border-gold);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(212, 175, 55, 0.1);
+        }
+        
+        /* گریدها */
+        .grid {
+            display: grid;
+            gap: 15px;
+        }
+        
+        .grid-2 {
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        }
+        
+        .grid-3 {
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        }
+        
+        .grid-4 {
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        }
+        
+        /* متن‌های خاص */
+        .quran-verse {
+            font-family: 'Scheherazade New', serif;
+            font-size: 1.3rem;
+            text-align: center;
+            line-height: 2;
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            border: 1px solid var(--border-gold);
+            color: var(--text-lighter);
+        }
+        
+        .hadith {
+            font-style: italic;
+            text-align: center;
+            padding: 15px;
+            margin: 15px 0;
+            background: rgba(212, 175, 55, 0.1);
+            border-radius: 8px;
+            border: 1px solid var(--border-gold);
+            color: var(--text-lighter);
+            line-height: 1.6;
+            font-family: 'Lateef', serif;
+            font-size: 1.1rem;
+        }
+        
+        .arabic-text {
+            font-family: 'Scheherazade New', serif;
+            font-size: 1.2rem;
+            color: var(--gold);
+        }
+        
+        /* انیمیشن‌ها */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        /* پیشرفت */
+        .progress-container {
+            width: 100%;
+            height: 6px;
+            background: rgba(30, 30, 30, 0.8);
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 10px 0;
+            border: 1px solid var(--border-gold);
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--gold), var(--dark-gold));
+            border-radius: 8px;
+            transition: width 0.5s ease;
+        }
+        
+        /* فوتر */
+        footer {
+            text-align: center;
+            padding: 30px 20px;
+            margin-top: 40px;
+            opacity: 0.9;
+            border-top: 1px solid var(--border-gold);
+        }
+        
+        /* رسپانسیو */
+        @media (max-width: 768px) {
+            .nav-container {
+                padding: 0 15px;
+            }
+            
+            .main-content {
+                padding: 15px;
+            }
+            
+            .card {
+                padding: 15px;
+                margin-bottom: 15px;
+            }
+            
+            .card-header {
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-start;
+            }
+            
+            .grid-2, .grid-3, .grid-4 {
+                grid-template-columns: 1fr;
+            }
+            
+            .quran-verse {
+                font-size: 1.1rem;
+                padding: 15px;
+            }
+            
+            .hadith {
+                font-size: 1rem;
+                padding: 12px;
+            }
+            
+            .logo-text h1 {
+                font-size: 1.2rem;
+            }
+            
+            .logo-text p {
+                font-size: 0.7rem;
+            }
+            
+            .btn {
+                padding: 8px 16px;
+                font-size: 0.85rem;
+            }
+            
+            .sidebar {
+                width: 280px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .main-content {
+                padding: 10px;
+            }
+            
+            .card {
+                padding: 12px;
+            }
+            
+            .card-title {
+                font-size: 1.1rem;
+            }
+            
+            .quran-verse {
+                font-size: 1rem;
+                padding: 12px;
+            }
+            
+            .sidebar {
+                width: 250px;
+            }
+        }
+        
+        /* استایل‌های فرم */
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 6px;
+            color: var(--gold);
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            background: rgba(30, 30, 30, 0.8);
+            border: 1px solid var(--border-gold);
+            border-radius: 6px;
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--gold);
+            box-shadow: 0 0 8px rgba(212, 175, 55, 0.3);
+        }
+        
+        /* پیام‌ها */
+        .alert {
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            border: 1px solid;
+        }
+        
+        .alert-success {
+            background: rgba(39, 174, 96, 0.2);
+            border-color: #27ae60;
+            color: #27ae60;
+        }
+        
+        .alert-error {
+            background: rgba(231, 76, 60, 0.2);
+            border-color: #e74c3c;
+            color: #e74c3c;
+        }
+        
+        /* محو کننده برای سایدبار */
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 9998;
+            display: none;
+        }
+        
+        .sidebar-overlay.active {
+            display: block;
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- لودینگ مود -->
+    <div id="loading-screen">
+        <div class="islamic-pattern"></div>
+        
+        <div class="loading-container pulse-gold">
+            <div class="logo-section">
+                <i class="fas fa-mosque logo-icon"></i>
+                <h1 class="loading-title">نور مهدی</h1>
+                <p class="loading-subtitle">سفر معنوی به سوی امام عصر(عج)</p>
+            </div>
+            
+            <div class="islamic-border"></div>
+            
+            <div class="loading-content">
+                <div class="moon-loader">
+                    <div class="moon"></div>
+                    <div class="moon-crescent"></div>
+                    <div class="star"></div>
+                    <div class="star"></div>
+                    <div class="star"></div>
+                    <div class="star"></div>
+                </div>
+                
+                <div class="arabic-text">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>
+                
+                <div class="quote-text">"مهدی از ما اهل بیت است، زمین را پر از عدل و داد می‌کند"</div>
+                
+                <div class="progress-container">
+                    <div class="progress-bar"></div>
+                </div>
+                
+                <div class="loading-text">آماده سازی محتوای معنوی...</div>
+            </div>
+            
+            <div class="islamic-border"></div>
+            
+            <p style="margin-top: 15px; font-size: 0.9rem; opacity: 0.7;">
+                لطفاً چند لحظه شکیبا باشید...
+            </p>
+        </div>
+    </div>
+
+    <!-- هدر -->
+    <header class="header">
+        <div class="nav-container">
+            <!-- دکمه همبرگری - همیشه نمایش داده می‌شود -->
+            <div class="hamburger-menu" id="hamburgerBtn">
+                <div class="hamburger-line"></div>
+                <div class="hamburger-line"></div>
+                <div class="hamburger-line"></div>
+            </div>
+            
+            <!-- لوگو -->
+            <div class="logo">
+                <i class="fas fa-mosque" style="font-size: 1.8rem; color: var(--gold);"></i>
+                <div class="logo-text">
+                    <h1>نور مهدی</h1>
+                    <p>سفر معنوی به سوی امام عصر(عج)</p>
+                </div>
+            </div>
+            
+            <!-- اطلاعات کاربر در دسکتاپ -->
+            {% if user.is_authenticated %}
+            <div class="user-info" style="display: flex; align-items: center; gap: 10px;">
+                <div class="user-avatar" style="width: 35px; height: 35px; font-size: 0.9rem;">
+                    {{ user.first_name|first }}
+                </div>
+                <span style="font-size: 0.9rem;">{{ user.get_full_name }}</span>
+            </div>
+            {% endif %}
+        </div>
+    </header>
+
+    <!-- سایدبار -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3 style="color: var(--gold);">منوی ناوبری</h3>
+            <button class="close-sidebar" id="closeSidebar">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <a href="{% url 'index' %}" class="sidebar-link {% if request.resolver_match.url_name == 'index' %}active{% endif %}">
+                <i class="fas fa-home"></i>
+                صفحه اصلی
+            </a>
+            
+            {% if user.is_authenticated %}
+            <a href="{% url 'dashboard' %}" class="sidebar-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                <i class="fas fa-tachometer-alt"></i>
+                پیشخوان
+            </a>
+            <a href="{% url 'marja_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'marja_list' %}active{% endif %}">
+                <i class="fas fa-users"></i>
+                مراجع تقلید
+            </a>
+            <a href="{% url 'marja_content_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'marja_content_list' %}active{% endif %}">
+                <i class="fas fa-book-open"></i>
+                محتوای مراجع
+            </a>
+            <a href="{% url 'user_following_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'user_following_list' %}active{% endif %}">
+                <i class="fas fa-heart"></i>
+                دنبال شده‌ها
+            </a>
+            <a href="{% url 'user_achievements' %}" class="sidebar-link {% if request.resolver_match.url_name == 'user_achievements' %}active{% endif %}">
+                <i class="fas fa-trophy"></i>
+                نشان‌ها
+            </a>
+            <a href="{% url 'user_statistics' %}" class="sidebar-link {% if request.resolver_match.url_name == 'user_statistics' %}active{% endif %}">
+                <i class="fas fa-chart-bar"></i>
+                آمار من
+            </a>
+            <a href="{% url 'station_leaderboard' %}" class="sidebar-link {% if request.resolver_match.url_name == 'station_leaderboard' %}active{% endif %}">
+                <i class="fas fa-ranking-star"></i>
+                رتبه‌بندی
+            </a>
+            <a href="{% url 'quran' %}" class="sidebar-link {% if request.resolver_match.url_name == 'quran' %}active{% endif %}">
+                <i class="fas fa-quran"></i>
+                قرآن
+            </a>
+            <a href="{% url 'games_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'quran' %}active{% endif %}">
+                <i class="fas fa-quran"></i>
+                بازی ها
+            </a>
+            <li class="nav-item">
+    <a href="{% url 'chat_home' %}" class="nav-link">
+        <i class="fas fa-comments nav-icon"></i>
+        پیام‌رسان
+    </a>
+</li>
+            
+            <!-- فقط برای مراجع تایید شده -->
+            {% if user.is_marja_approved %}
+            <a href="{% url 'marja_dashboard' %}" class="sidebar-link {% if request.resolver_match.url_name == 'marja_dashboard' %}active{% endif %}">
+                <i class="fas fa-user-tie"></i>
+                پنل مرجعیت
+            </a>
+            {% endif %}
+            
+            <a href="{% url 'profile' %}" class="sidebar-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
+                <i class="fas fa-user"></i>
+                پروفایل
+            </a>
+            <a href="{% url 'logout' %}" class="sidebar-link">
+                <i class="fas fa-sign-out-alt"></i>
+                خروج
+            </a>
+            {% else %}
+            <a href="{% url 'login' %}" class="sidebar-link {% if request.resolver_match.url_name == 'login' %}active{% endif %}">
+                <i class="fas fa-sign-in-alt"></i>
+                ورود
+            </a>
+            <a href="{% url 'register' %}" class="sidebar-link {% if request.resolver_match.url_name == 'register' %}active{% endif %}">
+                <i class="fas fa-user-plus"></i>
+                ثبت نام
+            </a>
+            {% endif %}
+        </nav>
+        
+        {% if user.is_authenticated %}
+        <div class="user-sidebar-info">
+            <div class="user-avatar">
+                {{ user.first_name|first }}
+            </div>
+            <div style="font-weight: bold; margin-bottom: 5px;">{{ user.get_full_name }}</div>
+            <div style="font-size: 0.8rem; opacity: 0.8;">
+                سطح: {{ user.get_spiritual_level_display }}
+            </div>
+            <div style="font-size: 0.8rem; margin-top: 5px;">
+                امتیاز: {{ user.points }}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- محو کننده سایدبار -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- محتوای اصلی -->
+    <main class="main-content">
+        <!-- نمایش پیام‌ها -->
+        {% if messages %}
+        <div style="margin-bottom: 15px;">
+            {% for message in messages %}
+            <div class="alert alert-{% if message.tags == 'error' %}error{% else %}success{% endif %} fade-in">
+                <i class="fas fa-{% if message.tags == 'error' %}exclamation-circle{% else %}check-circle{% endif %}"></i>
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <!-- فوتر -->
+    <footer>
+        <div class="quran-verse">
+            ﴿وَعَدَ اللَّهُ الَّذِينَ آمَنُوا مِنكُمْ وَعَمِلُوا الصَّالِحَاتِ لَيَسْتَخْلِفَنَّهُمْ فِي الْأَرْضِ﴾
+        </div>
+        <p style="margin-top: 15px; color: var(--text-light); font-family: 'Lateef', serif; font-size: 1rem;">
+            <i class="fas fa-mosque" style="color: var(--gold);"></i><br>
+            نور مهدی - زمینه‌ساز برای ظهور منجی بشریت<br>
+            <span style="opacity: 0.8; font-size: 0.8rem;">© ۱۴۰۳ - تمام حقوق محفوظ است</span>
+        </p>
+    </footer>
+
+    <script>
+        // مدیریت لودینگ
+        document.addEventListener('DOMContentLoaded', function() {
+            const progressBar = document.querySelector('.progress-bar');
+            const loadingText = document.querySelector('.loading-text');
+            const loadingScreen = document.getElementById('loading-screen');
+            const mainContent = document.querySelector('.main-content');
+            
+            const texts = [
+                "بارگذاری محتوای قرآنی...",
+                "آماده سازی درس‌های مهدوی...",
+                "بارگذاری ادعیه و زیارات...",
+                "تقریبا آماده است...",
+                "آخرین تنظیمات..."
+            ];
+            
+            let textIndex = 0;
+            
+            // تغییر متن هر 1.5 ثانیه
+            const textInterval = setInterval(() => {
+                loadingText.textContent = texts[textIndex];
+                textIndex = (textIndex + 1) % texts.length;
+            }, 1500);
+            
+            // شبیه سازی لودینگ و سپس نمایش صفحه اصلی
+            setTimeout(() => {
+                clearInterval(textInterval);
+                loadingScreen.style.opacity = '0';
+                setTimeout(() => {
+                    loadingScreen.style.display = 'none';
+                    mainContent.style.display = 'block';
+                    
+                    // انیمیشن fade-in برای المان‌ها
+                    const fadeElements = document.querySelectorAll('.fade-in');
+                    fadeElements.forEach(element => {
+                        element.style.opacity = '0';
+                        element.style.transform = 'translateY(15px)';
+                        
+                        setTimeout(() => {
+                            element.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                            element.style.opacity = '1';
+                            element.style.transform = 'translateY(0)';
+                        }, 100);
+                    });
+                }, 500);
+            }, 4000);
+        });
+
+        // مدیریت سایدبار
+        const hamburgerBtn = document.getElementById('hamburgerBtn');
+        const sidebar = document.getElementById('sidebar');
+        const closeSidebar = document.getElementById('closeSidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        
+        function openSidebar() {
+            sidebar.classList.add('active');
+            sidebarOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeSidebarFunc() {
+            sidebar.classList.remove('active');
+            sidebarOverlay.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+        
+        hamburgerBtn.addEventListener('click', openSidebar);
+        closeSidebar.addEventListener('click', closeSidebarFunc);
+        sidebarOverlay.addEventListener('click', closeSidebarFunc);
+        
+        // بستن سایدبار با کلید ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeSidebarFunc();
+            }
+        });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

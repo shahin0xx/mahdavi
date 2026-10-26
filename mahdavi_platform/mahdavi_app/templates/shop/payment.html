@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}پرداخت سفارش {{ order.order_number }} - نور مهدی{% endblock %}
+
+{% block extra_css %}
+<style>
+    .payment-section {
+        padding: 2rem 0;
+    }
+
+    .order-info-card {
+        background: rgba(30, 30, 30, 0.8);
+        padding: 2rem;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+        border: 2px solid var(--border-gold);
+    }
+
+    .payment-guide-card {
+        background: rgba(212, 175, 55, 0.1);
+        border: 2px solid var(--border-gold);
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .important-note {
+        background: rgba(39, 174, 96, 0.2);
+        border: 1px solid #27ae60;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+    }
+
+    .support-info {
+        text-align: center;
+        margin-top: 3rem;
+        padding: 2rem;
+        background: rgba(30, 30, 30, 0.8);
+        border-radius: 15px;
+        border: 1px solid var(--border-gold);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="payment-section fade-in">
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <i class="fas fa-credit-card card-icon"></i>
+                    پرداخت سفارش
+                </h2>
+                <div style="color: var(--text-secondary);">
+                    شماره سفارش: {{ order.order_number }}
+                </div>
+            </div>
+
+            <!-- اطلاعات سفارش -->
+            <div class="order-info-card">
+                <h3 style="color: var(--primary-gold); margin-bottom: 1.5rem;">مشخصات سفارش</h3>
+                <div class="grid grid-2">
+                    <div>
+                        <strong style="color: var(--text-secondary);">مبلغ قابل پرداخت:</strong>
+                        <div class="total-amount">{{ order.total_amount|floatformat:0 }} تومان</div>
+                    </div>
+                    <div>
+                        <strong style="color: var(--text-secondary);">وضعیت:</strong>
+                        <div style="color: #f39c12; margin-top: 0.5rem;">
+                            <i class="fas fa-clock"></i>
+                            در انتظار پرداخت
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- راهنمای پرداخت -->
+            <div class="payment-guide-card">
+                <h3 style="color: var(--primary-gold); margin-bottom: 1.5rem;">
+                    <i class="fas fa-info-circle"></i>
+                    راهنمای پرداخت کارت به کارت
+                </h3>
+                
+                <div style="color: var(--text-secondary); line-height: 1.8;">
+                    <p>لطفاً مبلغ <strong>{{ order.total_amount|floatformat:0 }} تومان</strong> را به شماره کارت زیر واریز نمایید:</p>
+                    
+                    <div class="card-number">
+                        {{ your_card_number }}
+                        <div style="color: var(--text-secondary); opacity: 0.8; font-size: 0.9rem; margin-top: 0.5rem;">
+                            شماره کارت پذیرنده
+                        </div>
+                    </div>
+
+                    <div class="important-note">
+                        <h4 style="color: #27ae60; margin-bottom: 1rem;">توجه مهم:</h4>
+                        <ul style="padding-right: 1.5rem;">
+                            <li>حتماً در قسمت "شرح تراکنش" شماره سفارش <strong>{{ order.order_number }}</strong> را ذکر کنید</li>
+                            <li>پس از واریز، تصویر رسید پرداخت را در فرم زیر آپلود کنید</li>
+                            <li>سفارش شما پس از تایید پرداخت، آماده ارسال خواهد شد</li>
+                            <li>در صورت بروز مشکل با پشتیبانی تماس بگیرید</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- فرم آپلود رسید -->
+            <div class="card">
+                <h3 style="color: var(--primary-gold); margin-bottom: 1.5rem;">
+                    <i class="fas fa-upload"></i>
+                    آپلود رسید پرداخت
+                </h3>
+
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <div class="form-group">
+                        <label class="form-label">عکس رسید پرداخت *</label>
+                        {{ form.payment_receipt }}
+                        {% if form.payment_receipt.errors %}
+                        <div class="error-message">
+                            {{ form.payment_receipt.errors }}
+                        </div>
+                        {% endif %}
+                        <small style="color: var(--text-secondary); opacity: 0.8; display: block; margin-top: 0.5rem;">
+                            فرمت‌های مجاز: JPG, PNG, PDF - حداکثر حجم: 5MB
+                        </small>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">
+                        <i class="fas fa-check-circle"></i>
+                        تایید پرداخت و ثبت نهایی سفارش
+                    </button>
+                </form>
+            </div>
+
+            <!-- اطلاعات تماس -->
+            <div class="support-info">
+                <h4 style="color: var(--primary-gold); margin-bottom: 1rem;">پشتیبانی</h4>
+                <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+                    در صورت وجود هرگونه سوال یا مشکل در پرداخت، با پشتیبانی تماس بگیرید
+                </p>
+                <div style="color: var(--text-secondary);">
+                    <i class="fas fa-phone"></i>
+                    تلفن پشتیبانی: ۰۲۱-۱۲۳۴۵۶۷۸
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

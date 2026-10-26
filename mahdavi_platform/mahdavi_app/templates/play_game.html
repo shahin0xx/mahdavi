@@ -1,0 +1,331 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ game.title }} - نور مهدی{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* استایل‌های مخصوص صفحه بازی */
+    .game-container {
+        background: white;
+        border-radius: 8px;
+        padding: 0;
+        min-height: 500px;
+        border: 2px solid var(--border-gold);
+        overflow: hidden;
+    }
+    
+    .game-content {
+        width: 100%;
+        min-height: 500px;
+    }
+    
+    /* استایل‌های مخصوص محتوای بازی */
+    .game-content body {
+        margin: 0 !important;
+        padding: 0 !important;
+        font-family: 'Vazir', Tahoma, sans-serif !important;
+    }
+    
+    .game-header {
+        background: linear-gradient(135deg, var(--dark-purple), var(--darker-blue));
+        padding: 20px;
+        border-bottom: 2px solid var(--border-gold);
+    }
+    
+    .game-stats {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-bottom: 20px;
+        padding: 15px;
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 8px;
+        border: 1px solid var(--border-gold);
+    }
+    
+    .stat-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.9rem;
+    }
+    
+    .stat-value {
+        color: var(--gold);
+        font-weight: bold;
+    }
+    
+    .completed-badge {
+        background: var(--islamic-green);
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+    }
+    
+    .not-completed-badge {
+        background: #e74c3c;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}       
+        <div style="margin-bottom: 20px; padding: 15px; background: rgba(212, 175, 55, 0.1); border-radius: 8px; border: 1px solid var(--border-gold);">
+            <h4 style="color: var(--gold); margin-bottom: 10px;">
+                <i class="fas fa-info-circle"></i> درباره این بازی
+            </h4>
+            <p style="font-size: 0.9rem; margin-bottom: 0; line-height: 1.6;">
+                {{ game.description }}
+            </p>
+        </div>
+
+        <!-- محتوای بازی -->
+        <div class="game-container">
+            {% if html_content %}
+                <div class="game-content">
+                    {{ html_content|safe }}
+                </div>
+            {% else %}
+                <div style="text-align: center; padding: 60px 20px; color: #000;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 4rem; color: #e74c3c; margin-bottom: 20px;"></i>
+                    <h3 style="color: #e74c3c; margin-bottom: 15px;">خطا در بارگذاری بازی</h3>
+                    <p style="color: #666; margin-bottom: 25px;">فایل بازی یافت نشد یا قابل خواندن نیست.</p>
+                    <a href="{% url 'games_list' %}" class="btn btn-primary">
+                        <i class="fas fa-arrow-right"></i>
+                        بازگشت به لیست بازی‌ها
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- راهنمای بازی -->
+        <div style="margin-top: 20px; padding: 15px; background: rgba(30, 61, 89, 0.3); border-radius: 8px; border: 1px solid var(--border-gold);">
+            <h4 style="color: var(--gold); margin-bottom: 10px;">
+                <i class="fas fa-question-circle"></i> راهنمای بازی
+            </h4>
+            <div style="font-size: 0.9rem; line-height: 1.6;">
+                <p style="margin-bottom: 10px;">
+                    <strong>🎮 نحوه بازی:</strong> پس از اتمام بازی، امتیاز شما به صورت خودکار ثبت خواهد شد.
+                </p>
+                <p style="margin-bottom: 10px;">
+                    <strong>🏆 امتیازدهی:</strong> در صورت تکمیل موفقیت‌آمیز بازی، 
+                    <strong>{{ game.points_reward }} امتیاز</strong> دریافت خواهید کرد.
+                </p>
+                <p style="margin-bottom: 0;">
+                    <strong>💡 نکته:</strong> هر بازی فقط یک بار امتیاز کامل می‌دهد. می‌توانید برای بهبود رکورد خود دوباره بازی کنید.
+                </p>
+            </div>
+        </div>
+
+        <!-- اطلاعات فنی -->
+        <div style="margin-top: 15px; text-align: center;">
+            <p style="font-size: 0.8rem; opacity: 0.7; margin: 0;">
+                <i class="fas fa-clock"></i>
+                آخرین بازی: 
+                {% if user_progress.last_played %}
+                    {{ user_progress.last_played|date:"Y/m/d - H:i" }}
+                {% else %}
+                    هنوز بازی نکرده‌اید
+                {% endif %}
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// اسکریپت برای ارتباط با بازی
+function sendGameScore(score) {
+    console.log('📤 ارسال امتیاز به سرور:', score);
+    
+    // نمایش پیام در حال ارسال
+    showGameMessage('⏳ در حال ثبت امتیاز...', 'info');
+    
+    // ارسال امتیاز به سرور
+    fetch("{% url 'complete_game' game.id %}", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: `score=${score}`
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('خطا در پاسخ سرور');
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('✅ پاسخ سرور:', data);
+        if (data.success) {
+            if (data.points_added > 0) {
+                // نمایش پیام موفقیت
+                showGameMessage(`🎉 ${data.message || 'تبریک! بازی تکمیل شد!'}`, 'success');
+                
+                // رفرش صفحه برای نمایش وضعیت جدید
+                setTimeout(() => {
+                    window.location.reload();
+                }, 3000);
+            } else {
+                showGameMessage(data.message || '✅ امتیاز شما ثبت شد!', 'info');
+            }
+        } else {
+            showGameMessage(data.error || '❌ خطا در ثبت امتیاز!', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('❌ Error:', error);
+        showGameMessage('❌ خطا در ارتباط با سرور!', 'error');
+    });
+}
+
+function showGameMessage(message, type) {
+    // ایجاد عنصر پیام
+    const messageDiv = document.createElement('div');
+    messageDiv.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        left: 20px;
+        padding: 15px 20px;
+        border-radius: 8px;
+        color: white;
+        font-weight: bold;
+        text-align: center;
+        z-index: 10000;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        font-family: 'Vazir', Tahoma, sans-serif;
+        font-size: 0.9rem;
+        animation: messageSlideIn 0.3s ease;
+    `;
+    
+    if (type === 'success') {
+        messageDiv.style.background = 'var(--islamic-green)';
+        messageDiv.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
+    } else if (type === 'error') {
+        messageDiv.style.background = '#e74c3c';
+        messageDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${message}`;
+    } else {
+        messageDiv.style.background = 'var(--dark-blue)';
+        messageDiv.innerHTML = `<i class="fas fa-info-circle"></i> ${message}`;
+    }
+    
+    document.body.appendChild(messageDiv);
+    
+    // حذف خودکار پس از 5 ثانیه
+    setTimeout(() => {
+        if (messageDiv.parentNode) {
+            messageDiv.parentNode.removeChild(messageDiv);
+        }
+    }, 5000);
+}
+
+// در معرض قرار دادن توابع برای بازی
+window.sendGameScore = sendGameScore;
+window.showGameMessage = showGameMessage;
+
+// اطلاع‌رسانی به بازی که صفحه آماده است
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🎮 صفحه بازی آماده است');
+    
+    // اضافه کردن استایل انیمیشن برای پیام‌ها
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes messageSlideIn {
+            from {
+                transform: translateY(-30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        /* استایل‌های اضافی برای بازی */
+        .game-content * {
+            box-sizing: border-box !important;
+        }
+        
+        .game-content body {
+            background: transparent !important;
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // اضافه کردن فونت‌آیسن‌ها برای پیام‌ها (اگر وجود ندارند)
+    if (!document.querySelector('link[href*="font-awesome"]')) {
+        const fontAwesome = document.createElement('link');
+        fontAwesome.rel = 'stylesheet';
+        fontAwesome.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css';
+        document.head.appendChild(fontAwesome);
+    }
+    
+    // اطلاع به بازی که والد آماده است
+    setTimeout(() => {
+        if (window.gameReady) {
+            window.gameReady();
+            console.log('✅ بازی از آماده بودن والد مطلع شد');
+        }
+        
+        // همچنین می‌توانیم یک event جهانی ارسال کنیم
+        window.dispatchEvent(new Event('gameParentReady'));
+    }, 1000);
+});
+
+// توابع کمکی برای دیباگ
+window.gameDebug = {
+    getGameState: function() {
+        return {
+            gameId: {{ game.id }},
+            gameTitle: "{{ game.title }}",
+            pointsReward: {{ game.points_reward }},
+            userProgress: {
+                completed: {{ user_progress.completed|yesno:"true,false" }},
+                score: {{ user_progress.score }},
+                playCount: {{ user_progress.play_count }},
+                lastPlayed: "{{ user_progress.last_played|date:'c' }}"
+            }
+        };
+    },
+    
+    testScoreSubmission: function(score) {
+        console.log('🧪 تست ارسال امتیاز:', score);
+        sendGameScore(score);
+    },
+    
+    showTestMessage: function() {
+        showGameMessage('این یک پیام تست است!', 'success');
+    }
+};
+
+// مدیریت خطاهای بازی
+window.addEventListener('error', function(e) {
+    console.error('❌ خطا در بازی:', e.error);
+    showGameMessage('خطایی در بازی رخ داده است. صفحه را رفرش کنید.', 'error');
+});
+
+// مدیریت unhandled rejections
+window.addEventListener('unhandledrejection', function(e) {
+    console.error('❌ خطای Promise:', e.reason);
+    showGameMessage('خطایی در بازی رخ داده است.', 'error');
+});
+
+console.log('🎮 اسکریپت بازی بارگذاری شد');
+console.log('📊 اطلاعات بازی:', {
+    gameId: {{ game.id }},
+    title: "{{ game.title }}",
+    pointsReward: {{ game.points_reward }},
+    completed: {{ user_progress.completed|yesno:"true,false" }}
+});
+</script>
+{% endblock %}

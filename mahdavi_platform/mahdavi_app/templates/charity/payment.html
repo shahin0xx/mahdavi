@@ -1,0 +1,1066 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}پرداخت موفق - پلتفرم مهدوی{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ===== متغیرهای اصلی ===== */
+    :root {
+        --success-primary: #28a745;
+        --success-secondary: #20c997;
+        --success-light: #d4edda;
+        --success-gradient: linear-gradient(135deg, var(--success-primary), var(--success-secondary));
+        --gold-gradient: linear-gradient(135deg, #FFD700, #FFA500);
+        --light-bg: #f8f9fa;
+    }
+
+    /* ===== استایل‌های اصلی ===== */
+    .payment-success-page {
+        background: linear-gradient(135deg, 
+            rgba(40, 167, 69, 0.05) 0%,
+            rgba(32, 201, 151, 0.03) 100%);
+        min-height: 100vh;
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* افکت پس‌زمینه */
+    .success-bg-pattern {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: 
+            radial-gradient(circle at 20% 30%, rgba(40, 167, 69, 0.1) 0%, transparent 50%),
+            radial-gradient(circle at 80% 70%, rgba(255, 215, 0, 0.08) 0%, transparent 50%),
+            url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="success-pattern" width="25" height="25" patternUnits="userSpaceOnUse"><path d="M0,0 L25,0 L25,25 Z" fill="rgba(40,167,69,0.03)"/><path d="M0,0 L0,25 L25,25 Z" fill="rgba(32,201,151,0.03)"/></pattern></defs><rect width="100" height="100" fill="url(%23success-pattern)"/></svg>');
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    /* ===== هیرو سکشن ===== */
+    .success-hero {
+        padding: 6rem 0 4rem;
+        position: relative;
+        z-index: 10;
+    }
+
+    .success-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 2rem;
+    }
+
+    /* کارت اصلی موفقیت */
+    .success-card {
+        background: white;
+        border-radius: 30px;
+        box-shadow: 
+            0 20px 40px rgba(0, 0, 0, 0.1),
+            0 0 100px rgba(40, 167, 69, 0.1);
+        overflow: hidden;
+        position: relative;
+        border: none;
+        margin-bottom: 3rem;
+        animation: cardAppear 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @keyframes cardAppear {
+        from {
+            opacity: 0;
+            transform: translateY(50px) scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    /* هدر کارت */
+    .success-header {
+        background: var(--success-gradient);
+        padding: 3rem 2rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .success-icon-wrapper {
+        width: 120px;
+        height: 120px;
+        margin: 0 auto 2rem;
+        position: relative;
+    }
+
+    .success-icon {
+        width: 100%;
+        height: 100%;
+        background: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 4rem;
+        color: var(--success-primary);
+        position: relative;
+        z-index: 2;
+        animation: iconPulse 2s infinite;
+        box-shadow: 
+            0 10px 30px rgba(0, 0, 0, 0.2),
+            inset 0 0 20px rgba(40, 167, 69, 0.1);
+    }
+
+    @keyframes iconPulse {
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.05);
+        }
+    }
+
+    .success-icon-wrapper::before,
+    .success-icon-wrapper::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        border-radius: 50%;
+        border: 2px solid white;
+        opacity: 0.3;
+    }
+
+    .success-icon-wrapper::before {
+        width: 140px;
+        height: 140px;
+        animation: ripple 2s infinite;
+    }
+
+    .success-icon-wrapper::after {
+        width: 160px;
+        height: 160px;
+        animation: ripple 2s infinite 0.5s;
+    }
+
+    @keyframes ripple {
+        0% {
+            width: 120px;
+            height: 120px;
+            opacity: 0.3;
+        }
+        100% {
+            width: 200px;
+            height: 200px;
+            opacity: 0;
+        }
+    }
+
+    .success-title {
+        font-size: 2.8rem;
+        font-weight: 900;
+        color: white;
+        margin-bottom: 1rem;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .success-subtitle {
+        font-size: 1.4rem;
+        color: rgba(255, 255, 255, 0.9);
+        max-width: 600px;
+        margin: 0 auto;
+        line-height: 1.6;
+    }
+
+    /* بدنه کارت */
+    .success-body {
+        padding: 3rem 2rem;
+    }
+
+    /* بخش اطلاعات پرداخت */
+    .payment-info-section {
+        margin-bottom: 3rem;
+    }
+
+    .info-card {
+        background: var(--light-bg);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+    }
+
+    .info-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        border-color: var(--success-primary);
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .info-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1.2rem;
+        background: white;
+        border-radius: 15px;
+        border-left: 4px solid var(--success-primary);
+    }
+
+    .info-icon {
+        width: 50px;
+        height: 50px;
+        background: var(--success-gradient);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+    }
+
+    .info-content {
+        flex: 1;
+    }
+
+    .info-label {
+        font-size: 0.9rem;
+        color: #6c757d;
+        margin-bottom: 0.3rem;
+    }
+
+    .info-value {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #343a40;
+    }
+
+    /* پروژه و کمک */
+    .project-section {
+        background: linear-gradient(135deg, rgba(40, 167, 69, 0.05), rgba(32, 201, 151, 0.05));
+        border-radius: 25px;
+        padding: 2.5rem;
+        margin-bottom: 3rem;
+        border: 1px solid rgba(40, 167, 69, 0.1);
+    }
+
+    .project-header {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .project-image {
+        width: 100px;
+        height: 100px;
+        border-radius: 20px;
+        object-fit: cover;
+        border: 3px solid white;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .project-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #343a40;
+        margin-bottom: 0.5rem;
+    }
+
+    .project-description {
+        color: #6c757d;
+        line-height: 1.6;
+    }
+
+    /* پیشرفت پروژه */
+    .progress-update {
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .progress-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .progress-stat {
+        text-align: center;
+        padding: 1.5rem;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .progress-stat-value {
+        font-size: 2.5rem;
+        font-weight: 800;
+        display: block;
+        margin-bottom: 0.5rem;
+    }
+
+    .progress-before {
+        color: #6c757d;
+    }
+
+    .progress-after {
+        color: var(--success-primary);
+        position: relative;
+    }
+
+    .progress-after::before {
+        content: '+';
+        position: absolute;
+        right: -1.5rem;
+        top: 0;
+        font-size: 1.5rem;
+        color: var(--success-primary);
+    }
+
+    .progress-stat-label {
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+
+    /* رسید پرداخت */
+    .receipt-section {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 3rem;
+        border: 2px dashed var(--success-primary);
+        position: relative;
+    }
+
+    .receipt-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .receipt-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #343a40;
+        margin: 0;
+    }
+
+    .receipt-badge {
+        background: var(--success-gradient);
+        color: white;
+        padding: 0.5rem 1.5rem;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .receipt-content {
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .receipt-preview {
+        width: 200px;
+        height: 200px;
+        border-radius: 15px;
+        overflow: hidden;
+        border: 3px solid #dee2e6;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .receipt-preview img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .receipt-details {
+        flex: 1;
+        min-width: 300px;
+    }
+
+    .receipt-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+
+    /* دکمه‌های اقدام */
+    .action-buttons {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-top: 3rem;
+    }
+
+    .action-btn {
+        padding: 1.2rem 2rem;
+        border-radius: 15px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        text-align: center;
+    }
+
+    .btn-download {
+        background: var(--success-gradient);
+        color: white;
+        border: none;
+    }
+
+    .btn-download:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(40, 167, 69, 0.3);
+    }
+
+    .btn-share {
+        background: white;
+        color: var(--success-primary);
+        border: 2px solid var(--success-primary);
+    }
+
+    .btn-share:hover {
+        background: var(--success-primary);
+        color: white;
+        transform: translateY(-5px);
+    }
+
+    .btn-new-donation {
+        background: var(--gold-gradient);
+        color: #343a40;
+        border: none;
+    }
+
+    .btn-new-donation:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(255, 215, 0, 0.3);
+    }
+
+    .btn-return {
+        background: #6c757d;
+        color: white;
+        border: none;
+    }
+
+    .btn-return:hover {
+        background: #5a6268;
+        transform: translateY(-5px);
+    }
+
+    /* پیام تشکر */
+    .thank-you-section {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: linear-gradient(135deg, 
+            rgba(255, 215, 0, 0.1) 0%,
+            rgba(40, 167, 69, 0.1) 100%);
+        border-radius: 30px;
+        margin-top: 4rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .thank-you-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: #343a40;
+        margin-bottom: 1.5rem;
+        position: relative;
+    }
+
+    .thank-you-text {
+        font-size: 1.2rem;
+        color: #6c757d;
+        max-width: 800px;
+        margin: 0 auto 2rem;
+        line-height: 1.8;
+    }
+
+    .thank-you-quote {
+        font-style: italic;
+        font-size: 1.3rem;
+        color: var(--success-primary);
+        border-right: 4px solid var(--success-primary);
+        padding-right: 1rem;
+        max-width: 600px;
+        margin: 2rem auto 0;
+        line-height: 1.6;
+    }
+
+    /* رسپانسیو */
+    @media (max-width: 992px) {
+        .success-title {
+            font-size: 2.3rem;
+        }
+        
+        .success-icon-wrapper {
+            width: 100px;
+            height: 100px;
+        }
+        
+        .success-icon {
+            font-size: 3rem;
+        }
+        
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .action-buttons {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .success-hero {
+            padding: 4rem 0 3rem;
+        }
+        
+        .success-title {
+            font-size: 2rem;
+        }
+        
+        .success-subtitle {
+            font-size: 1.2rem;
+        }
+        
+        .project-header {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .receipt-content {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .receipt-preview {
+            width: 100%;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+        
+        .receipt-details {
+            min-width: 100%;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .success-container {
+            padding: 0 1rem;
+        }
+        
+        .success-title {
+            font-size: 1.8rem;
+        }
+        
+        .success-body {
+            padding: 2rem 1rem;
+        }
+        
+        .info-item {
+            flex-direction: column;
+            text-align: center;
+            padding: 1.5rem 1rem;
+        }
+        
+        .action-btn {
+            padding: 1rem 1.5rem;
+            font-size: 1rem;
+        }
+        
+        .thank-you-title {
+            font-size: 2rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="payment-success-page">
+    <!-- پس‌زمینه -->
+    <div class="success-bg-pattern"></div>
+    
+    <!-- هیرو سکشن -->
+    <section class="success-hero">
+        <div class="success-container">
+            <!-- کارت اصلی موفقیت -->
+            <div class="success-card">
+                <!-- هدر -->
+                <div class="success-header">
+                    <div class="success-icon-wrapper">
+                        <div class="success-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                    </div>
+                    
+                    <h1 class="success-title">پرداخت شما با موفقیت ثبت شد!</h1>
+                    <p class="success-subtitle">
+                        قدردان مهربانی و اعتماد شما هستیم. کمک شما زندگی‌ها را تغییر خواهد داد.
+                    </p>
+                </div>
+                
+                <!-- بدنه -->
+                <div class="success-body">
+                    <!-- اطلاعات پرداخت -->
+                    <div class="payment-info-section">
+                        <h3 class="mb-4" style="color: #343a40; font-weight: 700;">
+                            <i class="fas fa-receipt ml-2"></i>
+                            اطلاعات پرداخت
+                        </h3>
+                        
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <div class="info-icon">
+                                    <i class="fas fa-hashtag"></i>
+                                </div>
+                                <div class="info-content">
+                                    <div class="info-label">شماره پیگیری</div>
+                                    <div class="info-value">{{ donation.donation_number }}</div>
+                                </div>
+                            </div>
+                            
+                            <div class="info-item">
+                                <div class="info-icon">
+                                    <i class="fas fa-coins"></i>
+                                </div>
+                                <div class="info-content">
+                                    <div class="info-label">مبلغ کمک</div>
+                                    <div class="info-value">{{ donation.amount|floatformat:0 }} تومان</div>
+                                </div>
+                            </div>
+                            
+                            <div class="info-item">
+                                <div class="info-icon">
+                                    <i class="fas fa-calendar-check"></i>
+                                </div>
+                                <div class="info-content">
+                                    <div class="info-label">تاریخ و زمان</div>
+                                    <div class="info-value">{{ donation.paid_at|date:"Y/m/d - H:i" }}</div>
+                                </div>
+                            </div>
+                            
+                            <div class="info-item">
+                                <div class="info-icon">
+                                    <i class="fas fa-check-double"></i>
+                                </div>
+                                <div class="info-content">
+                                    <div class="info-label">وضعیت</div>
+                                    <div class="info-value" style="color: var(--success-primary);">پرداخت موفق</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- پروژه و کمک -->
+                    <div class="project-section">
+                        <div class="project-header">
+                            {% if project.main_image %}
+                            <img src="{{ project.main_image.url }}" alt="{{ project.title }}" class="project-image">
+                            {% else %}
+                            <div class="project-image" style="background: var(--success-gradient); display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-hands-helping fa-2x" style="color: white;"></i>
+                            </div>
+                            {% endif %}
+                            <div>
+                                <h2 class="project-title">{{ project.title }}</h2>
+                                <p class="project-description">
+                                    {{ project.short_description|default:"پروژه خیریه‌ای که در آن مشارکت کرده‌اید" }}
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <!-- پیشرفت پروژه -->
+                        <div class="progress-update">
+                            <h4 class="mb-3" style="color: #343a40; font-weight: 600;">
+                                <i class="fas fa-chart-line ml-2"></i>
+                                تأثیر کمک شما بر پروژه
+                            </h4>
+                            
+                            <div class="progress-stats">
+                                <div class="progress-stat">
+                                    <span class="progress-stat-value progress-before">{{ project.progress_percentage|default:"50" }}%</span>
+                                    <span class="progress-stat-label">پیشرفت قبل</span>
+                                </div>
+                                
+                                <div class="progress-stat">
+                                    <span class="progress-stat-value progress-after">{{ project.new_progress|default:"55" }}%</span>
+                                    <span class="progress-stat-label">پیشرفت بعد</span>
+                                </div>
+                                
+                                <div class="progress-stat">
+                                    <span class="progress-stat-value progress-before">{{ project.donors_count|default:"45" }}</span>
+                                    <span class="progress-stat-label">کمک‌کننده قبل</span>
+                                </div>
+                                
+                                <div class="progress-stat">
+                                    <span class="progress-stat-value progress-after">{{ project.new_donors_count|default:"46" }}</span>
+                                    <span class="progress-stat-label">کمک‌کننده بعد</span>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4">
+                                <div class="alert alert-success" style="border-right: 4px solid var(--success-primary);">
+                                    <i class="fas fa-lightbulb ml-2"></i>
+                                    <strong>نکته:</strong> کمک شما باعث افزایش 
+                                    <strong>{{ donation.amount|floatformat:0 }} تومان</strong> 
+                                    به جمع کمک‌های این پروژه شد.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- رسید پرداخت -->
+                    {% if donation.payment_receipt %}
+                    <div class="receipt-section">
+                        <div class="receipt-header">
+                            <h3 class="receipt-title">رسید پرداخت</h3>
+                            <span class="receipt-badge">تأیید شده</span>
+                        </div>
+                        
+                        <div class="receipt-content">
+                            <div class="receipt-preview">
+                                <img src="{{ donation.payment_receipt.url }}" alt="رسید پرداخت">
+                            </div>
+                            
+                            <div class="receipt-details">
+                                <div class="mb-3">
+                                    <strong>نام فایل:</strong>
+                                    <div>{{ donation.payment_receipt.name|cut:"receipts/" }}</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <strong>تاریخ آپلود:</strong>
+                                    <div>{{ donation.updated_at|date:"Y/m/d - H:i" }}</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <strong>وضعیت بررسی:</strong>
+                                    <span class="badge bg-success">تأیید شده توسط سیستم</span>
+                                </div>
+                                
+                                <div class="receipt-actions">
+                                    <a href="{{ donation.payment_receipt.url }}" download class="btn btn-outline-primary">
+                                        <i class="fas fa-download ml-2"></i>
+                                        دانلود رسید
+                                    </a>
+                                    
+                                    <button class="btn btn-outline-secondary" onclick="window.print()">
+                                        <i class="fas fa-print ml-2"></i>
+                                        چاپ رسید
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- دکمه‌های اقدام -->
+                    <div class="action-buttons">
+                        <a href="{% url 'charity_project_detail' project.id %}" class="action-btn btn-return">
+                            <i class="fas fa-arrow-right ml-2"></i>
+                            بازگشت به پروژه
+                        </a>
+                        
+                        <a href="{% url 'charity_projects' %}" class="action-btn btn-new-donation">
+                            <i class="fas fa-hand-holding-heart ml-2"></i>
+                            کمک به پروژه دیگر
+                        </a>
+                        
+                        <button class="action-btn btn-share" onclick="shareDonation()">
+                            <i class="fas fa-share-alt ml-2"></i>
+                            اشتراک گذاری
+                        </button>
+                        
+                        <a href="#" class="action-btn btn-download" id="downloadCertificate">
+                            <i class="fas fa-award ml-2"></i>
+                            دریافت گواهی
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- پیام تشکر -->
+            <div class="thank-you-section">
+                <h2 class="thank-you-title">سپاس از مهربانی شما</h2>
+                
+                <p class="thank-you-text">
+                    با کمک شما، یک قدم دیگر به سوی هدف مشترکمان نزدیک‌تر شدیم. 
+                    هر کمک، حتی کوچک‌ترین‌ها، می‌تواند زندگی‌ای را متحول کند.
+                    قدردان اعتماد و همراهی شما در این مسیر خیر هستیم.
+                </p>
+                
+                <div class="action-buttons" style="max-width: 500px; margin: 0 auto;">
+                    <a href="{% url 'dashboard' %}" class="action-btn btn-download">
+                        <i class="fas fa-tachometer-alt ml-2"></i>
+                        رفتن به داشبورد
+                    </a>
+                    
+                    <a href="{% url 'charity_home' %}" class="action-btn btn-share">
+                        <i class="fas fa-home ml-2"></i>
+                        بازگشت به خیریه
+                    </a>
+                </div>
+                
+                <p class="thank-you-quote mt-4">
+                    "بهترین مردم کسانی هستند که برای دیگران سودمندترند."
+                    <br>
+                    <small class="text-muted">- پیامبر اکرم (ص)</small>
+                </p>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    class PaymentSuccessPage {
+        constructor() {
+            this.init();
+        }
+
+        init() {
+            this.initAnimations();
+            this.initConfetti();
+            this.initEventListeners();
+            this.initDownloadCertificate();
+        }
+
+        // انیمیشن‌های ورود
+        initAnimations() {
+            // انیمیشن عناصر با تأخیر
+            const elements = document.querySelectorAll('.info-item, .progress-stat, .action-btn');
+            
+            elements.forEach((element, index) => {
+                element.style.opacity = '0';
+                element.style.transform = 'translateY(30px)';
+                
+                setTimeout(() => {
+                    element.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+                    element.style.opacity = '1';
+                    element.style.transform = 'translateY(0)';
+                }, 200 + (index * 100));
+            });
+
+            // انیمیشن نوار پیشرفت
+            const progressAfter = document.querySelector('.progress-after');
+            if (progressAfter) {
+                setTimeout(() => {
+                    this.animateCounter(progressAfter);
+                }, 1000);
+            }
+        }
+
+        // انیمیشن شمارنده
+        animateCounter(element) {
+            const text = element.textContent;
+            const value = parseInt(text.replace(/\D/g, ''));
+            
+            element.textContent = '0';
+            
+            let current = 0;
+            const duration = 1500;
+            const step = value / (duration / 16);
+            
+            const timer = setInterval(() => {
+                current += step;
+                if (current >= value) {
+                    element.textContent = value + '%';
+                    clearInterval(timer);
+                    
+                    // ایجاد افکت تکمیل
+                    element.style.color = 'var(--success-primary)';
+                    element.style.textShadow = '0 0 10px rgba(40, 167, 69, 0.3)';
+                    
+                    setTimeout(() => {
+                        element.style.textShadow = 'none';
+                    }, 500);
+                } else {
+                    element.textContent = Math.floor(current) + '%';
+                }
+            }, 16);
+        }
+
+        // کانفتی جشن
+        initConfetti() {
+            setTimeout(() => {
+                this.createConfetti();
+            }, 800);
+        }
+
+        createConfetti() {
+            const colors = [
+                '#28a745', '#20c997', '#17a2b8', '#007bff',
+                '#6f42c1', '#e83e8c', '#fd7e14', '#ffc107'
+            ];
+
+            for (let i = 0; i < 150; i++) {
+                const confetti = document.createElement('div');
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                
+                confetti.style.cssText = `
+                    position: fixed;
+                    width: 10px;
+                    height: 10px;
+                    background: ${color};
+                    border-radius: 50%;
+                    pointer-events: none;
+                    z-index: 10000;
+                    top: -10px;
+                    left: ${Math.random() * 100}%;
+                    transform: translateX(-50%);
+                    animation: confettiFall ${Math.random() * 3 + 2}s linear forwards;
+                `;
+
+                document.body.appendChild(confetti);
+
+                // حذف المان بعد از اتمام انیمیشن
+                setTimeout(() => {
+                    confetti.remove();
+                }, 5000);
+            }
+
+            // اضافه کردن استایل انیمیشن
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes confettiFall {
+                    0% {
+                        transform: translateY(-10px) translateX(-50%) rotate(0deg);
+                        opacity: 1;
+                    }
+                    100% {
+                        transform: translateY(100vh) translateX(${Math.random() * 200 - 100}px) rotate(${Math.random() * 720}deg);
+                        opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        // رویدادها
+        initEventListeners() {
+            // اشتراک گذاری
+            window.shareDonation = this.shareDonation.bind(this);
+            
+            // پرینت
+            const printBtn = document.querySelector('[onclick="window.print()"]');
+            if (printBtn) {
+                printBtn.onclick = () => window.print();
+            }
+        }
+
+        shareDonation() {
+            const shareData = {
+                title: 'من به پروژه "{{ project.title }}" کمک کردم!',
+                text: `من ${ {{ donation.amount|floatformat:0 }} } تومان به پروژه "{{ project.title }}" کمک کردم. شما هم می‌توانید در این کار خیر شرکت کنید.`,
+                url: window.location.href,
+            };
+
+            if (navigator.share) {
+                navigator.share(shareData)
+                    .then(() => console.log('اشتراک گذاری موفق'))
+                    .catch((error) => console.log('خطا در اشتراک گذاری:', error));
+            } else {
+                // کپی لینک به کلیپ‌بورد
+                navigator.clipboard.writeText(shareData.url)
+                    .then(() => {
+                        alert('لینک کپی شد! می‌توانید آن را به اشتراک بگذارید.');
+                    })
+                    .catch(err => {
+                        console.error('خطا در کپی کردن:', err);
+                    });
+            }
+        }
+
+        // دانلود گواهی
+        initDownloadCertificate() {
+            const downloadBtn = document.getElementById('downloadCertificate');
+            if (downloadBtn) {
+                downloadBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.generateCertificate();
+                });
+            }
+        }
+
+        generateCertificate() {
+            // شبیه‌سازی تولید گواهی
+            const certificateData = {
+                name: '{{ user.get_full_name|default:"کمک‌کننده محترم" }}',
+                amount: '{{ donation.amount|floatformat:0 }}',
+                project: '{{ project.title }}',
+                date: '{{ donation.paid_at|date:"Y/m/d" }}',
+                number: '{{ donation.donation_number }}'
+            };
+
+            // نمایش پیام موفقیت
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-success position-fixed top-0 start-50 translate-middle-x mt-3';
+            alertDiv.style.zIndex = '10001';
+            alertDiv.innerHTML = `
+                <i class="fas fa-award ml-2"></i>
+                گواهی مشارکت برای شما صادر شد. 
+                <a href="#" class="alert-link" onclick="window.print()">برای چاپ کلیک کنید</a>
+            `;
+            
+            document.body.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+            
+            // باز کردن چاپ
+            setTimeout(() => {
+                window.print();
+            }, 1000);
+        }
+    }
+
+    // راه‌اندازی صفحه
+    document.addEventListener('DOMContentLoaded', () => {
+        const successPage = new PaymentSuccessPage();
+        window.PaymentSuccessPage = successPage;
+        
+        // پخش صدای موفقیت (در صورت مجوز)
+        setTimeout(() => {
+            this.playSuccessSound();
+        }, 500);
+    });
+
+    // تابع پخش صدا
+    function playSuccessSound() {
+        // می‌توانید یک صدای ملایم موفقیت پخش کنید
+        try {
+            const audio = new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEAQB8AAEAfAAABAAgAZGF0YQ');
+            audio.volume = 0.3;
+            audio.play();
+        } catch (e) {
+            // خطای بی‌صدا
+        }
+    }
+</script>
+{% endblock %}
+[file content end]

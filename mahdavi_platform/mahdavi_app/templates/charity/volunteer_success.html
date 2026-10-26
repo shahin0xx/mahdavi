@@ -1,0 +1,781 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}درخواست ثبت شد - پلتفرم مهدوی{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* متغیرهای مهدوی */
+    :root {
+        --charity-primary: #D4AF37;
+        --charity-secondary: #FFD700;
+        --charity-accent: #F39C12;
+        --charity-gradient: linear-gradient(135deg, var(--charity-primary), var(--charity-secondary));
+    }
+
+    /* استایل اصلی */
+    .success-container {
+        background: linear-gradient(180deg, 
+            rgba(15, 15, 26, 1) 0%,
+            rgba(26, 26, 46, 0.95) 50%,
+            rgba(15, 15, 26, 1) 100%);
+        min-height: 100vh;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+    }
+
+    /* کارت موفقیت */
+    .success-card {
+        background: linear-gradient(145deg, 
+            rgba(26, 26, 46, 0.9) 0%,
+            rgba(15, 15, 26, 0.95) 100%);
+        border-radius: 30px;
+        padding: 4rem 3rem;
+        border: 2px solid rgba(212, 175, 55, 0.3);
+        box-shadow: 
+            0 20px 60px rgba(0, 0, 0, 0.4),
+            0 0 100px rgba(212, 175, 55, 0.1);
+        max-width: 800px;
+        width: 100%;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+    }
+
+    .success-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--charity-gradient);
+    }
+
+    /* آیکون موفقیت */
+    .success-icon {
+        margin-bottom: 2rem;
+        position: relative;
+        display: inline-block;
+    }
+
+    .icon-circle {
+        width: 120px;
+        height: 120px;
+        background: var(--charity-gradient);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+        position: relative;
+        animation: bounceIn 1s ease;
+        box-shadow: 
+            0 15px 40px rgba(212, 175, 55, 0.4),
+            inset 0 4px 20px rgba(255, 255, 255, 0.3);
+    }
+
+    .icon-circle i {
+        font-size: 3.5rem;
+        color: var(--dark-bg);
+        animation: checkmark 0.5s ease 0.3s both;
+    }
+
+    .icon-circle::after {
+        content: '';
+        position: absolute;
+        top: -10px;
+        left: -10px;
+        right: -10px;
+        bottom: -10px;
+        background: rgba(212, 175, 55, 0.1);
+        border-radius: 50%;
+        animation: pulseRing 2s infinite;
+    }
+
+    /* متن موفقیت */
+    .success-title {
+        font-size: 2.5rem;
+        font-weight: 900;
+        background: var(--charity-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 1rem;
+        animation: fadeInUp 0.8s ease 0.5s both;
+    }
+
+    .success-message {
+        font-size: 1.2rem;
+        color: var(--text-secondary);
+        margin-bottom: 3rem;
+        line-height: 1.6;
+        animation: fadeInUp 0.8s ease 0.7s both;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .project-name {
+        color: var(--charity-primary);
+        font-weight: 700;
+        font-size: 1.3rem;
+        display: block;
+        margin: 0.5rem 0;
+    }
+
+    /* اطلاعات درخواست */
+    .request-info {
+        background: rgba(212, 175, 55, 0.05);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 3rem;
+        border: 1px solid rgba(212, 175, 55, 0.1);
+        animation: fadeInUp 0.8s ease 0.9s both;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        text-align: right;
+    }
+
+    .info-item {
+        background: rgba(255, 255, 255, 0.02);
+        padding: 1.5rem;
+        border-radius: 15px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .info-label {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .info-value {
+        color: var(--text-primary);
+        font-weight: 700;
+        font-size: 1.1rem;
+    }
+
+    /* مراحل بعدی */
+    .next-steps {
+        margin-bottom: 3rem;
+        animation: fadeInUp 0.8s ease 1.1s both;
+    }
+
+    .next-steps-title {
+        font-size: 1.5rem;
+        color: var(--text-primary);
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+    }
+
+    .steps-timeline {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        position: relative;
+    }
+
+    .step-item {
+        background: linear-gradient(135deg, 
+            rgba(255, 255, 255, 0.03) 0%,
+            rgba(255, 255, 255, 0.01) 100%);
+        border-radius: 20px;
+        padding: 2rem 1.5rem;
+        position: relative;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        transition: all 0.3s ease;
+    }
+
+    .step-item:hover {
+        border-color: var(--charity-primary);
+        transform: translateY(-5px);
+    }
+
+    .step-number {
+        width: 50px;
+        height: 50px;
+        background: var(--charity-gradient);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 900;
+        color: var(--dark-bg);
+        margin: 0 auto 1.5rem;
+        font-size: 1.3rem;
+        box-shadow: 0 10px 20px rgba(212, 175, 55, 0.3);
+    }
+
+    .step-title {
+        color: var(--charity-primary);
+        font-weight: 700;
+        margin-bottom: 0.8rem;
+        font-size: 1.1rem;
+    }
+
+    .step-description {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+
+    /* دکمه‌های اقدام */
+    .action-buttons {
+        display: flex;
+        gap: 1.5rem;
+        justify-content: center;
+        flex-wrap: wrap;
+        animation: fadeInUp 0.8s ease 1.3s both;
+    }
+
+    .action-btn {
+        padding: 1rem 2.5rem;
+        border-radius: 15px;
+        font-size: 1.1rem;
+        font-weight: 700;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 1rem;
+        transition: all 0.3s ease;
+        min-width: 200px;
+        justify-content: center;
+    }
+
+    .btn-primary {
+        background: var(--charity-gradient);
+        color: var(--dark-bg);
+        border: none;
+        box-shadow: 0 10px 30px rgba(212, 175, 55, 0.3);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(212, 175, 55, 0.4);
+    }
+
+    .btn-outline {
+        background: rgba(212, 175, 55, 0.1);
+        color: var(--charity-primary);
+        border: 2px solid var(--charity-primary);
+    }
+
+    .btn-outline:hover {
+        background: var(--charity-gradient);
+        color: var(--dark-bg);
+        transform: translateY(-5px);
+        border-color: transparent;
+    }
+
+    /* اطلاعات تماس */
+    .contact-info {
+        margin-top: 3rem;
+        padding: 2rem;
+        background: rgba(52, 152, 219, 0.05);
+        border-radius: 20px;
+        border: 1px solid rgba(52, 152, 219, 0.1);
+        animation: fadeInUp 0.8s ease 1.5s both;
+    }
+
+    .contact-title {
+        color: #3498db;
+        font-size: 1.3rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+    }
+
+    .contact-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1.5rem;
+        text-align: center;
+    }
+
+    .contact-item {
+        padding: 1.5rem 1rem;
+    }
+
+    .contact-icon {
+        width: 60px;
+        height: 60px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        font-size: 1.5rem;
+        color: #3498db;
+        border: 2px solid rgba(52, 152, 219, 0.2);
+    }
+
+    .contact-label {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .contact-value {
+        color: var(--text-primary);
+        font-weight: 600;
+    }
+
+    /* رسپانسیو */
+    @media (max-width: 768px) {
+        .success-card {
+            padding: 3rem 2rem;
+        }
+        
+        .success-title {
+            font-size: 2rem;
+        }
+        
+        .success-message {
+            font-size: 1.1rem;
+        }
+        
+        .steps-timeline {
+            grid-template-columns: 1fr;
+        }
+        
+        .action-buttons {
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .action-btn {
+            width: 100%;
+            max-width: 300px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .success-card {
+            padding: 2rem 1.5rem;
+        }
+        
+        .success-title {
+            font-size: 1.8rem;
+        }
+        
+        .icon-circle {
+            width: 100px;
+            height: 100px;
+        }
+        
+        .icon-circle i {
+            font-size: 2.5rem;
+        }
+        
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .contact-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* انیمیشن‌ها */
+    @keyframes bounceIn {
+        0% {
+            opacity: 0;
+            transform: scale(0.3);
+        }
+        50% {
+            opacity: 1;
+            transform: scale(1.05);
+        }
+        70% {
+            transform: scale(0.9);
+        }
+        100% {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    @keyframes checkmark {
+        0% {
+            transform: scale(0);
+        }
+        50% {
+            transform: scale(1.2);
+        }
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    @keyframes pulseRing {
+        0% {
+            transform: scale(0.8);
+            opacity: 1;
+        }
+        100% {
+            transform: scale(1.2);
+            opacity: 0;
+        }
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes shimmer {
+        0% {
+            background-position: -200% center;
+        }
+        100% {
+            background-position: 200% center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="success-container">
+    <div class="success-card">
+        <!-- آیکون موفقیت -->
+        <div class="success-icon">
+            <div class="icon-circle">
+                <i class="fas fa-check"></i>
+            </div>
+        </div>
+
+        <!-- متن موفقیت -->
+        <h1 class="success-title">درخواست شما ثبت شد!</h1>
+        <p class="success-message">
+            درخواست همکاری داوطلبانه شما برای پروژه 
+            <span class="project-name">"{{ project.title }}"</span>
+            با موفقیت ثبت و دریافت گردید.
+        </p>
+
+        <!-- اطلاعات درخواست -->
+        <div class="request-info">
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">پروژه</span>
+                    <span class="info-value">{{ project.title }}</span>
+                </div>
+                
+                <div class="info-item">
+                    <span class="info-label">تاریخ ثبت</span>
+                    <span class="info-value">{{ current_time|date:"Y/m/d - H:i" }}</span>
+                </div>
+                
+                <div class="info-item">
+                    <span class="info-label">کد درخواست</span>
+                    <span class="info-value">VOL-{{ "00000"|random_int:99999 }}</span>
+                </div>
+                
+                <div class="info-item">
+                    <span class="info-label">وضعیت</span>
+                    <span class="info-value" style="color: var(--charity-primary);">
+                        در انتظار بررسی
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- مراحل بعدی -->
+        <div class="next-steps">
+            <h3 class="next-steps-title">
+                <i class="fas fa-road"></i>
+                مراحل بعدی
+            </h3>
+            
+            <div class="steps-timeline">
+                <div class="step-item">
+                    <div class="step-number">۱</div>
+                    <h4 class="step-title">بررسی درخواست</h4>
+                    <p class="step-description">
+                        درخواست شما توسط تیم مدیریت پروژه بررسی خواهد شد
+                    </p>
+                </div>
+                
+                <div class="step-item">
+                    <div class="step-number">۲</div>
+                    <h4 class="step-title">تماس با شما</h4>
+                    <p class="step-description">
+                        در صورت نیاز، با شما تماس گرفته خواهد شد
+                    </p>
+                </div>
+                
+                <div class="step-item">
+                    <div class="step-number">۳</div>
+                    <h4 class="step-title">شروع همکاری</h4>
+                    <p class="step-description">
+                        پس از تأیید، همکاری شما با پروژه آغاز می‌شود
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- دکمه‌های اقدام -->
+        <div class="action-buttons">
+            <a href="{% url 'charity_project_detail' project.id %}" class="action-btn btn-outline">
+                <i class="fas fa-arrow-right"></i>
+                بازگشت به پروژه
+            </a>
+            
+            <a href="{% url 'charity_projects' %}" class="action-btn btn-primary">
+                <i class="fas fa-heart"></i>
+                مشاهده پروژه‌های دیگر
+            </a>
+        </div>
+
+        <!-- اطلاعات تماس -->
+        <div class="contact-info">
+            <h4 class="contact-title">
+                <i class="fas fa-headset"></i>
+                نیاز به راهنمایی دارید؟
+            </h4>
+            <p style="color: var(--text-secondary); text-align: center; margin-bottom: 2rem;">
+                در صورت وجود هرگونه سوال یا نیاز به راهنمایی، می‌توانید با روش‌های زیر تماس بگیرید.
+            </p>
+            
+            <div class="contact-grid">
+                <div class="contact-item">
+                    <div class="contact-icon">
+                        <i class="fas fa-phone"></i>
+                    </div>
+                    <span class="contact-label">تلفن پشتیبانی</span>
+                    <span class="contact-value">۰۲۱-۱۲۳۴۵۶۷۸</span>
+                </div>
+                
+                <div class="contact-item">
+                    <div class="contact-icon">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <span class="contact-label">ایمیل</span>
+                    <span class="contact-value">support@mahdavi.ir</span>
+                </div>
+                
+                <div class="contact-item">
+                    <div class="contact-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <span class="contact-label">ساعات کاری</span>
+                    <span class="contact-value">۲۴ ساعته</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+class SuccessPage {
+    constructor() {
+        this.init();
+    }
+
+    init() {
+        this.initAnimations();
+        this.initHoverEffects();
+        this.initConfetti();
+    }
+
+    initAnimations() {
+        // انیمیشن مراحل
+        const steps = document.querySelectorAll('.step-item');
+        steps.forEach((step, index) => {
+            step.style.opacity = '0';
+            step.style.transform = 'translateY(20px)';
+            
+            setTimeout(() => {
+                step.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+                step.style.opacity = '1';
+                step.style.transform = 'translateY(0)';
+            }, 500 + (index * 200));
+        });
+        
+        // انیمیشن دکمه‌ها
+        const buttons = document.querySelectorAll('.action-btn');
+        buttons.forEach((button, index) => {
+            button.style.opacity = '0';
+            button.style.transform = 'translateY(20px)';
+            
+            setTimeout(() => {
+                button.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+                button.style.opacity = '1';
+                button.style.transform = 'translateY(0)';
+            }, 1000 + (index * 100));
+        });
+    }
+
+    initHoverEffects() {
+        // افکت hover روی مراحل
+        const stepItems = document.querySelectorAll('.step-item');
+        stepItems.forEach(item => {
+            item.addEventListener('mousemove', (e) => {
+                this.handleStepHover(e, item);
+            });
+            
+            item.addEventListener('mouseleave', () => {
+                item.style.transform = 'translateY(-5px)';
+            });
+        });
+
+        // افکت ripple روی دکمه‌ها
+        const buttons = document.querySelectorAll('.action-btn');
+        buttons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                this.createRipple(e, btn);
+            });
+        });
+    }
+
+    handleStepHover(e, item) {
+        const rect = item.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        
+        const rotateY = ((x - centerX) / centerX) * 5;
+        const rotateX = ((centerY - y) / centerY) * 5;
+        
+        item.style.transform = `
+            perspective(1000px)
+            rotateX(${rotateX}deg)
+            rotateY(${rotateY}deg)
+            translateY(-5px)
+        `;
+    }
+
+    createRipple(e, element) {
+        const ripple = document.createElement('div');
+        const rect = element.getBoundingClientRect();
+        
+        const size = Math.max(rect.width, rect.height);
+        const x = e.clientX - rect.left - size / 2;
+        const y = e.clientY - rect.top - size / 2;
+        
+        ripple.style.cssText = `
+            position: absolute;
+            top: ${y}px;
+            left: ${x}px;
+            width: ${size}px;
+            height: ${size}px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.4);
+            transform: scale(0);
+            animation: ripple 0.6s ease-out;
+            pointer-events: none;
+        `;
+        
+        element.style.position = 'relative';
+        element.style.overflow = 'hidden';
+        element.appendChild(ripple);
+        
+        setTimeout(() => {
+            ripple.remove();
+        }, 600);
+    }
+
+    initConfetti() {
+        // ایجاد کانفی برای جشن موفقیت
+        const colors = ['#D4AF37', '#FFD700', '#F39C12', '#FFFFFF'];
+        const container = document.querySelector('.success-container');
+        
+        for (let i = 0; i < 50; i++) {
+            setTimeout(() => {
+                this.createConfetti(container, colors);
+            }, i * 50);
+        }
+    }
+
+    createConfetti(container, colors) {
+        const confetti = document.createElement('div');
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        const size = Math.random() * 10 + 5;
+        
+        confetti.style.cssText = `
+            position: absolute;
+            top: -20px;
+            left: ${Math.random() * 100}%;
+            width: ${size}px;
+            height: ${size}px;
+            background: ${color};
+            border-radius: ${Math.random() > 0.5 ? '50%' : '0'};
+            opacity: 0.8;
+            animation: confettiFall ${Math.random() * 3 + 2}s linear forwards;
+            z-index: 1;
+        `;
+        
+        container.appendChild(confetti);
+        
+        // حذف بعد از اتمام انیمیشن
+        setTimeout(() => {
+            confetti.remove();
+        }, 5000);
+    }
+}
+
+// راه‌اندازی صفحه
+document.addEventListener('DOMContentLoaded', () => {
+    // اضافه کردن استایل‌های داینامیک
+    const styleSheet = document.createElement('style');
+    styleSheet.textContent = `
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+        
+        @keyframes confettiFall {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+    `;
+    document.head.appendChild(styleSheet);
+    
+    // راه‌اندازی
+    const successPage = new SuccessPage();
+    window.SuccessPage = successPage;
+    
+    // پخش صدای موفقیت (اختیاری)
+    setTimeout(() => {
+        if (window.MahdaviApp && window.MahdaviApp.playSuccessSound) {
+            window.MahdaviApp.playSuccessSound();
+        }
+    }, 500);
+});
+</script>
+{% endblock %}

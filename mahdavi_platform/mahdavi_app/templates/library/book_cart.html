@@ -1,0 +1,446 @@
+{% extends "base.html" %}
+
+{% block title %}سبد خرید کتاب - کتابخانه مهدوی{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Cart Layout */
+    .cart-container {
+        background: var(--card-bg);
+        border-radius: 20px;
+        border: 1px solid var(--border-gold);
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Cart Items */
+    .cart-item {
+        background: rgba(212, 175, 55, 0.03);
+        border: 1px solid var(--border-gold);
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .cart-item:hover {
+        transform: translateX(-5px);
+        border-color: var(--primary-gold);
+        box-shadow: 0 8px 25px rgba(212, 175, 55, 0.15);
+    }
+
+    .cart-item::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.05), transparent);
+        transition: right 0.6s ease;
+    }
+
+    .cart-item:hover::before {
+        right: 100%;
+    }
+
+    .book-cover-small {
+        width: 60px;
+        height: 85px;
+        background: var(--gold-gradient);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--dark-bg);
+        font-size: 1.5rem;
+        box-shadow: 0 6px 15px rgba(212, 175, 55, 0.3);
+        transition: all 0.3s ease;
+        flex-shrink: 0;
+    }
+
+    .cart-item:hover .book-cover-small {
+        transform: scale(1.05);
+        box-shadow: 0 10px 20px rgba(212, 175, 55, 0.4);
+    }
+
+    .remove-btn {
+        padding: 0.75rem;
+        background: rgba(220, 53, 69, 0.1);
+        border: 1px solid rgba(220, 53, 69, 0.3);
+        border-radius: 10px;
+        color: #dc3545;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .remove-btn:hover {
+        background: rgba(220, 53, 69, 0.2);
+        transform: scale(1.05);
+    }
+
+    /* Summary Card */
+    .summary-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border-gold);
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .summary-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .summary-item:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .summary-total {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--primary-gold);
+    }
+
+    .info-box {
+        background: rgba(0, 217, 166, 0.1);
+        border: 1px solid rgba(0, 217, 166, 0.3);
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+        margin: 1.5rem 0;
+    }
+
+    .info-box i {
+        font-size: 2rem;
+        color: #00d9a6;
+        margin-bottom: 1rem;
+        display: block;
+    }
+
+    /* Payment Guide */
+    .guide-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border-gold);
+        border-radius: 15px;
+        padding: 2rem;
+    }
+
+    .guide-step {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .guide-step:last-child {
+        margin-bottom: 0;
+    }
+
+    .step-number {
+        width: 35px;
+        height: 35px;
+        background: var(--primary-gold);
+        color: var(--dark-bg);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.9rem;
+        flex-shrink: 0;
+    }
+
+    .bank-card {
+        background: rgba(212, 175, 55, 0.1);
+        border: 2px dashed var(--primary-gold);
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+        margin: 1rem 0;
+    }
+
+    .bank-number {
+        font-family: 'Courier New', monospace;
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--primary-gold);
+        margin-bottom: 0.5rem;
+    }
+
+    /* Empty State */
+    .empty-cart {
+        text-align: center;
+        padding: 4rem 2rem;
+    }
+
+    .empty-cart-icon {
+        font-size: 4rem;
+        color: var(--primary-gold);
+        margin-bottom: 1rem;
+        animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+        0%, 20%, 50%, 80%, 100% {
+            transform: translateY(0);
+        }
+        40% {
+            transform: translateY(-10px);
+        }
+        60% {
+            transform: translateY(-5px);
+        }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .cart-item {
+            flex-direction: column;
+            text-align: center;
+            gap: 1rem;
+        }
+        
+        .cart-item-content {
+            flex-direction: column;
+        }
+        
+        .book-cover-small {
+            align-self: center;
+        }
+        
+        .action-buttons {
+            flex-direction: column;
+        }
+        
+        .action-buttons .btn {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <h1 class="page-title">سبد خرید کتاب</h1>
+        <p class="page-subtitle">مدیریت کتاب‌های انتخاب شده برای خرید</p>
+    </div>
+</div>
+
+<div class="container">
+    {% if orders %}
+    <div class="grid grid-2" style="gap: 2rem;">
+        <!-- Cart Items -->
+        <div>
+            <div class="cart-container">
+                <div class="card-header" style="padding: 2rem 2rem 1rem;">
+                    <h3 class="card-title" style="color: var(--primary-gold); font-size: 1.5rem;">
+                        <i class="fas fa-shopping-cart"></i>
+                        کتاب‌های انتخاب شده
+                    </h3>
+                    <span class="badge" style="background: var(--primary-gold); color: var(--dark-bg); padding: 0.5rem 1rem;">
+                        {{ orders.count }} کتاب
+                    </span>
+                </div>
+
+                <div style="padding: 0 2rem 2rem;">
+                    <div class="grid grid-1 gap-3">
+                        {% for order in orders %}
+                        <div class="cart-item">
+                            <div class="cart-item-content" style="display: flex; gap: 1rem; align-items: center;">
+                                <div class="book-cover-small">
+                                    <i class="fas fa-book"></i>
+                                </div>
+                                
+                                <div style="flex: 1;">
+                                    <h4 style="color: var(--text-primary); margin-bottom: 0.25rem; font-weight: 600;">
+                                        {{ order.book.title }}
+                                    </h4>
+                                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.5rem;">
+                                        {{ order.book.author }}
+                                    </p>
+                                    <div style="color: var(--primary-gold); font-weight: 700; font-size: 1.1rem;">
+                                        {{ order.unit_price }} تومان
+                                    </div>
+                                </div>
+                                
+                                <form method="post" action="{% url 'remove_book_from_cart' order.id %}" style="margin: 0;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="remove-btn" title="حذف از سبد خرید">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Order Summary & Payment -->
+        <div>
+            <!-- Order Summary -->
+            <div class="summary-card">
+                <h3 class="card-title" style="color: var(--primary-gold); font-size: 1.5rem; margin-bottom: 1.5rem;">
+                    <i class="fas fa-receipt"></i>
+                    خلاصه سفارش
+                </h3>
+                
+                <div class="grid grid-1">
+                    <div class="summary-item">
+                        <span style="color: var(--text-muted);">تعداد کتاب:</span>
+                        <span style="color: var(--text-primary); font-weight: 600;">{{ orders.count }} عدد</span>
+                    </div>
+                    
+                    <div class="summary-item">
+                        <span style="color: var(--text-muted);">مبلغ کل:</span>
+                        <span class="summary-total">{{ total_amount }} تومان</span>
+                    </div>
+                </div>
+                
+                <div class="info-box">
+                    <i class="fas fa-info-circle"></i>
+                    <div style="color: #00d9a6; font-weight: 600; margin-bottom: 0.5rem;">
+                        توجه کنید
+                    </div>
+                    <div style="color: var(--text-secondary); font-size: 0.9rem;">
+                        پس از پرداخت، دسترسی شما توسط ادمین تایید خواهد شد
+                    </div>
+                </div>
+                
+                <div class="action-buttons" style="display: flex; gap: 1rem;">
+                    <a href="{% url 'book_checkout' %}" class="btn btn-primary" style="flex: 1; justify-content: center;">
+                        <i class="fas fa-credit-card"></i>
+                        پرداخت و تکمیل سفارش
+                    </a>
+                    <a href="{% url 'book_list' %}" class="btn btn-outline" style="flex: 1; justify-content: center;">
+                        <i class="fas fa-plus"></i>
+                        افزودن کتاب بیشتر
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Payment Guide -->
+            <div class="guide-card">
+                <h4 style="color: var(--primary-gold); margin-bottom: 1.5rem; font-size: 1.3rem;">
+                    <i class="fas fa-credit-card"></i>
+                    راهنمای پرداخت
+                </h4>
+                
+                <div class="grid grid-1">
+                    <div class="guide-step">
+                        <div class="step-number">1</div>
+                        <div style="flex: 1;">
+                            <div style="color: var(--text-primary); font-weight: 600; margin-bottom: 0.25rem;">
+                                واریز مبلغ
+                            </div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">
+                                مبلغ {{ total_amount }} تومان را به شماره کارت زیر واریز کنید
+                            </div>
+                            <div class="bank-card">
+                                <div class="bank-number">6037-XXXX-XXXX-XXXX</div>
+                                <div style="color: var(--text-muted); font-size: 0.8rem;">
+                                    بانک: ملی ایران - به نام: پلتفرم مهدوی
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="guide-step">
+                        <div class="step-number">2</div>
+                        <div style="flex: 1;">
+                            <div style="color: var(--text-primary); font-weight: 600; margin-bottom: 0.25rem;">
+                                ثبت رسید پرداخت
+                            </div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">
+                                از رسید پرداخت عکس بگیرید یا فایل PDF آن را ذخیره کنید
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="guide-step">
+                        <div class="step-number">3</div>
+                        <div style="flex: 1;">
+                            <div style="color: var(--text-primary); font-weight: 600; margin-bottom: 0.25rem;">
+                                آپلود رسید
+                            </div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">
+                                رسید پرداخت را در مرحله بعد آپلود کنید
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="guide-step">
+                        <div class="step-number">4</div>
+                        <div style="flex: 1;">
+                            <div style="color: var(--text-primary); font-weight: 600; margin-bottom: 0.25rem;">
+                                تایید نهایی
+                            </div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">
+                                پس از تایید ادمین، دسترسی شما فعال خواهد شد
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <!-- Empty Cart -->
+    <div class="empty-cart">
+        <div class="empty-cart-icon">
+            <i class="fas fa-shopping-cart"></i>
+        </div>
+        <h3 style="color: var(--text-secondary); margin-bottom: 1rem; font-weight: 600;">
+            سبد خرید شما خالی است
+        </h3>
+        <p style="color: var(--text-muted); margin-bottom: 2rem; line-height: 1.6;">
+            می‌توانید از کتابخانه کتاب‌های مورد نظر خود را انتخاب کنید
+        </p>
+        <a href="{% url 'book_list' %}" class="btn btn-primary btn-lg">
+            <i class="fas fa-book"></i>
+            مشاهده کتاب‌ها
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    // Add animation for cart items
+    document.addEventListener('DOMContentLoaded', function() {
+        const cartItems = document.querySelectorAll('.cart-item');
+        cartItems.forEach((item, index) => {
+            item.style.opacity = '0';
+            item.style.transform = 'translateX(-20px)';
+            
+            setTimeout(() => {
+                item.style.transition = 'all 0.5s ease';
+                item.style.opacity = '1';
+                item.style.transform = 'translateX(0)';
+            }, index * 100);
+        });
+
+        // Add confirmation for remove buttons
+        const removeButtons = document.querySelectorAll('.remove-btn');
+        removeButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                if (!confirm('آیا از حذف این کتاب از سبد خرید مطمئن هستید؟')) {
+                    e.preventDefault();
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,94 @@
+{% extends "admin/base.html" %}
+{% load static i18n %}
+
+{% block title %}{{ title }} | {% trans 'پلتفرم مهدوی' %}{% endblock %}
+
+{% block branding %}
+<h1 id="site-name">
+    <a href="{% url 'admin:index' %}">
+        <img src="{% static 'images/logo.png' %}" height="40px" style="margin-right: 10px;" alt="لوگو">
+        {% trans 'پنل مدیریت پلتفرم مهدوی' %}
+    </a>
+</h1>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}
+
+{% block extrastyle %}
+<style>
+    :root {
+        --primary: #2c5aa0;
+        --secondary: #d4af37;
+        --accent: #3a7bd5;
+    }
+    
+    #header {
+        background: linear-gradient(135deg, var(--primary), var(--accent));
+        color: white;
+    }
+    
+    #branding h1 {
+        color: white;
+        font-weight: bold;
+    }
+    
+    .module h2, .module caption, .inline-group h2 {
+        background: linear-gradient(135deg, var(--primary), var(--accent));
+    }
+    
+    div.breadcrumbs {
+        background: var(--secondary);
+        color: #333;
+    }
+    
+    .button, input[type=submit], input[type=button], .submit-row input, a.button {
+        background: var(--primary);
+    }
+    
+    .button:hover, input[type=submit]:hover, input[type=button]:hover {
+        background: var(--accent);
+    }
+    
+    .selector-chosen h2 {
+        background: var(--primary) !important;
+    }
+    
+    /* راست‌چین کردن متن‌ها */
+    body {
+        direction: rtl;
+        text-align: right;
+    }
+    
+    .module h2, .module caption {
+        text-align: right;
+    }
+    
+    .selector .selector-available h2, .selector .selector-chosen h2 {
+        text-align: right;
+    }
+    
+    .aligned label {
+        text-align: right;
+        float: right;
+        padding-left: 10px;
+        padding-right: 0;
+    }
+    
+    .form-row {
+        text-align: right;
+    }
+    
+    .related-widget-wrapper {
+        text-align: right;
+    }
+    
+    /* استایل‌های راست‌چین برای فیلدها */
+    input, textarea, select {
+        text-align: right;
+    }
+    
+    .vTextField, .vURLField {
+        text-align: right;
+    }
+</style>
+{% endblock %}

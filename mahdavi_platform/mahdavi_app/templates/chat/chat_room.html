@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ room.name }} - پیام‌رسان</title>
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/font-face.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --telegram-bg: #0e1621;
+            --telegram-secondary: #17212b;
+            --telegram-accent: #2b5278;
+            --telegram-green: #00af9c;
+            --telegram-text: #e6eaed;
+            --telegram-text-secondary: #7f91a4;
+            --gold: #d4af37;
+            --dark-gold: #b8941f;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Vazir', sans-serif;
+        }
+
+        body {
+            background: var(--telegram-bg);
+            color: var(--telegram-text);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background: var(--telegram-bg);
+        }
+
+        .chat-header {
+            padding: 12px 16px;
+            background: var(--telegram-secondary);
+            border-bottom: 1px solid var(--telegram-accent);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .chat-header-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .chat-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--gold), var(--dark-gold));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #000;
+            font-size: 1rem;
+        }
+
+        .chat-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin: 0;
+        }
+
+        .chat-subtitle {
+            font-size: 0.8rem;
+            color: var(--telegram-text-secondary);
+            margin: 2px 0 0 0;
+        }
+
+        .chat-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .chat-action-btn {
+            background: none;
+            border: none;
+            color: var(--telegram-text-secondary);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .chat-action-btn:hover {
+            background: rgba(255,255,255,0.1);
+            color: var(--telegram-text);
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            background: var(--telegram-bg);
+        }
+
+        .message-out {
+            align-self: flex-end;
+            max-width: 70%;
+            animation: messageSlide 0.3s ease-out;
+        }
+
+        .message-out .message-bubble {
+            background: var(--telegram-accent);
+            color: var(--telegram-text);
+            border-radius: 12px;
+            padding: 8px 12px;
+            border-bottom-right-radius: 4px;
+            position: relative;
+        }
+
+        .message-in {
+            align-self: flex-start;
+            max-width: 70%;
+            animation: messageSlide 0.3s ease-out;
+        }
+
+        .message-in .message-bubble {
+            background: var(--telegram-secondary);
+            color: var(--telegram-text);
+            border-radius: 12px;
+            padding: 8px 12px;
+            border-bottom-left-radius: 4px;
+            border: 1px solid rgba(255,255,255,0.1);
+            position: relative;
+        }
+
+        @keyframes messageSlide {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message-sender {
+            font-weight: 600;
+            font-size: 0.85rem;
+            margin-bottom: 4px;
+            color: var(--gold);
+        }
+
+        .message-content {
+            line-height: 1.4;
+            font-size: 0.95rem;
+            word-wrap: break-word;
+        }
+
+        .message-image {
+            max-width: 300px;
+            max-height: 300px;
+            border-radius: 8px;
+            margin-top: 8px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .message-image:hover {
+            transform: scale(1.02);
+        }
+
+        .message-file {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            margin-top: 8px;
+            text-decoration: none;
+            color: var(--telegram-text);
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .message-file:hover {
+            background: rgba(255,255,255,0.15);
+            transform: translateY(-1px);
+        }
+
+        .message-audio {
+            width: 250px;
+            margin-top: 8px;
+        }
+
+        .message-video {
+            max-width: 300px;
+            max-height: 300px;
+            border-radius: 8px;
+            margin-top: 8px;
+        }
+
+        .message-sticker {
+            font-size: 4rem;
+            text-align: center;
+            margin: 8px 0;
+        }
+
+        .message-file-icon {
+            font-size: 1.5rem;
+            color: var(--telegram-green);
+        }
+
+        .message-file-info {
+            flex: 1;
+        }
+
+        .message-file-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 2px;
+        }
+
+        .message-file-size {
+            font-size: 0.8rem;
+            color: var(--telegram-text-secondary);
+        }
+
+        .message-time {
+            font-size: 0.7rem;
+            opacity: 0.7;
+            margin-top: 4px;
+            text-align: left;
+            color: var(--telegram-text-secondary);
+        }
+
+        .message-out .message-time {
+            text-align: right;
+        }
+
+        .message-status {
+            margin-right: 4px;
+        }
+
+        .chat-input-container {
+            padding: 12px 16px;
+            background: var(--telegram-secondary);
+            border-top: 1px solid var(--telegram-accent);
+            flex-shrink: 0;
+        }
+
+        .message-form {
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+        }
+
+        .attachment-btn {
+            background: none;
+            border: none;
+            color: var(--telegram-text-secondary);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .attachment-btn:hover {
+            background: rgba(255,255,255,0.1);
+            color: var(--telegram-text);
+        }
+
+        .attachment-menu {
+            position: absolute;
+            bottom: 70px;
+            right: 20px;
+            background: var(--telegram-secondary);
+            border: 1px solid var(--telegram-accent);
+            border-radius: 12px;
+            padding: 8px;
+            display: none;
+            flex-direction: column;
+            gap: 4px;
+            min-width: 150px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            z-index: 1000;
+        }
+
+        .attachment-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: none;
+            border: none;
+            color: var(--telegram-text);
+            cursor: pointer;
+            border-radius: 6px;
+            transition: background 0.3s ease;
+            font-size: 0.9rem;
+            font-family: 'Vazir', sans-serif;
+        }
+
+        .attachment-item:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .message-input-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            position: relative;
+        }
+
+        .message-input {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--telegram-bg);
+            border: 1px solid var(--telegram-accent);
+            border-radius: 20px;
+            color: var(--telegram-text);
+            font-size: 0.95rem;
+            resize: none;
+            max-height: 120px;
+            font-family: 'Vazir', sans-serif;
+            transition: border-color 0.3s ease;
+        }
+
+        .message-input:focus {
+            outline: none;
+            border-color: var(--telegram-green);
+        }
+
+        .send-btn {
+            background: var(--telegram-green);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .send-btn:hover {
+            background: #009688;
+            transform: scale(1.05);
+        }
+
+        .send-btn:disabled {
+            background: var(--telegram-text-secondary);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .file-preview {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px;
+            border: 1px solid var(--telegram-accent);
+            font-size: 0.9rem;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .file-preview-remove {
+            color: #e74c3c;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 50%;
+            transition: background 0.3s ease;
+        }
+
+        .file-preview-remove:hover {
+            background: rgba(231, 76, 60, 0.2);
+        }
+
+        .sticker-picker {
+            position: absolute;
+            bottom: 70px;
+            left: 20px;
+            background: var(--telegram-secondary);
+            border: 1px solid var(--telegram-accent);
+            border-radius: 12px;
+            padding: 12px;
+            display: none;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            max-width: 300px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        .sticker-item {
+            font-size: 2rem;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            transition: background 0.3s ease;
+            text-align: center;
+        }
+
+        .sticker-item:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .image-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            position: relative;
+            max-width: 90%;
+            max-height: 90%;
+        }
+
+        .modal-image {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 8px;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: background 0.3s ease;
+        }
+
+        .modal-close:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .temp-notification {
+            position: fixed;
+            top: 20px;
+            right: 50%;
+            transform: translateX(50%);
+            background: #e74c3c;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            z-index: 10000;
+            animation: slideDown 0.3s ease, fadeOut 0.3s ease 2s forwards;
+            display: none;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateX(50%) translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(50%) translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                display: none;
+            }
+        }
+
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: var(--telegram-secondary);
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: var(--telegram-accent);
+            border-radius: 3px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb:hover {
+            background: var(--telegram-green);
+        }
+
+        @media (max-width: 768px) {
+            .chat-container {
+                height: 100vh;
+            }
+            
+            .message-out, .message-in {
+                max-width: 85%;
+            }
+            
+            .message-image, .message-video {
+                max-width: 250px;
+                max-height: 250px;
+            }
+            
+            .chat-header {
+                padding: 10px 12px;
+            }
+            
+            .chat-input-container {
+                padding: 10px 12px;
+            }
+            
+            .sticker-picker {
+                left: 10px;
+                right: 10px;
+                max-width: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="temp-notification" id="error-notification"></div>
+    
+    <div class="chat-container">
+        <div class="chat-header">
+            <div class="chat-header-info">
+                <button class="chat-action-btn" onclick="location.href='{% url 'chat_home' %}'">
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+                <div class="chat-avatar">
+                    {% if room.room_type == 'private' %}
+                        {% for participant in room.participants.all %}
+                            {% if participant != request.user %}
+                                {{ participant.first_name|first }}
+                            {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        <i class="fas fa-users"></i>
+                    {% endif %}
+                </div>
+                <div>
+                    <div class="chat-title">{{ room.name }}</div>
+                    <div class="chat-subtitle">
+                        {% if room.room_type == 'private' %}
+                            {% for participant in room.participants.all %}
+                                {% if participant != request.user %}
+                                    {{ participant.get_full_name }}
+                                {% endif %}
+                            {% endfor %}
+                        {% else %}
+                            {{ room.participants.count }} عضو
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="chat-actions">
+                {% if room.room_type == 'group' %}
+                <button class="chat-action-btn" onclick="location.href='{% url 'manage_chat_room' room.id %}'">
+                    <i class="fas fa-cog"></i>
+                </button>
+                {% endif %}
+                <button class="chat-action-btn" onclick="showRoomInfo()">
+                    <i class="fas fa-info-circle"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="chat-messages" id="chat-messages">
+            {% for message in chat_messages %}
+            <div class="{% if message.sender == request.user %}message-out{% else %}message-in{% endif %}" id="message-{{ message.id }}">
+                <div class="message-bubble">
+                    {% if message.sender != request.user and room.room_type == 'group' %}
+                    <div class="message-sender">{{ message.sender.get_full_name }}</div>
+                    {% endif %}
+                    
+                    <div class="message-content">
+                        {% if message.message_type == 'text' %}
+                            {{ message.content|linebreaksbr }}
+                        {% elif message.message_type == 'image' %}
+                            <img src="{{ message.image.url }}" alt="تصویر پیام" class="message-image" onclick="openImageModal('{{ message.image.url }}')">
+                            {% if message.content and message.content != '📷 عکس' %}
+                            <div style="margin-top: 8px;">{{ message.content }}</div>
+                            {% endif %}
+                        {% elif message.message_type == 'file' %}
+                            <a href="{{ message.file.url }}" target="_blank" class="message-file" download>
+                                <div class="message-file-icon">
+                                    <i class="fas fa-file-download"></i>
+                                </div>
+                                <div class="message-file-info">
+                                    <div class="message-file-name">{{ message.file_name }}</div>
+                                    <div class="message-file-size">{{ message.get_file_size_display }}</div>
+                                </div>
+                            </a>
+                            {% if message.content and message.content != '📎 فایل' %}
+                            <div style="margin-top: 8px;">{{ message.content }}</div>
+                            {% endif %}
+                        {% elif message.message_type == 'audio' %}
+                            <audio controls class="message-audio">
+                                <source src="{{ message.audio.url }}" type="audio/mpeg">
+                                مرورگر شما از پخش صوت پشتیبانی نمی‌کند
+                            </audio>
+                            {% if message.content and message.content != '🎵 صوت' %}
+                            <div style="margin-top: 8px;">{{ message.content }}</div>
+                            {% endif %}
+                        {% elif message.message_type == 'video' %}
+                            <video controls class="message-video">
+                                <source src="{{ message.video.url }}" type="video/mp4">
+                                مرورگر شما از پخش ویدیو پشتیبانی نمی‌کند
+                            </video>
+                            {% if message.content and message.content != '🎬 ویدیو' %}
+                            <div style="margin-top: 8px;">{{ message.content }}</div>
+                            {% endif %}
+                        {% elif message.message_type == 'sticker' %}
+                            <div class="message-sticker">{{ message.sticker }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="message-time">
+                        <span class="message-status">
+                            {% if message.sender == request.user %}
+                                {% if message.is_read %}✅{% else %}🕒{% endif %}
+                            {% endif %}
+                        </span>
+                        {{ message.created_date|date:"H:i" }}
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div style="text-align: center; padding: 40px; opacity: 0.7; align-self: center;">
+                <i class="fas fa-comments" style="font-size: 3rem; margin-bottom: 15px; color: var(--telegram-text-secondary);"></i>
+                <p style="color: var(--telegram-text-secondary);">هنوز هیچ پیامی در این گفتگو وجود ندارد</p>
+                <p style="font-size: 0.9rem; color: var(--telegram-text-secondary);">اولین نفر باشید که پیام می‌فرستد!</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="chat-input-container">
+            <form method="post" enctype="multipart/form-data" class="message-form" id="message-form">
+                {% csrf_token %}
+                
+                <div style="position: relative;">
+                    <button type="button" class="attachment-btn" id="attachment-btn">
+                        <i class="fas fa-paperclip"></i>
+                    </button>
+                    <div class="attachment-menu" id="attachment-menu">
+                        <label class="attachment-item">
+                            <i class="fas fa-image"></i>
+                            عکس
+                            <input type="file" name="image" accept="image/*" hidden id="image-input">
+                        </label>
+                        <label class="attachment-item">
+                            <i class="fas fa-file"></i>
+                            فایل
+                            <input type="file" name="file" hidden id="file-input">
+                        </label>
+                        <label class="attachment-item">
+                            <i class="fas fa-microphone"></i>
+                            صوت
+                            <input type="file" name="audio" accept="audio/*" hidden id="audio-input">
+                        </label>
+                        <label class="attachment-item">
+                            <i class="fas fa-video"></i>
+                            ویدیو
+                            <input type="file" name="video" accept="video/*" hidden id="video-input">
+                        </label>
+                        <button type="button" class="attachment-item" id="sticker-btn">
+                            <i class="fas fa-smile"></i>
+                            استیکر
+                        </button>
+                    </div>
+                </div>
+
+                <div class="sticker-picker" id="sticker-picker">
+                    <div class="sticker-item" data-sticker="😀">😀</div>
+                    <div class="sticker-item" data-sticker="😂">😂</div>
+                    <div class="sticker-item" data-sticker="❤️">❤️</div>
+                    <div class="sticker-item" data-sticker="👍">👍</div>
+                    <div class="sticker-item" data-sticker="🙏">🙏</div>
+                    <div class="sticker-item" data-sticker="🎉">🎉</div>
+                    <div class="sticker-item" data-sticker="🔥">🔥</div>
+                    <div class="sticker-item" data-sticker="⭐">⭐</div>
+                    <div class="sticker-item" data-sticker="🌈">🌈</div>
+                    <div class="sticker-item" data-sticker="🚀">🚀</div>
+                    <div class="sticker-item" data-sticker="💯">💯</div>
+                    <div class="sticker-item" data-sticker="✨">✨</div>
+                </div>
+
+                <div class="message-input-wrapper">
+                    <div id="file-preview-container"></div>
+                    
+                    <textarea 
+                        name="content" 
+                        rows="1" 
+                        placeholder="پیام خود را بنویسید..."
+                        class="message-input"
+                        id="message-input"
+                        oninput="autoResize(this)"
+                    ></textarea>
+                </div>
+
+                <button type="submit" class="send-btn" id="send-btn">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="image-modal" id="image-modal">
+        <div class="modal-content">
+            <img src="" alt="تصویر بزرگ" class="modal-image" id="modal-image">
+            <button class="modal-close" onclick="closeImageModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+    let lastMessageId = {{ chat_messages.last.id|default:0 }};
+    let isSending = false;
+    let pollInterval;
+
+    window.addEventListener('load', function() {
+        scrollToBottom();
+        startPolling();
+    });
+
+    function startPolling() {
+        pollInterval = setInterval(checkNewMessages, 3000);
+    }
+
+    function stopPolling() {
+        if (pollInterval) {
+            clearInterval(pollInterval);
+        }
+    }
+
+    function checkNewMessages() {
+        fetch(`/chat/api/messages/{{ room.id }}/?last_message_id=${lastMessageId}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success && data.has_new_messages) {
+                    data.messages.forEach(message => {
+                        addNewMessage(message);
+                        lastMessageId = Math.max(lastMessageId, message.id);
+                    });
+                    scrollToBottom();
+                }
+            })
+            .catch(error => console.error('Error fetching new messages:', error));
+    }
+
+    function addNewMessage(message) {
+        const messagesContainer = document.getElementById('chat-messages');
+        const messageClass = message.is_own ? 'message-out' : 'message-in';
+        
+        let messageContent = '';
+        if (message.message_type === 'text') {
+            messageContent = message.content.replace(/\n/g, '<br>');
+        } else if (message.message_type === 'image') {
+            messageContent = `
+                <img src="${message.image_url}" alt="تصویر پیام" class="message-image" onclick="openImageModal('${message.image_url}')">
+                ${message.content && message.content !== '📷 عکس' ? `<div style="margin-top: 8px;">${message.content}</div>` : ''}
+            `;
+        } else if (message.message_type === 'file') {
+            messageContent = `
+                <a href="${message.file_url}" target="_blank" class="message-file" download>
+                    <div class="message-file-icon">
+                        <i class="fas fa-file-download"></i>
+                    </div>
+                    <div class="message-file-info">
+                        <div class="message-file-name">${message.file_name}</div>
+                        <div class="message-file-size">${message.file_size}</div>
+                    </div>
+                </a>
+                ${message.content && message.content !== '📎 فایل' ? `<div style="margin-top: 8px;">${message.content}</div>` : ''}
+            `;
+        } else if (message.message_type === 'audio') {
+            messageContent = `
+                <audio controls class="message-audio">
+                    <source src="${message.audio_url}" type="audio/mpeg">
+                    مرورگر شما از پخش صوت پشتیبانی نمی‌کند
+                </audio>
+                ${message.content && message.content !== '🎵 صوت' ? `<div style="margin-top: 8px;">${message.content}</div>` : ''}
+            `;
+        } else if (message.message_type === 'video') {
+            messageContent = `
+                <video controls class="message-video">
+                    <source src="${message.video_url}" type="video/mp4">
+                    مرورگر شما از پخش ویدیو پشتیبانی نمی‌کند
+                </video>
+                ${message.content && message.content !== '🎬 ویدیو' ? `<div style="margin-top: 8px;">${message.content}</div>` : ''}
+            `;
+        } else if (message.message_type === 'sticker') {
+            messageContent = `<div class="message-sticker">${message.sticker}</div>`;
+        }
+        
+        const senderName = message.is_own ? '' : 
+            `<div class="message-sender">${message.sender_name}</div>`;
+        
+        const messageHtml = `
+            <div class="${messageClass}" id="message-${message.id}">
+                <div class="message-bubble">
+                    {% if room.room_type == 'group' %}${senderName}{% endif %}
+                    <div class="message-content">
+                        ${messageContent}
+                    </div>
+                    <div class="message-time">
+                        ${message.is_own ? '<span class="message-status">🕒</span>' : ''}
+                        ${message.created_date}
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        const emptyState = messagesContainer.querySelector('.empty-state');
+        if (emptyState) {
+            emptyState.remove();
+        }
+        
+        messagesContainer.insertAdjacentHTML('beforeend', messageHtml);
+    }
+
+    function showError(message) {
+        const notification = document.getElementById('error-notification');
+        notification.textContent = message;
+        notification.style.display = 'block';
+        
+        setTimeout(() => {
+            notification.style.display = 'none';
+        }, 3000);
+    }
+
+    document.getElementById('message-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        if (isSending) return;
+        
+        const formData = new FormData(this);
+        const messageInput = document.getElementById('message-input');
+        const hasContent = messageInput.value.trim().length > 0;
+        const hasImage = document.getElementById('image-input').files.length > 0;
+        const hasFile = document.getElementById('file-input').files.length > 0;
+        const hasAudio = document.getElementById('audio-input').files.length > 0;
+        const hasVideo = document.getElementById('video-input').files.length > 0;
+        const hasSticker = document.querySelector('input[name="sticker"]')?.value;
+        
+        if (!hasContent && !hasImage && !hasFile && !hasAudio && !hasVideo && !hasSticker) {
+            showError('لطفاً پیام یا فایلی را انتخاب کنید');
+            return;
+        }
+        
+        isSending = true;
+        const sendBtn = document.getElementById('send-btn');
+        sendBtn.disabled = true;
+        sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        
+        fetch(this.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': csrfToken
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                messageInput.value = '';
+                autoResize(messageInput);
+                document.getElementById('file-preview-container').innerHTML = '';
+                document.getElementById('image-input').value = '';
+                document.getElementById('file-input').value = '';
+                document.getElementById('audio-input').value = '';
+                document.getElementById('video-input').value = '';
+                document.querySelector('input[name="sticker"]')?.remove();
+                
+                addNewMessage({
+                    id: data.message_id,
+                    sender_id: {{ request.user.id }},
+                    sender_name: data.sender_name || '{{ request.user.get_full_name }}',
+                    message_type: data.message_type,
+                    content: data.content,
+                    image_url: data.image_url || '',
+                    file_url: data.file_url || '',
+                    audio_url: data.audio_url || '',
+                    video_url: data.video_url || '',
+                    sticker: data.sticker || '',
+                    file_name: data.file_name || '',
+                    file_size: data.file_size || '',
+                    created_date: data.created_date,
+                    is_own: true
+                });
+                
+                scrollToBottom();
+                lastMessageId = Math.max(lastMessageId, data.message_id);
+            } else {
+                if (data.error) {
+                    showError(data.error);
+                } else {
+                    showError('خطا در ارسال پیام');
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error sending message:', error);
+            showError('خطا در ارسال پیام');
+        })
+        .finally(() => {
+            isSending = false;
+            sendBtn.disabled = false;
+            sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i>';
+        });
+    });
+
+    function autoResize(textarea) {
+        textarea.style.height = 'auto';
+        textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+        
+        const sendBtn = document.getElementById('send-btn');
+        const hasContent = textarea.value.trim().length > 0;
+        const hasFile = document.getElementById('image-input').files.length > 0 || 
+                       document.getElementById('file-input').files.length > 0 ||
+                       document.getElementById('audio-input').files.length > 0 ||
+                       document.getElementById('video-input').files.length > 0;
+        
+        sendBtn.disabled = !(hasContent || hasFile);
+    }
+
+    const attachmentBtn = document.getElementById('attachment-btn');
+    const attachmentMenu = document.getElementById('attachment-menu');
+    const stickerPicker = document.getElementById('sticker-picker');
+    const stickerBtn = document.getElementById('sticker-btn');
+
+    attachmentBtn.addEventListener('click', function() {
+        attachmentMenu.style.display = attachmentMenu.style.display === 'flex' ? 'none' : 'flex';
+        stickerPicker.style.display = 'none';
+    });
+
+    stickerBtn.addEventListener('click', function() {
+        stickerPicker.style.display = stickerPicker.style.display === 'grid' ? 'none' : 'grid';
+        attachmentMenu.style.display = 'none';
+    });
+
+    document.addEventListener('click', function(event) {
+        if (!attachmentBtn.contains(event.target) && !attachmentMenu.contains(event.target)) {
+            attachmentMenu.style.display = 'none';
+        }
+        if (!stickerBtn.contains(event.target) && !stickerPicker.contains(event.target)) {
+            stickerPicker.style.display = 'none';
+        }
+    });
+
+    document.querySelectorAll('.sticker-item').forEach(item => {
+        item.addEventListener('click', function() {
+            const sticker = this.getAttribute('data-sticker');
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = 'sticker';
+            hiddenInput.value = sticker;
+            document.getElementById('message-form').appendChild(hiddenInput);
+            
+            document.getElementById('message-form').dispatchEvent(new Event('submit'));
+            stickerPicker.style.display = 'none';
+        });
+    });
+
+    document.getElementById('image-input').addEventListener('change', function(e) {
+        handleFileUpload(e.target.files[0], 'image');
+    });
+
+    document.getElementById('file-input').addEventListener('change', function(e) {
+        handleFileUpload(e.target.files[0], 'file');
+    });
+
+    document.getElementById('audio-input').addEventListener('change', function(e) {
+        handleFileUpload(e.target.files[0], 'audio');
+    });
+
+    document.getElementById('video-input').addEventListener('change', function(e) {
+        handleFileUpload(e.target.files[0], 'video');
+    });
+
+    function handleFileUpload(file, type) {
+        if (!file) return;
+        
+        const previewContainer = document.getElementById('file-preview-container');
+        const fileId = 'file-' + Date.now();
+        
+        let previewHtml = '';
+        if (type === 'image') {
+            previewHtml = `
+                <div class="file-preview" id="${fileId}">
+                    <i class="fas fa-image" style="color: var(--telegram-green);"></i>
+                    <span>${file.name}</span>
+                    <span class="file-preview-remove" onclick="removeFilePreview('${fileId}')">
+                        <i class="fas fa-times"></i>
+                    </span>
+                </div>
+            `;
+        } else if (type === 'audio') {
+            previewHtml = `
+                <div class="file-preview" id="${fileId}">
+                    <i class="fas fa-microphone" style="color: var(--telegram-green);"></i>
+                    <span>${file.name} (${formatFileSize(file.size)})</span>
+                    <span class="file-preview-remove" onclick="removeFilePreview('${fileId}')">
+                        <i class="fas fa-times"></i>
+                    </span>
+                </div>
+            `;
+        } else if (type === 'video') {
+            previewHtml = `
+                <div class="file-preview" id="${fileId}">
+                    <i class="fas fa-video" style="color: var(--telegram-green);"></i>
+                    <span>${file.name} (${formatFileSize(file.size)})</span>
+                    <span class="file-preview-remove" onclick="removeFilePreview('${fileId}')">
+                        <i class="fas fa-times"></i>
+                    </span>
+                </div>
+            `;
+        } else {
+            previewHtml = `
+                <div class="file-preview" id="${fileId}">
+                    <i class="fas fa-file" style="color: var(--telegram-green);"></i>
+                    <span>${file.name} (${formatFileSize(file.size)})</span>
+                    <span class="file-preview-remove" onclick="removeFilePreview('${fileId}')">
+                        <i class="fas fa-times"></i>
+                    </span>
+                </div>
+            `;
+        }
+        
+        previewContainer.innerHTML = previewHtml;
+        attachmentMenu.style.display = 'none';
+        
+        document.getElementById('send-btn').disabled = false;
+    }
+
+    function formatFileSize(bytes) {
+        if (bytes < 1024) return bytes + ' B';
+        else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+        else return (bytes / 1048576).toFixed(1) + ' MB';
+    }
+
+    function removeFilePreview(fileId) {
+        const preview = document.getElementById(fileId);
+        if (preview) preview.remove();
+        
+        document.getElementById('image-input').value = '';
+        document.getElementById('file-input').value = '';
+        document.getElementById('audio-input').value = '';
+        document.getElementById('video-input').value = '';
+        
+        const textarea = document.getElementById('message-input');
+        autoResize(textarea);
+    }
+
+    function openImageModal(imageUrl) {
+        const modal = document.getElementById('image-modal');
+        const modalImage = document.getElementById('modal-image');
+        modalImage.src = imageUrl;
+        modal.style.display = 'flex';
+    }
+
+    function closeImageModal() {
+        const modal = document.getElementById('image-modal');
+        modal.style.display = 'none';
+    }
+
+    document.getElementById('image-modal').addEventListener('click', function(e) {
+        if (e.target === this) closeImageModal();
+    });
+
+    function scrollToBottom() {
+        const messagesContainer = document.getElementById('chat-messages');
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    function showRoomInfo() {
+        alert('نام: {{ room.name }}\nاعضا: {{ room.participants.count }} نفر\nایجاد شده توسط: {{ room.created_by.get_full_name }}');
+    }
+
+    window.addEventListener('beforeunload', function() {
+        stopPolling();
+    });
+
+    document.getElementById('message-input').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            document.getElementById('message-form').dispatchEvent(new Event('submit'));
+        }
+    });
+    </script>
+</body>
+</html>

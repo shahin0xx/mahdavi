@@ -1,0 +1,207 @@
+<!-- templates/marja_profile.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card fade-in">
+    <div class="card-header">
+        <div style="display: flex; justify-content: between; align-items: center; flex-wrap: wrap; gap: 20px;">
+            <div style="display: flex; align-items: center; gap: 20px;">
+                {% if marja.profile_image %}
+                <img src="{{ marja.profile_image.url }}" alt="{{ marja.get_full_name }}" 
+                     style="width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--gold); object-fit: cover;">
+                {% else %}
+                <div style="width: 80px; height: 80px; border-radius: 50%; 
+                            background: linear-gradient(135deg, var(--gold), var(--dark-gold)); 
+                            display: flex; align-items: center; justify-content: center; 
+                            color: #000; font-size: 2rem; font-weight: bold; border: 3px solid var(--gold);">
+                    {{ marja.first_name|first|upper }}{{ marja.last_name|first|upper }}
+                </div>
+                {% endif %}
+                <div>
+                    <h1 style="color: var(--gold); margin-bottom: 5px;">{{ marja.get_full_name }}</h1>
+                    <p style="opacity: 0.8; margin-bottom: 10px;">کارشناس دین</p>
+                    <div style="display: flex; gap: 15px;">
+                        <span style="background: rgba(212, 175, 55, 0.2); padding: 4px 12px; border-radius: 15px; 
+                                    color: var(--gold); font-size: 0.9rem;">
+                            <i class="fas fa-users"></i>
+                            {{ followers_count }} دنبال کننده
+                        </span>
+                        <span style="background: rgba(52, 152, 219, 0.2); padding: 4px 12px; border-radius: 15px; 
+                                    color: #3498db; font-size: 0.9rem;">
+                            <i class="fas fa-file-alt"></i>
+                            {{ contents_count }} محتوا
+                        </span>
+                    </div>
+                </div>
+            </div>
+            
+            {% if user.is_authenticated %}
+            <div style="display: flex; gap: 10px;">
+                {% if is_following %}
+                <form method="post" action="{% url 'unfollow_marja' marja.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-secondary">
+                        <i class="fas fa-user-minus"></i>
+                        آنفالو
+                    </button>
+                </form>
+                {% else %}
+                <form method="post" action="{% url 'follow_marja' marja.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-user-plus"></i>
+                        دنبال کردن
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if marja.marja_bio %}
+    <div style="margin-bottom: 30px; padding: 20px; background: rgba(212, 175, 55, 0.1); 
+                border-radius: 10px; border: 1px solid var(--border-gold);">
+        <h3 style="color: var(--gold); margin-bottom: 15px;">
+            <i class="fas fa-book"></i>
+            درباره مرجع
+        </h3>
+        <p style="line-height: 1.8; opacity: 0.9;">{{ marja.marja_bio|linebreaks }}</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- محتوای مرجع -->
+<div class="card fade-in">
+    <div class="card-header">
+        <h2 class="card-title">
+            <i class="fas fa-file-alt card-icon"></i>
+            محتوای منتشر شده
+        </h2>
+    </div>
+
+    {% if contents %}
+    <div class="content-grid">
+        {% for content in contents %}
+        <div class="content-item">
+            {% if content.thumbnail %}
+            <img src="{{ content.thumbnail.url }}" alt="{{ content.title }}" class="content-thumbnail">
+            {% else %}
+            <div class="content-thumbnail" style="background: linear-gradient(135deg, var(--dark-purple), var(--dark-blue)); 
+                        display: flex; align-items: center; justify-content: center; color: var(--gold); font-size: 3rem;">
+                <i class="fas fa-{% if content.content_type == 'video' %}video{% elif content.content_type == 'audio' %}music{% elif content.content_type == 'image' %}image{% else %}file-alt{% endif %}"></i>
+            </div>
+            {% endif %}
+            
+            <div class="content-info">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
+                    <h4 style="color: var(--gold);">{{ content.title }}</h4>
+                    <span style="background: rgba(212, 175, 55, 0.2); padding: 2px 8px; border-radius: 10px; 
+                                font-size: 0.7rem; color: var(--gold);">
+                        {{ content.get_content_type_display }}
+                    </span>
+                </div>
+                
+                <p style="font-size: 0.9rem; opacity: 0.8; margin-bottom: 15px; height: 60px; overflow: hidden;">
+                    {{ content.content|truncatewords:15 }}
+                </p>
+                
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <small style="opacity: 0.6;">
+                        <i class="fas fa-calendar"></i>
+                        {{ content.created_date|date:"Y/m/d" }}
+                    </small>
+                    <span style="color: var(--gold); font-weight: bold;">
+                        <i class="fas fa-star"></i>
+                        {{ content.points }}
+                    </span>
+                </div>
+                
+                <div style="margin-top: 15px;">
+                    <a href="{% url 'marja_content_detail' content.id %}" class="btn btn-primary" style="width: 100%; padding: 8px;">
+                        <i class="fas fa-eye"></i>
+                        مشاهده و مطالعه
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div style="text-align: center; padding: 40px; opacity: 0.7;">
+        <i class="fas fa-inbox" style="font-size: 4rem; color: var(--gold); margin-bottom: 20px;"></i>
+        <h3 style="color: var(--gold);">هنوز محتوایی منتشر نشده</h3>
+        <p>این کارشناس تاکنون محتوایی منتشر نکرده است.</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- لیست دنبال کنندگان -->
+<div class="card fade-in">
+    <div class="card-header">
+        <h2 class="card-title">
+            <i class="fas fa-users card-icon"></i>
+            دنبال کنندگان
+        </h2>
+        <span style="background: rgba(212, 175, 55, 0.2); padding: 4px 12px; border-radius: 15px; 
+                    color: var(--gold); font-size: 0.9rem;">
+            {{ followers_count }} نفر
+        </span>
+    </div>
+
+    {% if marja.followers.all %}
+    <div class="grid grid-4">
+        {% for follow in marja.followers.all|slice:":12" %}
+        <div style="text-align: center; padding: 15px;">
+            {% if follow.user.profile_image %}
+            <img src="{{ follow.user.profile_image.url }}" alt="{{ follow.user.get_full_name }}" 
+                 style="width: 60px; height: 60px; border-radius: 50%; border: 2px solid var(--border-gold); 
+                        object-fit: cover; margin-bottom: 10px;">
+            {% else %}
+            <div style="width: 60px; height: 60px; border-radius: 50%; 
+                        background: linear-gradient(135deg, var(--gold), var(--dark-gold)); 
+                        display: flex; align-items: center; justify-content: center; 
+                        color: #000; font-weight: bold; margin: 0 auto 10px auto;
+                        border: 2px solid var(--border-gold);">
+                {{ follow.user.first_name|first|upper }}
+            </div>
+            {% endif %}
+            <div style="font-size: 0.9rem; font-weight: bold; color: var(--gold);">
+                {{ follow.user.first_name }}
+            </div>
+            <div style="font-size: 0.8rem; opacity: 0.7;">
+                {{ follow.user.get_spiritual_level_display }}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    {% if followers_count > 12 %}
+    <div style="text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-gold);">
+        <p style="opacity: 0.7;">
+            و {{ followers_count|add:"-12" }} دنبال کننده دیگر...
+        </p>
+    </div>
+    {% endif %}
+    
+    {% else %}
+    <div style="text-align: center; padding: 40px; opacity: 0.7;">
+        <i class="fas fa-user-friends" style="font-size: 4rem; color: var(--gold); margin-bottom: 20px;"></i>
+        <h3 style="color: var(--gold);">هنوز دنبال کننده‌ای ندارد</h3>
+        <p>اولین نفری باشید که این مرجع را دنبال می‌کند.</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- دکمه‌های ناوبری -->
+<div style="display: flex; gap: 15px; margin-top: 20px;">
+    <a href="{% url 'marja_list' %}" class="btn btn-secondary" style="flex: 1;">
+        <i class="fas fa-arrow-right"></i>
+        بازگشت به لیست مراجع
+    </a>
+    <a href="{% url 'dashboard' %}" class="btn btn-secondary" style="flex: 1;">
+        <i class="fas fa-home"></i>
+        بازگشت به پیشخوان
+    </a>
+</div>
+{% endblock %}

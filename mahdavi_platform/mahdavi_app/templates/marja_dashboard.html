@@ -1,0 +1,168 @@
+<!-- marja_dashboard.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- استقبال مرجع -->
+<div class="card text-center fade-in">
+    <div class="card-header">
+        <h1 class="card-title" style="font-size: 2rem;">
+            <i class="fas fa-user-tie card-icon"></i>
+            پنل کارشناسان دینی
+        </h1>
+    </div>
+    
+    <div style="margin: 20px 0;">
+        <h2 style="color: var(--gold); margin-bottom: 10px;">حضرت {{ user.get_full_name }}</h2>
+        <p style="font-size: 1.1rem; opacity: 0.9;">
+            خوش آمدید به پنل مدیریت محتوای مهدوی
+        </p>
+    </div>
+    
+    <div class="grid grid-3" style="margin-top: 30px;">
+        <div class="badge-item">
+            <i class="fas fa-file-alt" style="font-size: 2rem; color: var(--gold);"></i>
+            <h3 style="color: var(--gold); margin: 10px 0;">{{ total_contents }}</h3>
+            <p>محتواهای منتشر شده</p>
+        </div>
+        
+        <div class="badge-item">
+            <i class="fas fa-users" style="font-size: 2rem; color: var(--gold);"></i>
+            <h3 style="color: var(--gold); margin: 10px 0;">{{ total_followers }}</h3>
+            <p>دنبال کننده</p>
+        </div>
+        
+        <div class="badge-item">
+            <i class="fas fa-eye" style="font-size: 2rem; color: var(--gold);"></i>
+            <h3 style="color: var(--gold); margin: 10px 0;">{{ total_completions }}</h3>
+            <p>بازدید محتواها</p>
+        </div>
+    </div>
+</div>
+
+<!-- ایجاد محتوای جدید -->
+<div class="card fade-in">
+    <div class="card-header">
+        <h2 class="card-title">
+            <i class="fas fa-plus-circle card-icon"></i>
+            ایجاد محتوای جدید
+        </h2>
+    </div>
+    
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label class="form-label">عنوان محتوا</label>
+            {{ form.title }}
+        </div>
+        
+        <div class="grid grid-2">
+            <div class="form-group">
+                <label class="form-label">نوع محتوا</label>
+                {{ form.content_type }}
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">امتیاز محتوا</label>
+                {{ form.points }}
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label">متن محتوا</label>
+            {{ form.content }}
+        </div>
+        
+        <div class="grid grid-2">
+            <div class="form-group">
+                <label class="form-label">فایل محتوا (اختیاری)</label>
+                {{ form.file }}
+                <small style="opacity: 0.7;">برای ویدیو، صوت و عکس</small>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">تصویر thumbnail (اختیاری)</label>
+                {{ form.thumbnail }}
+            </div>
+        </div>
+        
+        <button type="submit" class="btn btn-primary" style="width: 100%;">
+            <i class="fas fa-upload"></i>
+            انتشار محتوا
+        </button>
+    </form>
+</div>
+
+<!-- محتواهای منتشر شده -->
+<div class="card fade-in">
+    <div class="card-header">
+        <h2 class="card-title">
+            <i class="fas fa-list card-icon"></i>
+            محتواهای منتشر شده
+        </h2>
+    </div>
+    
+    {% if contents %}
+    <div class="content-grid">
+        {% for content in contents %}
+        <div class="content-item">
+            {% if content.thumbnail %}
+            <img src="{{ content.thumbnail.url }}" alt="{{ content.title }}" class="content-thumbnail">
+            {% else %}
+            <div class="content-thumbnail" style="background: linear-gradient(135deg, var(--dark-purple), var(--dark-blue)); 
+                        display: flex; align-items: center; justify-content: center; color: var(--gold); font-size: 3rem;">
+                <i class="fas fa-{% if content.content_type == 'video' %}video{% elif content.content_type == 'audio' %}music{% elif content.content_type == 'image' %}image{% else %}file-alt{% endif %}"></i>
+            </div>
+            {% endif %}
+            
+            <div class="content-info">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
+                    <h4 style="color: var(--gold);">{{ content.title }}</h4>
+                    <span style="background: rgba(212, 175, 55, 0.2); padding: 2px 8px; border-radius: 10px; 
+                                font-size: 0.7rem; color: var(--gold);">
+                        {{ content.get_content_type_display }}
+                    </span>
+                </div>
+                
+                <p style="font-size: 0.9rem; opacity: 0.8; margin-bottom: 15px; height: 60px; overflow: hidden;">
+                    {{ content.content|truncatewords:15 }}
+                </p>
+                
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <small style="opacity: 0.6;">
+                        <i class="fas fa-calendar"></i>
+                        {{ content.created_date|date:"Y/m/d" }}
+                    </small>
+                    <span style="color: var(--gold); font-weight: bold;">
+                        <i class="fas fa-star"></i>
+                        {{ content.points }}
+                    </span>
+                </div>
+                
+                <div style="margin-top: 15px; display: flex; gap: 10px;">
+                    <a href="{% url 'marja_content_detail' content.id %}" class="btn btn-secondary" style="flex: 1; padding: 8px;">
+                        <i class="fas fa-eye"></i>
+                        مشاهده
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div style="text-align: center; padding: 40px; opacity: 0.7;">
+        <i class="fas fa-inbox" style="font-size: 4rem; color: var(--gold); margin-bottom: 20px;"></i>
+        <h3 style="color: var(--gold);">هنوز محتوایی منتشر نکرده‌اید</h3>
+        <p>اولین محتوای خود را در فرم بالا ایجاد کنید</p>
+    </div>
+    {% endif %}
+</div>
+
+<div class="hadith fade-in">
+    <i class="fas fa-quote-right" style="color: var(--gold); margin-left: 10px;"></i>
+    "عالمان وارثان پیامبران هستند"
+    <i class="fas fa-quote-left" style="color: var(--gold); margin-right: 10px;"></i>
+    <br>
+    <span style="opacity: 0.8; font-size: 0.9rem;">- پیامبر اکرم (ص)</span>
+</div>
+{% endblock %}

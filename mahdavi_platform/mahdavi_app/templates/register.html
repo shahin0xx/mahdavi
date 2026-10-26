@@ -1,0 +1,1276 @@
+{% extends 'base.html' %}
+
+{% block title %}ثبت نام | پلتفرم مهدوی{% endblock %}
+
+{% block content %}
+<!-- پس‌زمینه انیمیشن‌دار -->
+<div class="auth-background">
+    <div class="particles-container"></div>
+    <div class="light-rays">
+        <div class="ray ray-1"></div>
+        <div class="ray ray-2"></div>
+        <div class="ray ray-3"></div>
+    </div>
+</div>
+
+<div class="container" style="padding-top: 120px; min-height: 100vh; position: relative; z-index: 1;">
+    <!-- هدر انیمیشن‌دار -->
+    <div class="auth-header" data-aos="fade-down" data-aos-duration="800">
+        <div class="auth-logo animate-glow">
+            <div class="auth-logo-icon">
+                <i class="fas fa-user-plus"></i>
+            </div>
+            <div class="auth-logo-text">
+                <h1>شروع سفر مهدوی</h1>
+                <p>ثبت نام در پلتفرم نورانی</p>
+            </div>
+        </div>
+        
+        <!-- آیه قرآن -->
+        <div class="quran-verse animate-fade-in" style="max-width: 600px; margin: 2rem auto;">
+            ﴿يَا أَيُّهَا الَّذِينَ آمَنُوا اتَّقُوا اللَّهَ وَكُونُوا مَعَ الصَّادِقِينَ﴾
+            <div class="verse-translation">ای کسانی که ایمان آورده‌اید، از خدا پروا کنید و با راستان باشید</div>
+        </div>
+    </div>
+
+    <!-- کارت اصلی ثبت نام -->
+    <div class="auth-card-container" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="300">
+        <div class="auth-card golden-border">
+            <!-- هدر کارت -->
+            <div class="auth-card-header">
+                <div class="auth-card-title">
+                    <i class="fas fa-user-circle"></i>
+                    <h2>فرم ثبت نام</h2>
+                </div>
+                <div class="auth-card-subtitle">
+                    اطلاعات خود را برای شروع سفر معنوی وارد کنید
+                </div>
+            </div>
+
+            <!-- نمایش پیام‌ها -->
+            {% if messages %}
+            <div class="auth-messages">
+                {% for message in messages %}
+                <div class="message animate-slide-in {{ message.tags }}" data-aos="fade-left" data-aos-delay="{{ forloop.counter|add:2 }}00">
+                    <i class="fas 
+                        {% if message.tags == 'success' %}fa-check-circle
+                        {% elif message.tags == 'error' %}fa-exclamation-circle
+                        {% elif message.tags == 'warning' %}fa-exclamation-triangle
+                        {% else %}fa-info-circle{% endif %}">
+                    </i>
+                    <span>{{ message }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- فرم ثبت نام -->
+            <form method="post" class="auth-form" id="registerForm" data-aos="fade-up" data-aos-delay="500">
+                {% csrf_token %}
+                
+                <!-- ردیف اول: نام و نام خانوادگی -->
+                <div class="form-row animate-fade-in" data-aos-delay="600">
+                    <div class="form-group">
+                        <div class="form-label-wrapper">
+                            <i class="fas fa-user"></i>
+                            <label>نام</label>
+                        </div>
+                        <div class="input-with-icon">
+                            <input type="text" name="first_name" class="form-input" placeholder="نام خود را وارد کنید" 
+                                   value="{{ form.first_name.value|default:'' }}" required
+                                   data-validation="name">
+                            <i class="fas fa-user-check input-icon"></i>
+                        </div>
+                        {% if form.first_name.errors %}
+                        <div class="form-error animate-error">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ form.first_name.errors }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="form-label-wrapper">
+                            <i class="fas fa-user-friends"></i>
+                            <label>نام خانوادگی</label>
+                        </div>
+                        <div class="input-with-icon">
+                            <input type="text" name="last_name" class="form-input" placeholder="نام خانوادگی خود را وارد کنید"
+                                   value="{{ form.last_name.value|default:'' }}" required
+                                   data-validation="name">
+                            <i class="fas fa-user-check input-icon"></i>
+                        </div>
+                        {% if form.last_name.errors %}
+                        <div class="form-error animate-error">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ form.last_name.errors }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- ردیف دوم: موبایل و ایمیل -->
+                <div class="form-row animate-fade-in" data-aos-delay="700">
+                    <div class="form-group">
+                        <div class="form-label-wrapper">
+                            <i class="fas fa-mobile-alt"></i>
+                            <label>شماره موبایل</label>
+                        </div>
+                        <div class="input-with-icon">
+                            <input type="tel" name="phone" class="form-input" placeholder="۰۹۱۲۳۴۵۶۷۸۹" 
+                                   value="{{ form.phone.value|default:'' }}" required
+                                   data-validation="phone"
+                                   pattern="09[0-9]{9}">
+                            <i class="fas fa-phone input-icon"></i>
+                        </div>
+                        {% if form.phone.errors %}
+                        <div class="form-error animate-error">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ form.phone.errors }}
+                        </div>
+                        {% endif %}
+                        <div class="form-hint">فرمت: ۰۹۱۲۳۴۵۶۷۸۹</div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="form-label-wrapper">
+                            <i class="fas fa-envelope"></i>
+                            <label>آدرس ایمیل</label>
+                        </div>
+                        <div class="input-with-icon">
+                            <input type="email" name="email" class="form-input" placeholder="example@mahdavi.com"
+                                   value="{{ form.email.value|default:'' }}" required
+                                   data-validation="email">
+                            <i class="fas fa-at input-icon"></i>
+                        </div>
+                        {% if form.email.errors %}
+                        <div class="form-error animate-error">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ form.email.errors }}
+                        </div>
+                        {% endif %}
+                        <div class="form-hint">برای اطلاع‌رسانی و بازیابی</div>
+                    </div>
+                </div>
+                
+                <!-- ردیف سوم: سن و جنسیت -->
+                <div class="form-row animate-fade-in" data-aos-delay="800">
+                    <div class="form-group">
+                        <div class="form-label-wrapper">
+                            <i class="fas fa-birthday-cake"></i>
+                            <label>سن</label>
+                        </div>
+                        <div class="input-with-icon">
+                            <input type="number" name="age" class="form-input" placeholder="سن خود را وارد کنید"
+                                   value="{{ form.age.value|default:'18' }}" min="10" max="100" required
+                                   data-validation="number">
+                            <i class="fas fa-calendar-alt input-icon"></i>
+                        </div>
+                        {% if form.age.errors %}
+                        <div class="form-error animate-error">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ form.age.errors }}
+                        </div>
+                        {% endif %}
+                        <div class="form-hint">تعیین محتوای مناسب سنی</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="form-label-wrapper">
+                            <i class="fas fa-venus-mars"></i>
+                            <label>جنسیت</label>
+                        </div>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="gender" value="M" checked>
+                                <span class="radio-custom"></span>
+                                <span>آقا</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="gender" value="F">
+                                <span class="radio-custom"></span>
+                                <span>خانم</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- ردیف چهارم: رمز عبور -->
+                <div class="form-row animate-fade-in" data-aos-delay="900">
+                    <div class="form-group">
+                        <div class="form-label-wrapper">
+                            <i class="fas fa-lock"></i>
+                            <label>رمز عبور</label>
+                        </div>
+                        <div class="input-with-icon password-field">
+                            <input type="password" name="password" class="form-input" placeholder="رمز عبور قوی انتخاب کنید" required
+                                   data-validation="password"
+                                   minlength="8">
+                            <i class="fas fa-eye input-icon toggle-password"></i>
+                            <div class="password-strength">
+                                <div class="strength-bar"></div>
+                                <div class="strength-text"></div>
+                            </div>
+                        </div>
+                        {% if form.password.errors %}
+                        <div class="form-error animate-error">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ form.password.errors }}
+                        </div>
+                        {% endif %}
+                        <div class="form-hint">حداقل ۸ کاراکتر شامل حروف و اعداد</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="form-label-wrapper">
+                            <i class="fas fa-lock"></i>
+                            <label>تکرار رمز عبور</label>
+                        </div>
+                        <div class="input-with-icon password-field">
+                            <input type="password" name="password2" class="form-input" placeholder="رمز عبور را تکرار کنید" required
+                                   data-validation="confirmPassword">
+                            <i class="fas fa-eye input-icon toggle-password"></i>
+                        </div>
+                        {% if form.password2.errors %}
+                        <div class="form-error animate-error">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ form.password2.errors }}
+                        </div>
+                        {% endif %}
+                        <div class="form-hint password-match"></div>
+                    </div>
+                </div>
+
+                <!-- قوانین و شرایط -->
+                <div class="form-group terms-group animate-fade-in" data-aos-delay="1000">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="terms" name="terms" required>
+                        <span class="checkbox-custom"></span>
+                        <span class="checkbox-text">
+                            با <a href="#" class="terms-link">قوانین و شرایط</a> استفاده از پلتفرم مهدوی موافقم
+                            و متعهد می‌شوم از این پلتفرم در راستای اهداف معنوی استفاده کنم
+                        </span>
+                    </label>
+                    {% if form.terms.errors %}
+                    <div class="form-error animate-error">
+                        <i class="fas fa-exclamation-circle"></i>
+                        {{ form.terms.errors }}
+                    </div>
+                    {% endif %}
+                </div>
+                
+                {% if form.non_field_errors %}
+                <div class="form-error main-error animate-slide-in" data-aos-delay="1100">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>{{ form.non_field_errors }}</span>
+                </div>
+                {% endif %}
+
+                <!-- دکمه ثبت نام -->
+                <div class="form-actions animate-fade-in" data-aos-delay="1200">
+                    <button type="submit" class="btn btn-primary btn-glow" id="submitBtn">
+                        <i class="fas fa-user-plus"></i>
+                        <span>ثبت نام و شروع سفر</span>
+                        <div class="btn-loading">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </button>
+                </div>
+            </form>
+
+            <!-- ورود -->
+            <div class="auth-footer animate-fade-in" data-aos-delay="1300">
+                <div class="divider">
+                    <span>حساب دارید؟</span>
+                </div>
+                <a href="{% url 'login' %}" class="btn btn-outline btn-hover-glow">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span>ورود به حساب کاربری</span>
+                </a>
+            </div>
+
+            <!-- ویژگی‌های پلتفرم -->
+            <div class="features-grid animate-fade-in" data-aos-delay="1400">
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="fas fa-gem"></i>
+                    </div>
+                    <div class="feature-content">
+                        <h4>نشان‌های طلایی</h4>
+                        <p>دریافت نشان‌های معنوی مهدوی</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="fas fa-book-quran"></i>
+                    </div>
+                    <div class="feature-content">
+                        <h4>محتوای ناب</h4>
+                        <p>دسترسی به منابع غنی مذهبی</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="feature-content">
+                        <h4>جامعه منتظران</h4>
+                        <p>ارتباط با عاشقان امام زمان</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div class="feature-content">
+                        <h4>امنیت بالا</h4>
+                        <p>حفظ حریم خصوصی کاربران</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* استایل‌های جدید */
+    .auth-background {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 0;
+        overflow: hidden;
+    }
+
+    .particles-container {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background: 
+            radial-gradient(circle at 20% 30%, rgba(212, 175, 55, 0.1) 0%, transparent 50%),
+            radial-gradient(circle at 80% 70%, rgba(26, 46, 77, 0.1) 0%, transparent 50%);
+    }
+
+    .light-rays .ray {
+        position: absolute;
+        background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.2), transparent);
+        height: 1px;
+        width: 100%;
+        animation: rayMove 20s infinite linear;
+    }
+
+    .ray-1 {
+        top: 20%;
+        animation-delay: 0s;
+    }
+
+    .ray-2 {
+        top: 50%;
+        animation-delay: 5s;
+    }
+
+    .ray-3 {
+        top: 80%;
+        animation-delay: 10s;
+    }
+
+    @keyframes rayMove {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
+    }
+
+    .auth-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .auth-logo {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .auth-logo-icon {
+        width: 120px;
+        height: 120px;
+        background: linear-gradient(135deg, var(--primary-gold), var(--dark-gold));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        animation: pulseGlow 3s infinite alternate;
+        box-shadow: var(--glow-gold);
+    }
+
+    .auth-logo-icon i {
+        font-size: 3rem;
+        color: var(--dark-bg);
+    }
+
+    .auth-logo-text h1 {
+        font-size: 2.5rem;
+        background: linear-gradient(135deg, var(--primary-gold), var(--light-gold));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.5rem;
+        font-weight: 800;
+    }
+
+    .auth-logo-text p {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+    }
+
+    @keyframes pulseGlow {
+        0% {
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.3);
+        }
+        100% {
+            box-shadow: 0 0 50px rgba(212, 175, 55, 0.6);
+        }
+    }
+
+    .quran-verse {
+        font-family: 'Lateef', serif;
+        font-size: 2.2rem;
+        color: var(--primary-gold);
+        line-height: 1.8;
+        text-align: center;
+        padding: 1.5rem;
+        background: rgba(212, 175, 55, 0.05);
+        border-radius: 15px;
+        border: 1px solid var(--border-gold);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .verse-translation {
+        font-family: 'Vazirmatn', sans-serif;
+        font-size: 1rem;
+        color: var(--text-secondary);
+        margin-top: 1rem;
+        font-style: italic;
+    }
+
+    .auth-card-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .auth-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border-gold);
+        border-radius: 25px;
+        overflow: hidden;
+        box-shadow: var(--shadow-xl);
+        position: relative;
+    }
+
+    .auth-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-gold), var(--light-gold));
+    }
+
+    .auth-card-header {
+        padding: 2.5rem 2.5rem 1rem;
+        text-align: center;
+    }
+
+    .auth-card-title {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .auth-card-title i {
+        font-size: 2.5rem;
+        color: var(--primary-gold);
+    }
+
+    .auth-card-title h2 {
+        font-size: 1.8rem;
+        color: var(--text-primary);
+        font-weight: 700;
+    }
+
+    .auth-card-subtitle {
+        color: var(--text-secondary);
+        font-size: 1rem;
+    }
+
+    .auth-messages {
+        padding: 0 2.5rem;
+    }
+
+    .auth-form {
+        padding: 1rem 2.5rem 2.5rem;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .form-group {
+        position: relative;
+    }
+
+    .form-label-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-label-wrapper i {
+        color: var(--primary-gold);
+        font-size: 1rem;
+    }
+
+    .form-label-wrapper label {
+        color: var(--text-primary);
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .input-with-icon {
+        position: relative;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 1rem 3rem 1rem 1rem;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border-gold);
+        border-radius: 12px;
+        color: var(--text-primary);
+        font-family: 'Vazirmatn', sans-serif;
+        font-size: 1rem;
+        transition: all var(--transition-fast);
+        direction: rtl;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: var(--primary-gold);
+        box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    .form-input:valid {
+        border-color: rgba(39, 174, 96, 0.5);
+    }
+
+    .form-input:invalid:not(:placeholder-shown) {
+        border-color: rgba(231, 76, 60, 0.5);
+    }
+
+    .input-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+        transition: all var(--transition-fast);
+    }
+
+    .form-input:focus + .input-icon {
+        color: var(--primary-gold);
+    }
+
+    .form-hint {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        margin-top: 0.5rem;
+        opacity: 0.8;
+    }
+
+    .form-error {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--error);
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+        padding: 0.5rem;
+        background: rgba(231, 76, 60, 0.1);
+        border-radius: 8px;
+        border: 1px solid rgba(231, 76, 60, 0.3);
+    }
+
+    .animate-error {
+        animation: shake 0.5s ease;
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+        20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+
+    .radio-group {
+        display: flex;
+        gap: 1.5rem;
+        margin-top: 0.5rem;
+    }
+
+    .radio-label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        color: var(--text-secondary);
+        transition: all var(--transition-fast);
+    }
+
+    .radio-label:hover {
+        color: var(--text-primary);
+    }
+
+    .radio-label input {
+        display: none;
+    }
+
+    .radio-custom {
+        width: 20px;
+        height: 20px;
+        border: 2px solid var(--border-gold);
+        border-radius: 50%;
+        position: relative;
+        transition: all var(--transition-fast);
+    }
+
+    .radio-label input:checked + .radio-custom {
+        border-color: var(--primary-gold);
+        background: var(--primary-gold);
+    }
+
+    .radio-label input:checked + .radio-custom::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 8px;
+        height: 8px;
+        background: white;
+        border-radius: 50%;
+    }
+
+    .password-field {
+        position: relative;
+    }
+
+    .toggle-password {
+        cursor: pointer;
+        left: 3rem;
+    }
+
+    .password-strength {
+        margin-top: 0.5rem;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 2px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .strength-bar {
+        height: 100%;
+        width: 0%;
+        background: var(--error);
+        transition: all var(--transition-fast);
+        border-radius: 2px;
+    }
+
+    .strength-text {
+        position: absolute;
+        top: -1.5rem;
+        left: 0;
+        font-size: 0.7rem;
+        color: var(--text-muted);
+    }
+
+    .password-match {
+        font-size: 0.8rem;
+        opacity: 0;
+        transition: all var(--transition-fast);
+    }
+
+    .terms-group {
+        margin: 2rem 0;
+        padding: 1.5rem;
+        background: rgba(212, 175, 55, 0.05);
+        border-radius: 15px;
+        border: 1px solid var(--border-gold);
+    }
+
+    .checkbox-label {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        cursor: pointer;
+    }
+
+    .checkbox-custom {
+        width: 24px;
+        height: 24px;
+        border: 2px solid var(--border-gold);
+        border-radius: 6px;
+        position: relative;
+        flex-shrink: 0;
+        margin-top: 0.2rem;
+        transition: all var(--transition-fast);
+    }
+
+    .checkbox-label input:checked + .checkbox-custom {
+        background: var(--primary-gold);
+        border-color: var(--primary-gold);
+    }
+
+    .checkbox-label input:checked + .checkbox-custom::after {
+        content: '✓';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: var(--dark-bg);
+        font-weight: bold;
+        font-size: 0.9rem;
+    }
+
+    .checkbox-text {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        line-height: 1.6;
+    }
+
+    .terms-link {
+        color: var(--primary-gold);
+        text-decoration: none;
+        font-weight: 600;
+        transition: all var(--transition-fast);
+    }
+
+    .terms-link:hover {
+        text-decoration: underline;
+    }
+
+    .form-actions {
+        margin-top: 2rem;
+    }
+
+    .btn-glow {
+        position: relative;
+        overflow: hidden;
+        width: 100%;
+        padding: 1.2rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        transition: all var(--transition-fast);
+    }
+
+    .btn-glow:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(212, 175, 55, 0.4);
+    }
+
+    .btn-loading {
+        display: none;
+        margin-right: 0.5rem;
+    }
+
+    .btn-glow.loading .btn-loading {
+        display: inline-block;
+    }
+
+    .btn-glow.loading span {
+        display: none;
+    }
+
+    .auth-footer {
+        margin-top: 3rem;
+        padding-top: 2rem;
+        border-top: 1px solid var(--border-gold);
+        text-align: center;
+    }
+
+    .divider {
+        position: relative;
+        margin-bottom: 1.5rem;
+    }
+
+    .divider::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: var(--border-gold);
+    }
+
+    .divider span {
+        position: relative;
+        background: var(--card-bg);
+        padding: 0 1rem;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+
+    .btn-hover-glow:hover {
+        box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+        border-color: var(--primary-gold);
+    }
+
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+        margin-top: 3rem;
+    }
+
+    @media (max-width: 576px) {
+        .features-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .feature-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1.2rem;
+        background: rgba(212, 175, 55, 0.05);
+        border-radius: 12px;
+        border: 1px solid var(--border-gold);
+        transition: all var(--transition-fast);
+    }
+
+    .feature-item:hover {
+        transform: translateY(-3px);
+        background: rgba(212, 175, 55, 0.1);
+        border-color: var(--primary-gold);
+    }
+
+    .feature-icon {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, var(--primary-gold), var(--dark-gold));
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .feature-icon i {
+        color: var(--dark-bg);
+        font-size: 1.3rem;
+    }
+
+    .feature-content h4 {
+        color: var(--text-primary);
+        font-size: 1rem;
+        margin-bottom: 0.3rem;
+    }
+
+    .feature-content p {
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        line-height: 1.5;
+    }
+
+    /* انیمیشن‌ها */
+    .animate-glow {
+        animation: glowPulse 3s infinite alternate;
+    }
+
+    @keyframes glowPulse {
+        0% {
+            filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.3));
+        }
+        100% {
+            filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.6));
+        }
+    }
+
+    .animate-fade-in {
+        animation: fadeIn 0.8s ease forwards;
+        opacity: 0;
+    }
+
+    @keyframes fadeIn {
+        to {
+            opacity: 1;
+        }
+    }
+
+    .animate-slide-in {
+        animation: slideInLeft 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        opacity: 0;
+        transform: translateX(30px);
+    }
+
+    @keyframes slideInLeft {
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    /* ریسپانسیو */
+    @media (max-width: 768px) {
+        .container {
+            padding-top: 100px;
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+        
+        .auth-card-header,
+        .auth-form,
+        .auth-messages {
+            padding-left: 1.5rem;
+            padding-right: 1.5rem;
+        }
+        
+        .auth-logo-text h1 {
+            font-size: 2rem;
+        }
+        
+        .quran-verse {
+            font-size: 1.8rem;
+            padding: 1rem;
+        }
+        
+        .auth-logo-icon {
+            width: 100px;
+            height: 100px;
+        }
+        
+        .auth-logo-icon i {
+            font-size: 2.5rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .container {
+            padding-top: 90px;
+        }
+        
+        .auth-logo-text h1 {
+            font-size: 1.8rem;
+        }
+        
+        .auth-card-title {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .auth-card-title i {
+            font-size: 2rem;
+        }
+        
+        .auth-card-title h2 {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // انیمیشن عناصر با تاخیر
+        const animateElements = document.querySelectorAll('[data-aos]');
+        animateElements.forEach((el, index) => {
+            const delay = el.getAttribute('data-aos-delay') || 0;
+            setTimeout(() => {
+                el.style.animationDelay = `${delay}ms`;
+                el.classList.add('animate-fade-in');
+            }, 100);
+        });
+
+        // مدیریت پویای رمز عبور
+        const passwordInput = document.querySelector('input[name="password"]');
+        const confirmPasswordInput = document.querySelector('input[name="password2"]');
+        const strengthBar = document.querySelector('.strength-bar');
+        const strengthText = document.querySelector('.strength-text');
+        const passwordMatch = document.querySelector('.password-match');
+
+        if (passwordInput) {
+            passwordInput.addEventListener('input', function() {
+                const password = this.value;
+                const strength = calculatePasswordStrength(password);
+                
+                // آپدیت نوار قدرت
+                strengthBar.style.width = `${strength.percentage}%`;
+                strengthBar.style.backgroundColor = strength.color;
+                strengthText.textContent = strength.text;
+                strengthText.style.color = strength.color;
+                
+                // آپدیت رنگ border
+                if (password.length > 0) {
+                    this.style.borderColor = strength.color;
+                } else {
+                    this.style.borderColor = 'var(--border-gold)';
+                }
+            });
+        }
+
+        if (confirmPasswordInput && passwordInput) {
+            confirmPasswordInput.addEventListener('input', function() {
+                const match = this.value === passwordInput.value;
+                passwordMatch.textContent = match ? '✓ رمز عبور مطابقت دارد' : '✗ رمز عبور مطابقت ندارد';
+                passwordMatch.style.color = match ? 'var(--success)' : 'var(--error)';
+                passwordMatch.style.opacity = this.value ? '1' : '0';
+                
+                if (this.value.length > 0) {
+                    this.style.borderColor = match ? 'var(--success)' : 'var(--error)';
+                } else {
+                    this.style.borderColor = 'var(--border-gold)';
+                }
+            });
+        }
+
+        // تابع محاسبه قدرت رمز عبور
+        function calculatePasswordStrength(password) {
+            let score = 0;
+            let feedback = '';
+            
+            if (password.length >= 8) score += 1;
+            if (/[A-Z]/.test(password)) score += 1;
+            if (/[a-z]/.test(password)) score += 1;
+            if (/[0-9]/.test(password)) score += 1;
+            if (/[^A-Za-z0-9]/.test(password)) score += 1;
+            
+            let percentage = (score / 5) * 100;
+            
+            let result = {
+                percentage: percentage,
+                color: 'var(--error)',
+                text: 'ضعیف'
+            };
+            
+            if (percentage >= 80) {
+                result.color = 'var(--success)';
+                result.text = 'خیلی قوی';
+            } else if (percentage >= 60) {
+                result.color = 'var(--info)';
+                result.text = 'قوی';
+            } else if (percentage >= 40) {
+                result.color = 'var(--warning)';
+                result.text = 'متوسط';
+            }
+            
+            return result;
+        }
+
+        // نمایش/مخفی کردن رمز عبور
+        const toggleButtons = document.querySelectorAll('.toggle-password');
+        toggleButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const input = this.parentElement.querySelector('input');
+                const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+                input.setAttribute('type', type);
+                this.classList.toggle('fa-eye');
+                this.classList.toggle('fa-eye-slash');
+            });
+        });
+
+        // مدیریت ارسال فرم
+        const submitBtn = document.getElementById('submitBtn');
+        const form = document.getElementById('registerForm');
+        
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                // اعتبارسنجی اولیه
+                const phoneInput = this.querySelector('input[name="phone"]');
+                const termsCheckbox = this.querySelector('#terms');
+                
+                let isValid = true;
+                let errorMessage = '';
+                
+                // اعتبارسنجی موبایل
+                if (phoneInput && !/^09[0-9]{9}$/.test(phoneInput.value.replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)))) {
+                    isValid = false;
+                    errorMessage = 'شماره موبایل معتبر نیست';
+                }
+                
+                // اعتبارسنجی شرایط
+                if (!termsCheckbox.checked) {
+                    isValid = false;
+                    errorMessage = 'لطفاً با قوانین و شرایط موافقت کنید';
+                }
+                
+                if (!isValid) {
+                    e.preventDefault();
+                    MahdaviApp.showNotification(errorMessage, 'error');
+                    return;
+                }
+                
+                // نمایش حالت لودینگ
+                if (submitBtn) {
+                    submitBtn.classList.add('loading');
+                    submitBtn.disabled = true;
+                    
+                    // شبیه‌سازی انیمیشن ارسال
+                    setTimeout(() => {
+                        MahdaviApp.showNotification('در حال ثبت اطلاعات...', 'info');
+                    }, 1000);
+                }
+            });
+        }
+
+        // اعتبارسنجی real-time
+        const formInputs = form.querySelectorAll('.form-input');
+        formInputs.forEach(input => {
+            input.addEventListener('blur', function() {
+                validateField(this);
+            });
+        });
+
+        function validateField(field) {
+            const validationType = field.getAttribute('data-validation');
+            let isValid = true;
+            
+            switch(validationType) {
+                case 'name':
+                    isValid = field.value.length >= 2;
+                    break;
+                case 'phone':
+                    isValid = /^09[0-9]{9}$/.test(field.value.replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)));
+                    break;
+                case 'email':
+                    isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(field.value);
+                    break;
+                case 'number':
+                    const value = parseInt(field.value);
+                    isValid = !isNaN(value) && value >= 10 && value <= 100;
+                    break;
+                case 'password':
+                    isValid = field.value.length >= 8;
+                    break;
+            }
+            
+            if (field.value && !isValid) {
+                field.style.borderColor = 'var(--error)';
+                field.style.animation = 'shake 0.5s ease';
+            } else if (field.value && isValid) {
+                field.style.borderColor = 'var(--success)';
+            }
+            
+            setTimeout(() => {
+                field.style.animation = '';
+            }, 500);
+        }
+
+        // ایجاد particle effect
+        function createParticles() {
+            const container = document.querySelector('.particles-container');
+            if (!container) return;
+            
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.style.cssText = `
+                    position: absolute;
+                    width: ${Math.random() * 3 + 1}px;
+                    height: ${Math.random() * 3 + 1}px;
+                    background: var(--primary-gold);
+                    border-radius: 50%;
+                    opacity: ${Math.random() * 0.3 + 0.1};
+                    top: ${Math.random() * 100}%;
+                    left: ${Math.random() * 100}%;
+                    animation: float ${Math.random() * 10 + 10}s linear infinite;
+                    animation-delay: ${Math.random() * 5}s;
+                `;
+                container.appendChild(particle);
+            }
+        }
+
+        // ایجاد keyframes برای particles
+        const styleSheet = document.createElement('style');
+        styleSheet.textContent = `
+            @keyframes float {
+                0% {
+                    transform: translate(0, 0) rotate(0deg);
+                    opacity: 0.1;
+                }
+                25% {
+                    transform: translate(${Math.random() * 50 - 25}px, ${Math.random() * 50 - 25}px) rotate(90deg);
+                    opacity: ${Math.random() * 0.5 + 0.1};
+                }
+                50% {
+                    transform: translate(${Math.random() * 50 - 25}px, ${Math.random() * 50 - 25}px) rotate(180deg);
+                    opacity: ${Math.random() * 0.8 + 0.1};
+                }
+                75% {
+                    transform: translate(${Math.random() * 50 - 25}px, ${Math.random() * 50 - 25}px) rotate(270deg);
+                    opacity: ${Math.random() * 0.5 + 0.1};
+                }
+                100% {
+                    transform: translate(0, 0) rotate(360deg);
+                    opacity: 0.1;
+                }
+            }
+        `;
+        document.head.appendChild(styleSheet);
+        
+        // راه‌اندازی particles
+        createParticles();
+
+        // فوکوس روی اولین فیلد
+        setTimeout(() => {
+            const firstInput = document.querySelector('input[name="first_name"]');
+            if (firstInput) {
+                firstInput.focus();
+                firstInput.style.transform = 'scale(1.02)';
+                setTimeout(() => {
+                    firstInput.style.transform = 'scale(1)';
+                }, 300);
+            }
+        }, 1000);
+
+        // انیمیشن hover برای feature items
+        const featureItems = document.querySelectorAll('.feature-item');
+        featureItems.forEach((item, index) => {
+            item.style.animationDelay = `${1500 + index * 100}ms`;
+            
+            item.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px) scale(1.02)';
+                const icon = this.querySelector('.feature-icon');
+                if (icon) {
+                    icon.style.transform = 'rotate(10deg)';
+                }
+            });
+            
+            item.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+                const icon = this.querySelector('.feature-icon');
+                if (icon) {
+                    icon.style.transform = 'rotate(0)';
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,405 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- هدر ایستگاه -->
+<div class="card fade-in golden-border">
+    <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
+        <div style="font-size: 3.5rem; color: var(--gold);">
+            📖
+        </div>
+        <div style="flex: 1;">
+            <h1 style="color: var(--gold); margin-bottom: 10px; font-size: 1.8rem;">
+                {{ station.name }}
+            </h1>
+            <p class="readable-text" style="font-size: 1rem; line-height: 1.7;">
+                {{ station.description }}
+            </p>
+        </div>
+    </div>
+    
+    <!-- پیشرفت ایستگاه -->
+    <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid var(--border-gold);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h3 style="color: var(--gold); font-size: 1.1rem;">
+                پیشرفت شما در این ایستگاه:
+            </h3>
+            <span style="color: var(--gold); font-weight: bold;">
+                {{ progress.completed }}/{{ progress.total }} ({{ progress.percentage|floatformat:0 }}%)
+            </span>
+        </div>
+        
+        <div class="progress-container">
+            <div class="progress-bar" style="width: {{ progress.percentage }}%;"></div>
+        </div>
+        
+        {% if progress.station_completed %}
+        <div class="text-center" style="margin-top: 15px; padding: 15px; background: rgba(39, 174, 96, 0.2); border-radius: 8px; border: 2px solid #27ae60;">
+            <i class="fas fa-check-circle" style="color: #27ae60; font-size: 1.5rem; margin-bottom: 10px;"></i>
+            <h4 style="color: #27ae60; margin-bottom: 5px;">تبریک! این ایستگاه کامل شد</h4>
+            <p class="readable-text" style="color: #27ae60; margin: 0;">شما تمام محتواهای این ایستگاه را تکمیل کرده‌اید</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- آیه قرآن -->
+{% if station.quran_verse %}
+<div class="card fade-in" style="background: rgba(0,0,0,0.5); border-right: 5px solid var(--gold);">
+    <div class="quran-verse">
+        {{ station.quran_verse|linebreaks }}
+    </div>
+</div>
+{% endif %}
+
+<div class="grid grid-2">
+    <!-- محتوای داستان -->
+    {% if station.story_content.strip %}
+    <div class="card fade-in">
+        <div class="card-header">
+            <h2 class="card-title">
+                <i class="fas fa-book card-icon"></i>
+                داستان مهدوی
+            </h2>
+            <span style="color: var(--gold); font-size: 0.9rem;">
+                {{ station.story_points }} امتیاز
+            </span>
+        </div>
+        
+        <div class="readable-text" style="line-height: 1.8; font-size: 0.95rem; max-height: 300px; overflow-y: auto;">
+            {{ station.story_content|linebreaks }}
+        </div>
+        
+        {% if not user_progress.completed_story %}
+        <form method="post" action="{% url 'complete_content' station.id 'story' %}" style="margin-top: 20px;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-success" style="width: 100%;">
+                <i class="fas fa-check-circle"></i>
+                تکمیل داستان (+{{ station.story_points }} امتیاز)
+            </button>
+        </form>
+        {% else %}
+        <div class="text-center" style="margin-top: 20px; padding: 15px; background: rgba(39, 174, 96, 0.2); border-radius: 8px; border: 1px solid #27ae60;">
+            <i class="fas fa-check-circle" style="color: #27ae60; font-size: 1.2rem;"></i>
+            <span style="color: #27ae60; margin-right: 8px;">تکمیل شده</span>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- محتوای دعا -->
+    {% if station.prayer_content.strip %}
+    <div class="card fade-in">
+        <div class="card-header">
+            <h2 class="card-title">
+                <i class="fas fa-hands-praying card-icon"></i>
+                دعا و مناجات
+            </h2>
+            <span style="color: var(--gold); font-size: 0.9rem;">
+                {{ station.prayer_points }} امتیاز
+            </span>
+        </div>
+        
+        <div class="readable-text" style="line-height: 1.8; font-size: 0.95rem; max-height: 300px; overflow-y: auto;">
+            {{ station.prayer_content|linebreaks }}
+        </div>
+        
+        {% if not user_progress.completed_prayer %}
+        <form method="post" action="{% url 'complete_content' station.id 'prayer' %}" style="margin-top: 20px;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-success" style="width: 100%;">
+                <i class="fas fa-check-circle"></i>
+                تکمیل دعا (+{{ station.prayer_points }} امتیاز)
+            </button>
+        </form>
+        {% else %}
+        <div class="text-center" style="margin-top: 20px; padding: 15px; background: rgba(39, 174, 96, 0.2); border-radius: 8px; border: 1px solid #27ae60;">
+            <i class="fas fa-check-circle" style="color: #27ae60; font-size: 1.2rem;"></i>
+            <span style="color: #27ae60; margin-right: 8px;">تکمیل شده</span>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<div class="grid grid-2">
+    <!-- محتوای مطلب -->
+    {% if station.article_content.strip %}
+    <div class="card fade-in">
+        <div class="card-header">
+            <h2 class="card-title">
+                <i class="fas fa-file-alt card-icon"></i>
+                مطلب آموزشی
+            </h2>
+            <span style="color: var(--gold); font-size: 0.9rem;">
+                {{ station.article_points }} امتیاز
+            </span>
+        </div>
+        
+        <div class="readable-text" style="line-height: 1.8; font-size: 0.95rem; max-height: 300px; overflow-y: auto;">
+            {{ station.article_content|linebreaks }}
+        </div>
+        
+        {% if not user_progress.completed_article %}
+        <form method="post" action="{% url 'complete_content' station.id 'article' %}" style="margin-top: 20px;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-success" style="width: 100%;">
+                <i class="fas fa-check-circle"></i>
+                تکمیل مطلب (+{{ station.article_points }} امتیاز)
+            </button>
+        </form>
+        {% else %}
+        <div class="text-center" style="margin-top: 20px; padding: 15px; background: rgba(39, 174, 96, 0.2); border-radius: 8px; border: 1px solid #27ae60;">
+            <i class="fas fa-check-circle" style="color: #27ae60; font-size: 1.2rem;"></i>
+            <span style="color: #27ae60; margin-right: 8px;">تکمیل شده</span>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- محتوای ویدیو -->
+    {% if station.video_file %}
+    <div class="card fade-in">
+        <div class="card-header">
+            <h2 class="card-title">
+                <i class="fas fa-video card-icon"></i>
+                محتوای ویدیویی
+            </h2>
+            <span style="color: var(--gold); font-size: 0.9rem;">
+                {{ station.video_points }} امتیاز
+            </span>
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <video controls style="width: 100%; border-radius: 8px; background: #000; max-height: 300px;">
+                <source src="{{ station.video_file.url }}" type="video/mp4">
+                مرورگر شما از پخش ویدیو پشتیبانی نمی‌کند.
+            </video>
+        </div>
+        
+        {% if not user_progress.completed_video %}
+        <form method="post" action="{% url 'complete_content' station.id 'video' %}" style="margin-top: 20px;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-success" style="width: 100%;">
+                <i class="fas fa-check-circle"></i>
+                تکمیل ویدیو (+{{ station.video_points }} امتیاز)
+            </button>
+        </form>
+        {% else %}
+        <div class="text-center" style="margin-top: 20px; padding: 15px; background: rgba(39, 174, 96, 0.2); border-radius: 8px; border: 1px solid #27ae60;">
+            <i class="fas fa-check-circle" style="color: #27ae60; font-size: 1.2rem;"></i>
+            <span style="color: #27ae60; margin-right: 8px;">تکمیل شده</span>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<!-- آزمون -->
+{% if station.quiz_question.strip %}
+<div class="card fade-in">
+    <div class="card-header">
+        <h2 class="card-title">
+            <i class="fas fa-question-circle card-icon"></i>
+            آزمون مهدوی
+        </h2>
+        <span style="color: var(--gold); font-size: 0.9rem;">
+            {{ station.quiz_points }} امتیاز
+        </span>
+    </div>
+    
+    {% if not user_progress.quiz_passed %}
+    <div class="readable-text" style="margin-bottom: 25px; font-size: 1.1rem; line-height: 1.7; padding: 15px; background: rgba(212, 175, 55, 0.1); border-radius: 8px; border-right: 3px solid var(--gold);">
+        {{ station.quiz_question }}
+    </div>
+    
+    <form method="post" action="{% url 'submit_quiz' station.id %}">
+        {% csrf_token %}
+        
+        <div style="display: grid; gap: 12px; margin-bottom: 25px;">
+            {% if station.choice1.strip %}
+            <label style="display: flex; align-items: center; gap: 12px; padding: 15px; background: rgba(30,30,30,0.6); border-radius: 8px; border: 1px solid var(--border-gold); cursor: pointer; transition: all 0.3s ease;">
+                <input type="radio" name="selected_choice" value="1" required style="accent-color: var(--gold);">
+                <span class="readable-text">{{ station.choice1 }}</span>
+            </label>
+            {% endif %}
+            
+            {% if station.choice2.strip %}
+            <label style="display: flex; align-items: center; gap: 12px; padding: 15px; background: rgba(30,30,30,0.6); border-radius: 8px; border: 1px solid var(--border-gold); cursor: pointer; transition: all 0.3s ease;">
+                <input type="radio" name="selected_choice" value="2" required style="accent-color: var(--gold);">
+                <span class="readable-text">{{ station.choice2 }}</span>
+            </label>
+            {% endif %}
+            
+            {% if station.choice3.strip %}
+            <label style="display: flex; align-items: center; gap: 12px; padding: 15px; background: rgba(30,30,30,0.6); border-radius: 8px; border: 1px solid var(--border-gold); cursor: pointer; transition: all 0.3s ease;">
+                <input type="radio" name="selected_choice" value="3" required style="accent-color: var(--gold);">
+                <span class="readable-text">{{ station.choice3 }}</span>
+            </label>
+            {% endif %}
+            
+            {% if station.choice4.strip %}
+            <label style="display: flex; align-items: center; gap: 12px; padding: 15px; background: rgba(30,30,30,0.6); border-radius: 8px; border: 1px solid var(--border-gold); cursor: pointer; transition: all 0.3s ease;">
+                <input type="radio" name="selected_choice" value="4" required style="accent-color: var(--gold);">
+                <span class="readable-text">{{ station.choice4 }}</span>
+            </label>
+            {% endif %}
+        </div>
+        
+        <button type="submit" class="btn btn-primary" style="width: 100%;">
+            <i class="fas fa-paper-plane"></i>
+            ثبت پاسخ و بررسی
+        </button>
+    </form>
+    {% else %}
+    <div class="text-center" style="padding: 30px;">
+        <i class="fas fa-check-circle" style="font-size: 3rem; color: #27ae60; margin-bottom: 15px;"></i>
+        <h3 style="color: #27ae60; margin-bottom: 10px;">آزمون با موفقیت گذرانده شد!</h3>
+        <p class="readable-text" style="margin-bottom: 15px;">شما {{ station.quiz_points }} امتیاز دریافت کردید</p>
+        <div style="padding: 15px; background: rgba(39, 174, 96, 0.1); border-radius: 8px; border: 1px solid #27ae60;">
+            <p class="readable-text" style="margin: 0; color: #27ae60;">
+                <i class="fas fa-info-circle"></i>
+                پاسخ صحیح: گزینه {{ station.correct_choice }}
+            </p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endif %}
+
+<!-- پیام تکمیل ایستگاه -->
+{% if progress.station_completed %}
+<div class="card fade-in pulse-gold" style="background: linear-gradient(135deg, rgba(212,175,55,0.2), rgba(39,174,96,0.2)); border: 2px solid var(--gold);">
+    <div class="text-center" style="padding: 30px;">
+        <i class="fas fa-trophy" style="font-size: 4rem; color: var(--gold); margin-bottom: 20px;"></i>
+        <h2 style="color: var(--gold); margin-bottom: 15px;">تبریک! ایستگاه کامل شد 🎉</h2>
+        <p class="readable-text" style="font-size: 1.1rem; margin-bottom: 20px;">
+            شما با موفقیت تمام محتواهای این ایستگاه را به پایان رساندید.<br>
+            امتیاز کل کسب شده از این ایستگاه: 
+            <span style="color: var(--gold); font-weight: bold; font-size: 1.2rem;">
+                {{ user_progress.total_score }}
+            </span>
+        </p>
+        
+        {% if next_station %}
+        <a href="{% url 'station_detail' next_station.id %}" class="btn btn-primary pulse-gold">
+            <i class="fas fa-arrow-left"></i>
+            رفتن به ایستگاه بعدی
+        </a>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+<!-- ناوبری -->
+<div class="card fade-in">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+        <a href="{% url 'dashboard' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-right"></i>
+            بازگشت به پیشخوان
+        </a>
+        
+        {% if next_station and not progress.station_completed %}
+        <a href="{% url 'station_detail' next_station.id %}" class="btn btn-primary">
+            <i class="fas fa-arrow-left"></i>
+            ایستگاه بعدی
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<!-- حدیث شریف -->
+<div class="hadith fade-in">
+    <i class="fas fa-quote-right" style="color: var(--gold); margin-left: 10px;"></i>
+    <span class="arabic-text">افضل اعمال امت انتظار الفرج</span>
+    <i class="fas fa-quote-left" style="color: var(--gold); margin-right: 10px;"></i>
+    <br>
+    <small style="opacity: 0.8; color: var(--text-light);">- امام صادق(ع)</small>
+</div>
+
+<style>
+    /* استایل برای محتوای اسکرول */
+    .readable-text::-webkit-scrollbar {
+        width: 8px;
+    }
+    
+    .readable-text::-webkit-scrollbar-track {
+        background: rgba(255,255,255,0.1);
+        border-radius: 4px;
+    }
+    
+    .readable-text::-webkit-scrollbar-thumb {
+        background: var(--gold);
+        border-radius: 4px;
+    }
+    
+    .readable-text::-webkit-scrollbar-thumb:hover {
+        background: var(--dark-gold);
+    }
+    
+    /* انیمیشن برای کارت‌ها */
+    .card {
+        transition: all 0.3s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-2px);
+    }
+    
+    /* استایل برای ویدیو */
+    video {
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* استایل برای گزینه‌های آزمون */
+    label:hover {
+        background: rgba(212, 175, 55, 0.1) !important;
+        border-color: var(--gold) !important;
+    }
+    
+    /* استایل برای دکمه‌ها */
+    .btn {
+        transition: all 0.3s ease;
+    }
+    
+    .btn:hover {
+        transform: translateY(-2px);
+    }
+</style>
+
+<script>
+    // اسکرول نرم برای محتواها
+    document.addEventListener('DOMContentLoaded', function() {
+        // افزودن انیمیشن به کارت‌ها
+        const cards = document.querySelectorAll('.card');
+        cards.forEach((card, index) => {
+            card.style.animationDelay = `${index * 0.1}s`;
+        });
+        
+        // مدیریت وضعیت گزینه‌های آزمون
+        const radioLabels = document.querySelectorAll('label[style*="cursor: pointer"]');
+        radioLabels.forEach(label => {
+            const radio = label.querySelector('input[type="radio"]');
+            label.addEventListener('click', function() {
+                // حذف انتخاب از سایر گزینه‌ها
+                radioLabels.forEach(l => {
+                    l.style.background = 'rgba(30,30,30,0.6)';
+                });
+                // انتخاب گزینه فعلی
+                this.style.background = 'rgba(212, 175, 55, 0.2)';
+            });
+        });
+        
+        // مدیریت پخش ویدیو
+        const videos = document.querySelectorAll('video');
+        videos.forEach(video => {
+            video.addEventListener('play', function() {
+                this.style.boxShadow = '0 4px 20px rgba(212, 175, 55, 0.4)';
+            });
+            
+            video.addEventListener('pause', function() {
+                this.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.3)';
+            });
+        });
+    });
+</script>
+{% endblock %}

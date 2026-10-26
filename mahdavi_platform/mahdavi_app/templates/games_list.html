@@ -1,0 +1,355 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}بازی‌های معنوی - پلتفرم مهدوی{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 100px; min-height: 100vh;">
+    <!-- هدر صفحه -->
+    <div class="card golden-border" style="margin-bottom: 2rem;">
+        <div class="card-header">
+            <h1 class="card-title">
+                <i class="fas fa-gamepad"></i>
+                بازی‌های معنوی مهدوی
+            </h1>
+        </div>
+        
+        <!-- حدیث و متن الهام‌بخش -->
+        <div style="text-align: center; padding: 2rem; background: rgba(212, 175, 55, 0.05); border-radius: 12px; margin: 1rem 0;">
+            <i class="fas fa-quote-right" style="color: var(--primary-gold); font-size: 1.5rem; margin-bottom: 1rem;"></i>
+            <p style="font-size: 1.2rem; color: var(--text-secondary); line-height: 1.8; font-family: 'Lateef', serif;">
+                "سرگرمی و بازی در مسیر شناخت امام زمان(عج) می‌تواند زمینه‌ساز رشد معنوی و تعمیق باورهای دینی باشد"
+            </p>
+            <div style="margin-top: 1rem;">
+                <span style="color: var(--primary-gold); font-family: 'Lateef', serif;">امام صادق (ع)</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- شبکه بازی‌ها -->
+    {% if games %}
+    <div class="grid grid-3">
+        {% for game in games %}
+        <div class="card game-card" data-game-id="{{ game.id }}">
+            <!-- تصویر بازی -->
+            <div class="game-thumbnail">
+                {% if game.thumbnail %}
+                <img src="{{ game.thumbnail.url }}" alt="{{ game.title }}" class="game-image">
+                {% else %}
+                <div class="game-placeholder">
+                    <i class="fas fa-{{ game.icon|default:'gamepad' }}"></i>
+                </div>
+                {% endif %}
+                
+                <!-- وضعیت پیشرفت -->
+                {% if user.is_authenticated %}
+                    {% for progress_key, progress_value in user_progress.items %}
+                        {% if progress_key == game.id and progress_value.completed %}
+                        <div class="completion-badge">
+                            <i class="fas fa-crown"></i>
+                            تکمیل شده
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            <!-- اطلاعات بازی -->
+            <div class="game-info">
+                <h3 class="game-title">{{ game.title }}</h3>
+                <p class="game-description">{{ game.description|default:"بازی معنوی برای شناخت بیشتر امام زمان (عج)" }}</p>
+                
+                <!-- امتیاز و دشواری -->
+                <div class="game-meta">
+                    <div class="meta-item">
+                        <i class="fas fa-star"></i>
+                        <span>{{ game.points_reward|default:50 }} امتیاز</span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-chart-line"></i>
+                        <span>{{ game.difficulty|default:"متوسط" }}</span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-clock"></i>
+                        <span>{{ game.duration|default:"۵-۱۰ دقیقه" }}</span>
+                    </div>
+                </div>
+
+                <!-- دکمه شروع بازی -->
+                <a href="{% url 'play_game' game.id %}" class="btn btn-primary game-btn">
+                    <i class="fas fa-play"></i>
+                    شروع بازی
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <!-- حالت خالی -->
+    <div class="card text-center" style="padding: 4rem 2rem;">
+        <div class="logo-icon" style="width: 100px; height: 100px; margin: 0 auto 2rem; background: linear-gradient(135deg, var(--primary-gold), var(--light-gold));">
+            <i class="fas fa-gamepad" style="font-size: 2.5rem;"></i>
+        </div>
+        <h2 style="color: var(--primary-gold); margin-bottom: 1rem; font-family: 'Lateef', serif;">بازی‌های معنوی</h2>
+        <p style="color: var(--text-secondary); font-size: 1.1rem; margin-bottom: 2rem;">
+            به زودی بازی‌های جذاب و آموزنده مهدوی در این بخش قرار خواهد گرفت
+        </p>
+        <div class="btn btn-outline" onclick="showNotification('بازی‌ها به زودی اضافه خواهند شد', 'info')">
+            <i class="fas fa-bell"></i>
+            اطلاع‌رسانی شوید
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- بخش آمار -->
+    <div class="grid grid-3" style="margin-top: 3rem;">
+        <div class="card text-center">
+            <i class="fas fa-trophy" style="font-size: 2.5rem; color: var(--primary-gold); margin-bottom: 1rem;"></i>
+            <h3 style="color: var(--primary-gold); margin-bottom: 0.5rem;" id="totalPoints">0</h3>
+            <p style="color: var(--text-secondary);">امتیاز کل کسب شده</p>
+        </div>
+        
+        <div class="card text-center">
+            <i class="fas fa-flag-checkered" style="font-size: 2.5rem; color: var(--primary-gold); margin-bottom: 1rem;"></i>
+            <h3 style="color: var(--primary-gold); margin-bottom: 0.5rem;" id="completedGames">0</h3>
+            <p style="color: var(--text-secondary);">بازی‌های تکمیل شده</p>
+        </div>
+        
+        <div class="card text-center">
+            <i class="fas fa-medal" style="font-size: 2.5rem; color: var(--primary-gold); margin-bottom: 1rem;"></i>
+            <h3 style="color: var(--primary-gold); margin-bottom: 0.5rem;" id="userRank">-</h3>
+            <p style="color: var(--text-secondary);">رتبه شما</p>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* استایل کارت بازی */
+    .game-card {
+        transition: all 0.3s ease;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .game-card:hover {
+        transform: translateY(-10px);
+        border-color: var(--primary-gold);
+        box-shadow: var(--shadow-xl);
+    }
+
+    /* تصویر بازی */
+    .game-thumbnail {
+        position: relative;
+        height: 200px;
+        overflow: hidden;
+        border-radius: 12px 12px 0 0;
+    }
+
+    .game-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+
+    .game-card:hover .game-image {
+        transform: scale(1.05);
+    }
+
+    .game-placeholder {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, var(--card-bg), var(--hover-bg));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--primary-gold);
+        font-size: 3rem;
+    }
+
+    /* نشان تکمیل */
+    .completion-badge {
+        position: absolute;
+        top: 1rem;
+        left: 1rem;
+        background: linear-gradient(135deg, var(--primary-gold), var(--light-gold));
+        color: var(--dark-bg);
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    /* اطلاعات بازی */
+    .game-info {
+        padding: 1.5rem;
+    }
+
+    .game-title {
+        color: var(--primary-gold);
+        font-size: 1.3rem;
+        margin-bottom: 0.5rem;
+        font-weight: 700;
+    }
+
+    .game-description {
+        color: var(--text-secondary);
+        line-height: 1.6;
+        margin-bottom: 1.5rem;
+        font-size: 0.95rem;
+    }
+
+    /* متا اطلاعات */
+    .game-meta {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
+        padding: 1rem;
+        background: rgba(212, 175, 55, 0.05);
+        border-radius: 8px;
+        border: 1px solid var(--border-gold);
+    }
+
+    .meta-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.25rem;
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+    }
+
+    .meta-item i {
+        color: var(--primary-gold);
+        font-size: 1rem;
+    }
+
+    /* دکمه بازی */
+    .game-btn {
+        width: 100%;
+        justify-content: center;
+        font-weight: 600;
+    }
+
+    /* انیمیشن‌ها */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .game-card {
+        animation: fadeInUp 0.6s ease;
+    }
+
+    .game-card:nth-child(1) { animation-delay: 0.1s; }
+    .game-card:nth-child(2) { animation-delay: 0.2s; }
+    .game-card:nth-child(3) { animation-delay: 0.3s; }
+    .game-card:nth-child(4) { animation-delay: 0.4s; }
+    .game-card:nth-child(5) { animation-delay: 0.5s; }
+    .game-card:nth-child(6) { animation-delay: 0.6s; }
+
+    /* ریسپانسیو */
+    @media (max-width: 1200px) {
+        .grid-3 {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .grid-3 {
+            grid-template-columns: 1fr;
+        }
+        
+        .game-meta {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .meta-item {
+            flex-direction: row;
+            justify-content: center;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .container {
+            padding-top: 80px;
+        }
+        
+        .game-thumbnail {
+            height: 160px;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // آمار کاربر
+        const userStats = {
+            totalPoints: {{ user.points|default:0 }},
+            completedGames: {{ user.completed_games|default:0 }},
+            userRank: "{{ user.rank|default:'-' }}"
+        };
+
+        // انیمیشن شمارنده آمار
+        function animateCounter(element, target, duration = 2000) {
+            const start = parseInt(element.textContent) || 0;
+            const increment = (target - start) / (duration / 16);
+            let current = start;
+
+            const timer = setInterval(() => {
+                current += increment;
+                if ((increment > 0 && current >= target) || (increment < 0 && current <= target)) {
+                    current = target;
+                    clearInterval(timer);
+                }
+                element.textContent = Math.floor(current).toLocaleString('fa-IR');
+            }, 16);
+        }
+
+        // مقداردهی اولیه آمار
+        const totalPointsEl = document.getElementById('totalPoints');
+        const completedGamesEl = document.getElementById('completedGames');
+        const userRankEl = document.getElementById('userRank');
+
+        if (totalPointsEl) animateCounter(totalPointsEl, userStats.totalPoints);
+        if (completedGamesEl) animateCounter(completedGamesEl, userStats.completedGames);
+        if (userRankEl) userRankEl.textContent = userStats.userRank;
+
+        // انیمیشن کارت‌ها
+        const gameCards = document.querySelectorAll('.game-card');
+        gameCards.forEach((card, index) => {
+            card.style.animationDelay = `${(index + 1) * 0.1}s`;
+        });
+
+        // مدیریت کلیک روی کارت بازی
+        gameCards.forEach(card => {
+            card.addEventListener('click', function(e) {
+                if (!e.target.closest('.game-btn')) {
+                    const gameId = this.getAttribute('data-game-id');
+                    const gameLink = this.querySelector('.game-btn').href;
+                    window.location.href = gameLink;
+                }
+            });
+        });
+
+        // نمایش نوتیفیکیشن
+        window.showNotification = function(message, type = 'info') {
+            if (window.MahdaviApp && window.MahdaviApp.showNotification) {
+                window.MahdaviApp.showNotification(message, type);
+            } else {
+                alert(message);
+            }
+        };
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,518 @@
+{% extends 'base.html' %}
+
+{% block title %}اذکار روزهای هفته - نور مهدی{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* استایل‌های مخصوص صفحه اذکار روزهای هفته */
+    .days-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        justify-content: center;
+        margin-bottom: 30px;
+    }
+    
+    .day-btn {
+        padding: 12px 20px;
+        background: rgba(30, 30, 30, 0.8);
+        border: 1px solid var(--border-gold);
+        border-radius: 8px;
+        color: var(--text-light);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 1rem;
+        font-family: 'Lateef', serif;
+        min-width: 100px;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .day-btn:hover {
+        background: rgba(212, 175, 55, 0.1);
+        transform: translateY(-2px);
+    }
+    
+    .day-btn.active {
+        background: linear-gradient(135deg, var(--gold), var(--dark-gold));
+        color: #000;
+        font-weight: bold;
+        box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3);
+    }
+    
+    .day-btn.active::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 100%;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #fff, transparent);
+    }
+    
+    .zekr-container {
+        background: var(--bg-card);
+        backdrop-filter: blur(15px);
+        border-radius: 12px;
+        padding: 25px;
+        margin-bottom: 20px;
+        border: 1px solid var(--border-gold);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+        position: relative;
+        overflow: hidden;
+        min-height: 300px;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .zekr-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 100%;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    }
+    
+    .zekr-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid var(--border-gold);
+    }
+    
+    .zekr-title {
+        font-size: 1.5rem;
+        color: var(--gold);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-family: 'Lateef', serif;
+    }
+    
+    .zekr-icon {
+        font-size: 1.5rem;
+    }
+    
+    .current-day {
+        background: rgba(212, 175, 55, 0.1);
+        padding: 8px 15px;
+        border-radius: 8px;
+        border: 1px solid var(--border-gold);
+        font-size: 0.9rem;
+        color: var(--gold);
+        font-family: 'Lateef', serif;
+    }
+    
+    .zekr-content {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        text-align: center;
+        padding: 20px 0;
+    }
+    
+    .zekr-arabic {
+        font-family: 'Scheherazade New', serif;
+        font-size: 1.8rem;
+        line-height: 2.5;
+        color: var(--text-lighter);
+        margin-bottom: 20px;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+    
+    .zekr-translation {
+        font-size: 1.1rem;
+        line-height: 1.8;
+        color: var(--text-light);
+        font-family: 'Lateef', serif;
+        margin-bottom: 20px;
+        padding: 0 10px;
+    }
+    
+    .zekr-source {
+        font-size: 0.9rem;
+        color: var(--gold);
+        opacity: 0.8;
+        font-style: italic;
+        margin-top: 15px;
+        font-family: 'Lateef', serif;
+    }
+    
+    .zekr-actions {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-top: 20px;
+    }
+    
+    .counter-section {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+        margin: 20px 0;
+        padding: 15px;
+        background: rgba(30, 30, 30, 0.5);
+        border-radius: 8px;
+        border: 1px solid var(--border-gold);
+    }
+    
+    .counter-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--gold);
+        color: #000;
+        border: none;
+        font-size: 1.2rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+    
+    .counter-btn:hover {
+        transform: scale(1.1);
+        box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+    }
+    
+    .counter-display {
+        font-size: 1.5rem;
+        color: var(--gold);
+        font-weight: bold;
+        min-width: 60px;
+        text-align: center;
+    }
+    
+    .reset-counter {
+        background: rgba(231, 76, 60, 0.2);
+        color: #e74c3c;
+        border: 1px solid #e74c3c;
+        padding: 5px 10px;
+        border-radius: 5px;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .reset-counter:hover {
+        background: rgba(231, 76, 60, 0.3);
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: var(--text-light);
+        opacity: 0.7;
+        font-family: 'Lateef', serif;
+        font-size: 1.2rem;
+    }
+    
+    .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 15px;
+        color: var(--gold);
+        opacity: 0.5;
+    }
+    
+    /* استایل‌های ریسپانسیو */
+    @media (max-width: 768px) {
+        .days-container {
+            gap: 10px;
+        }
+        
+        .day-btn {
+            min-width: 80px;
+            padding: 10px 15px;
+            font-size: 0.9rem;
+        }
+        
+        .zekr-container {
+            padding: 20px;
+        }
+        
+        .zekr-arabic {
+            font-size: 1.5rem;
+            line-height: 2.2;
+        }
+        
+        .zekr-translation {
+            font-size: 1rem;
+        }
+        
+        .zekr-actions {
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .counter-section {
+            flex-direction: column;
+            gap: 10px;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .days-container {
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .day-btn {
+            width: 100%;
+            max-width: 200px;
+        }
+        
+        .zekr-container {
+            padding: 15px;
+        }
+        
+        .zekr-arabic {
+            font-size: 1.3rem;
+            line-height: 2;
+        }
+        
+        .zekr-header {
+            flex-direction: column;
+            gap: 10px;
+            align-items: flex-start;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card fade-in">
+    <div class="card-header">
+        <h2 class="card-title">
+            <i class="fas fa-pray card-icon"></i>
+            اذکار روزهای هفته
+        </h2>
+        <p style="color: var(--text-light); opacity: 0.8; font-family: 'Lateef', serif;">
+            انتخاب روز برای مشاهده ذکر مخصوص آن روز
+        </p>
+    </div>
+    
+    <div class="days-container">
+        <button class="day-btn" data-day="saturday">شنبه</button>
+        <button class="day-btn" data-day="sunday">یکشنبه</button>
+        <button class="day-btn" data-day="monday">دوشنبه</button>
+        <button class="day-btn" data-day="tuesday">سه‌شنبه</button>
+        <button class="day-btn" data-day="wednesday">چهارشنبه</button>
+        <button class="day-btn" data-day="thursday">پنجشنبه</button>
+        <button class="day-btn active" data-day="friday">جمعه</button>
+    </div>
+    
+    <div class="zekr-container">
+        <div class="zekr-header">
+            <h3 class="zekr-title">
+                <i class="fas fa-praying-hands zekr-icon"></i>
+                ذکر روز جمعه
+            </h3>
+            <div class="current-day">امروز</div>
+        </div>
+        
+        <div class="zekr-content">
+            <div class="zekr-arabic">
+                أَسْتَغْفِرُ اللَّهَ الَّذِي لَا إِلَهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ وَأَتُوبُ إِلَيْهِ
+            </div>
+            
+            <div class="zekr-translation">
+                آمرزش می‌خواهم از خدایی که معبودی جز او نیست، زنده و پایدار است و به سوی او بازمی‌گردم.
+            </div>
+            
+            <div class="counter-section">
+                <button class="counter-btn" id="decreaseBtn">-</button>
+                <div class="counter-display" id="counterDisplay">۰</div>
+                <button class="counter-btn" id="increaseBtn">+</button>
+                <button class="reset-counter" id="resetBtn">بازنشانی</button>
+            </div>
+            
+            <div class="zekr-source">
+                تعداد توصیه شده: ۱۰۰ بار
+            </div>
+        </div>
+    </div>
+    
+    <div class="hadith fade-in">
+        <i class="fas fa-quote-right" style="color: var(--gold); margin-left: 10px;"></i>
+        بهترین ذکر، "لا إله إلا الله" و بهترین دعا، "الحمد لله" است.
+        <i class="fas fa-quote-left" style="color: var(--gold); margin-right: 10px;"></i>
+        <br>
+        <span style="font-size: 0.9rem; opacity: 0.8; margin-top: 5px; display: block;">پیامبر اکرم (ص)</span>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const dayButtons = document.querySelectorAll('.day-btn');
+        const zekrTitle = document.querySelector('.zekr-title');
+        const zekrArabic = document.querySelector('.zekr-arabic');
+        const zekrTranslation = document.querySelector('.zekr-translation');
+        const zekrSource = document.querySelector('.zekr-source');
+        const currentDayElement = document.querySelector('.current-day');
+        
+        // عناصر شمارنده
+        const decreaseBtn = document.getElementById('decreaseBtn');
+        const increaseBtn = document.getElementById('increaseBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const counterDisplay = document.getElementById('counterDisplay');
+        
+        let currentCount = 0;
+        
+        // داده‌های اذکار هر روز
+        const azkar = {
+            saturday: {
+                title: 'ذکر روز شنبه',
+                arabic: 'سُبْحَانَ اللَّهِ وَالْحَمْدُ لِلَّهِ وَلَا إِلَهَ إِلَّا اللَّهُ وَاللَّهُ أَكْبَرُ',
+                translation: 'پاک و منزه است خدا و ستایش مخصوص خداست و هیچ معبودی جز خدا نیست و خدا بزرگتر است.',
+                source: 'تعداد توصیه شده: ۱۰۰ بار',
+                recommended: 100
+            },
+            sunday: {
+                title: 'ذکر روز یکشنبه',
+                arabic: 'لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ الْعَلِيِّ الْعَظِيمِ',
+                translation: 'هیچ نیرو و توانی جز به خداوند بلندمرتبه و بزرگ نیست.',
+                source: 'تعداد توصیه شده: ۱۰۰ بار',
+                recommended: 100
+            },
+            monday: {
+                title: 'ذکر روز دوشنبه',
+                arabic: 'أَسْتَغْفِرُ اللَّهَ رَبِّي وَأَتُوبُ إِلَيْهِ',
+                translation: 'از خداوند، پروردگارم، آمرزش می‌خواهم و به سوی او بازمی‌گردم.',
+                source: 'تعداد توصیه شده: ۷۰ بار',
+                recommended: 70
+            },
+            tuesday: {
+                title: 'ذکر روز سه‌شنبه',
+                arabic: 'اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ وَآلِ مُحَمَّدٍ',
+                translation: 'خدایا! بر محمد و خاندان محمد درود فرست.',
+                source: 'تعداد توصیه شده: ۱۰۰ بار',
+                recommended: 100
+            },
+            wednesday: {
+                title: 'ذکر روز چهارشنبه',
+                arabic: 'يَا رَبِّ يَا رَحْمَانُ يَا رَحِيمُ يَا كَرِيمُ',
+                translation: 'ای پروردگار! ای بخشاینده! ای مهربان! ای بزرگوار!',
+                source: 'تعداد توصیه شده: ۴۰ بار',
+                recommended: 40
+            },
+            thursday: {
+                title: 'ذکر روز پنجشنبه',
+                arabic: 'اللَّهُمَّ اغْفِرْ لِي وَارْحَمْنِي وَاهْدِنِي وَعَافِنِي وَارْزُقْنِي',
+                translation: 'خدایا! مرا بیامرز و به من رحم کن و مرا هدایت نما و سلامت بدار و به من روزی عطا کن.',
+                source: 'تعداد توصیه شده: ۱۰ بار',
+                recommended: 10
+            },
+            friday: {
+                title: 'ذکر روز جمعه',
+                arabic: 'أَسْتَغْفِرُ اللَّهَ الَّذِي لَا إِلَهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ وَأَتُوبُ إِلَيْهِ',
+                translation: 'آمرزش می‌خواهم از خدایی که معبودی جز او نیست، زنده و پایدار است و به سوی او بازمی‌گردم.',
+                source: 'تعداد توصیه شده: ۱۰۰ بار',
+                recommended: 100
+            }
+        };
+        
+        // تعیین روز فعلی
+        const today = new Date().getDay();
+        const daysMap = {
+            0: 'sunday',
+            1: 'monday',
+            2: 'tuesday',
+            3: 'wednesday',
+            4: 'thursday',
+            5: 'friday',
+            6: 'saturday'
+        };
+        const todayKey = daysMap[today];
+        
+        // مدیریت شمارنده
+        function updateCounter() {
+            counterDisplay.textContent = currentCount.toLocaleString('fa-IR');
+            
+            // تغییر رنگ وقتی به تعداد توصیه شده رسید
+            if (currentCount >= getCurrentZekrRecommended()) {
+                counterDisplay.style.color = '#27ae60';
+            } else {
+                counterDisplay.style.color = 'var(--gold)';
+            }
+        }
+        
+        function getCurrentZekrRecommended() {
+            const activeDay = document.querySelector('.day-btn.active').dataset.day;
+            return azkar[activeDay].recommended;
+        }
+        
+        decreaseBtn.addEventListener('click', function() {
+            if (currentCount > 0) {
+                currentCount--;
+                updateCounter();
+            }
+        });
+        
+        increaseBtn.addEventListener('click', function() {
+            currentCount++;
+            updateCounter();
+        });
+        
+        resetBtn.addEventListener('click', function() {
+            currentCount = 0;
+            updateCounter();
+        });
+        
+        // تنظیم روز فعلی به عنوان فعال
+        dayButtons.forEach(btn => {
+            if (btn.dataset.day === todayKey) {
+                btn.classList.add('active');
+                currentDayElement.textContent = 'امروز';
+            }
+            
+            btn.addEventListener('click', function() {
+                // حذف کلاس active از همه دکمه‌ها
+                dayButtons.forEach(b => b.classList.remove('active'));
+                
+                // اضافه کردن کلاس active به دکمه انتخاب شده
+                this.classList.add('active');
+                
+                // به‌روزرسانی نمایش ذکر
+                const day = this.dataset.day;
+                updateZekrDisplay(day);
+                
+                // بازنشانی شمارنده
+                currentCount = 0;
+                updateCounter();
+                
+                // به‌روزرسانی برچسب "امروز"
+                if (day === todayKey) {
+                    currentDayElement.textContent = 'امروز';
+                } else {
+                    currentDayElement.textContent = '';
+                }
+            });
+        });
+        
+        // تابع به‌روزرسانی نمایش ذکر
+        function updateZekrDisplay(day) {
+            const zekr = azkar[day];
+            
+            if (zekr) {
+                zekrTitle.innerHTML = `<i class="fas fa-praying-hands zekr-icon"></i> ${zekr.title}`;
+                zekrArabic.textContent = zekr.arabic;
+                zekrTranslation.textContent = zekr.translation;
+                zekrSource.textContent = zekr.source;
+            }
+        }
+        
+        // نمایش ذکر روز فعلی در ابتدا
+        updateZekrDisplay(todayKey);
+        updateCounter();
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,581 @@
+{% extends "base.html" %}
+
+{% block title %}مطالعه آنلاین - {{ book.title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Reader Container */
+    .reader-container {
+        background: var(--card-bg);
+        border-radius: 20px;
+        border: 1px solid var(--border-gold);
+        overflow: hidden;
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.4);
+        margin: 2rem 0;
+    }
+
+    /* Reader Header */
+    .reader-header {
+        background: linear-gradient(135deg, var(--card-bg) 0%, rgba(26, 26, 46, 0.95) 100%);
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid var(--border-gold);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        backdrop-filter: blur(10px);
+    }
+
+    .reader-title {
+        color: var(--primary-gold);
+        font-size: 1.4rem;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+    }
+
+    .reader-author {
+        color: var(--text-muted);
+        font-size: 1rem;
+    }
+
+    .reader-actions {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
+
+    /* Reader Content */
+    .reader-content {
+        padding: 3rem;
+        min-height: 600px;
+        background: #ffffff;
+        color: #2c3e50;
+        line-height: 2;
+        font-size: 1.1rem;
+        text-align: justify;
+        position: relative;
+    }
+
+    .reader-content.dark-mode {
+        background: #1a1a2e;
+        color: #e9ecef;
+    }
+
+    .content-wrapper {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .book-title {
+        text-align: center;
+        margin-bottom: 2rem;
+        color: #2c3e50;
+        font-size: 2.5rem;
+        font-weight: 700;
+    }
+
+    .book-author {
+        text-align: center;
+        margin-bottom: 3rem;
+        color: #6c757d;
+        font-size: 1.3rem;
+        font-weight: 500;
+    }
+
+    .book-description {
+        margin-bottom: 3rem;
+        font-size: 1.05rem;
+    }
+
+    .sample-content {
+        background: #f8f9fa;
+        padding: 2.5rem;
+        border-radius: 15px;
+        margin: 2rem 0;
+        border-left: 4px solid var(--primary-gold);
+    }
+
+    .sample-content.dark-mode {
+        background: #25253d;
+        color: #e9ecef;
+    }
+
+    .sample-title {
+        color: #2c3e50;
+        margin-bottom: 1rem;
+        font-size: 1.3rem;
+        font-weight: 600;
+    }
+
+    .sample-title.dark-mode {
+        color: #e9ecef;
+    }
+
+    /* PDF Viewer */
+    .pdf-viewer {
+        text-align: center;
+        padding: 3rem 2rem;
+    }
+
+    .pdf-icon {
+        font-size: 4rem;
+        color: #dc3545;
+        margin-bottom: 1.5rem;
+        display: block;
+    }
+
+    /* Reader Controls */
+    .reader-controls {
+        background: var(--card-bg);
+        padding: 1.5rem 2rem;
+        border-top: 1px solid var(--border-gold);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        backdrop-filter: blur(10px);
+    }
+
+    .page-nav {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
+
+    .page-info {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        background: rgba(255, 255, 255, 0.05);
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        min-width: 100px;
+        text-align: center;
+    }
+
+    .font-controls {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
+
+    .font-size-btn {
+        width: 40px;
+        height: 40px;
+        border: 1px solid var(--border-gold);
+        border-radius: 50%;
+        background: transparent;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .font-size-btn:hover {
+        background: rgba(212, 175, 55, 0.1);
+        border-color: var(--primary-gold);
+        transform: scale(1.1);
+    }
+
+    .font-size-label {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        min-width: 80px;
+        text-align: center;
+    }
+
+    /* Access Denied */
+    .access-denied {
+        text-align: center;
+        padding: 4rem 2rem;
+    }
+
+    .access-denied-icon {
+        font-size: 4rem;
+        color: var(--primary-gold);
+        margin-bottom: 1rem;
+    }
+
+    /* Fullscreen Mode */
+    .reader-container.fullscreen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        margin: 0;
+        border-radius: 0;
+        z-index: 9999;
+    }
+
+    .reader-container.fullscreen .reader-content {
+        min-height: calc(100vh - 140px);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .reader-header {
+            flex-direction: column;
+            gap: 1rem;
+            text-align: center;
+            padding: 1.5rem 1rem;
+        }
+        
+        .reader-controls {
+            flex-direction: column;
+            gap: 1rem;
+            padding: 1.5rem 1rem;
+        }
+        
+        .reader-content {
+            padding: 2rem 1rem;
+            font-size: 1rem;
+        }
+        
+        .book-title {
+            font-size: 2rem;
+        }
+        
+        .page-nav {
+            order: 2;
+        }
+        
+        .font-controls {
+            order: 1;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .reader-actions {
+            flex-direction: column;
+            width: 100%;
+        }
+        
+        .reader-actions .btn {
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .page-nav {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <h1 class="page-title">مطالعه آنلاین</h1>
+        <p class="page-subtitle">{{ book.title }} - {{ book.author }}</p>
+    </div>
+</div>
+
+<div class="container">
+    {% if has_access or book.is_free %}
+    <div class="reader-container" id="readerContainer">
+        <!-- Reader Header -->
+        <div class="reader-header">
+            <div>
+                <div class="reader-title">{{ book.title }}</div>
+                <div class="reader-author">{{ book.author }}</div>
+            </div>
+            <div class="reader-actions">
+                <a href="{% url 'download_book' book.id %}" class="btn btn-primary">
+                    <i class="fas fa-download"></i>
+                    دانلود PDF
+                </a>
+                <button class="btn btn-outline" onclick="toggleFullscreen()">
+                    <i class="fas fa-expand"></i>
+                    تمام صفحه
+                </button>
+                <button class="btn btn-outline" onclick="toggleDarkMode()">
+                    <i class="fas fa-moon"></i>
+                    حالت شب
+                </button>
+            </div>
+        </div>
+        
+        <!-- Reader Content -->
+        <div class="reader-content" id="bookContent">
+            {% if book.pdf_file %}
+            <!-- PDF Viewer -->
+            <div class="pdf-viewer">
+                <i class="fas fa-file-pdf pdf-icon"></i>
+                <h3 style="color: #333; margin-bottom: 1rem; font-size: 1.5rem;">
+                    فایل PDF کتاب
+                </h3>
+                <p style="color: #666; margin-bottom: 2rem; line-height: 1.6;">
+                    برای مشاهده کامل کتاب، لطفاً فایل PDF را دانلود کنید
+                </p>
+                <a href="{{ book.pdf_file.url }}" class="btn btn-primary btn-lg" download>
+                    <i class="fas fa-download"></i>
+                    دانلود فایل کامل
+                </a>
+            </div>
+            {% else %}
+            <!-- Text Content -->
+            <div class="content-wrapper">
+                <h1 class="book-title" id="bookMainTitle">{{ book.title }}</h1>
+                <h2 class="book-author" id="bookMainAuthor">{{ book.author }}</h2>
+                
+                <div class="book-description" id="bookDescription">
+                    {{ book.description|linebreaks }}
+                </div>
+                
+                <!-- Sample Content -->
+                <div class="sample-content" id="sampleContent">
+                    <h3 class="sample-title">نمونه‌ای از محتوای کتاب</h3>
+                    <p style="line-height: 1.8; margin-bottom: 1rem;">
+                        این بخش نمونه‌ای از محتوای کتاب را نمایش می‌دهد. برای مطالعه کامل کتاب، 
+                        لطفاً فایل PDF را دانلود کنید یا نسخه چاپی آن را تهیه نمایید.
+                    </p>
+                    <p style="line-height: 1.8;">
+                        مطالعه کتاب‌های معنوی و مذهبی می‌تواند تاثیر عمیقی بر رشد معنوی 
+                        و شناخت بیشتر معارف دینی داشته باشد. امیدواریم این کتاب برای شما 
+                        مفید واقع شود و بتوانید از معارف آن بهره‌مند شوید.
+                    </p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Reader Controls -->
+        <div class="reader-controls">
+            <div class="page-nav">
+                <button class="btn btn-outline" onclick="previousPage()">
+                    <i class="fas fa-chevron-right"></i>
+                    صفحه قبل
+                </button>
+                <span class="page-info" id="pageInfo">صفحه 1 از 1</span>
+                <button class="btn btn-outline" onclick="nextPage()">
+                    صفحه بعد
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            
+            <div class="font-controls">
+                <button class="font-size-btn" onclick="changeFontSize(-1)" title="کوچک‌تر">
+                    <i class="fas fa-minus"></i>
+                </button>
+                <span class="font-size-label" id="fontSizeLabel">اندازه قلم</span>
+                <button class="font-size-btn" onclick="changeFontSize(1)" title="بزرگ‌تر">
+                    <i class="fas fa-plus"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <!-- Access Denied -->
+    <div class="access-denied">
+        <div class="access-denied-icon">
+            <i class="fas fa-lock"></i>
+        </div>
+        <h3 style="color: var(--text-secondary); margin-bottom: 1rem; font-weight: 600;">
+            دسترسی محدود
+        </h3>
+        <p style="color: var(--text-muted); margin-bottom: 2rem; line-height: 1.6;">
+            شما به این کتاب دسترسی ندارید. برای مطالعه باید آن را خریداری کنید.
+        </p>
+        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+            <a href="{% url 'add_book_to_cart' book.id %}" class="btn btn-primary">
+                <i class="fas fa-shopping-cart"></i>
+                خرید کتاب
+            </a>
+            <a href="{% url 'book_list' %}" class="btn btn-outline">
+                <i class="fas fa-book"></i>
+                مشاهده کتاب‌های دیگر
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    // Reader State
+    let currentFontSize = 100;
+    let currentPage = 1;
+    let totalPages = 1;
+    let isDarkMode = false;
+    let isFullscreen = false;
+
+    // Font Size Control
+    function changeFontSize(delta) {
+        currentFontSize += delta * 10;
+        currentFontSize = Math.max(80, Math.min(200, currentFontSize));
+        
+        const content = document.getElementById('bookContent');
+        content.style.fontSize = currentFontSize + '%';
+        
+        updateFontSizeLabel();
+        saveReaderSettings();
+    }
+
+    function updateFontSizeLabel() {
+        const label = document.getElementById('fontSizeLabel');
+        label.textContent = `${currentFontSize}%`;
+    }
+
+    // Dark Mode Toggle
+    function toggleDarkMode() {
+        isDarkMode = !isDarkMode;
+        const content = document.getElementById('bookContent');
+        const sampleContent = document.getElementById('sampleContent');
+        const bookTitle = document.getElementById('bookMainTitle');
+        const bookAuthor = document.getElementById('bookMainAuthor');
+        const sampleTitle = document.querySelector('.sample-title');
+        
+        if (isDarkMode) {
+            content.classList.add('dark-mode');
+            if (sampleContent) sampleContent.classList.add('dark-mode');
+            if (bookTitle) bookTitle.style.color = '#e9ecef';
+            if (bookAuthor) bookAuthor.style.color = '#adb5bd';
+            if (sampleTitle) sampleTitle.classList.add('dark-mode');
+        } else {
+            content.classList.remove('dark-mode');
+            if (sampleContent) sampleContent.classList.remove('dark-mode');
+            if (bookTitle) bookTitle.style.color = '#2c3e50';
+            if (bookAuthor) bookAuthor.style.color = '#6c757d';
+            if (sampleTitle) sampleTitle.classList.remove('dark-mode');
+        }
+        
+        saveReaderSettings();
+    }
+
+    // Fullscreen Toggle
+    function toggleFullscreen() {
+        const reader = document.getElementById('readerContainer');
+        
+        if (!isFullscreen) {
+            if (reader.requestFullscreen) {
+                reader.requestFullscreen();
+            } else if (reader.webkitRequestFullscreen) {
+                reader.webkitRequestFullscreen();
+            } else if (reader.msRequestFullscreen) {
+                reader.msRequestFullscreen();
+            }
+            reader.classList.add('fullscreen');
+            isFullscreen = true;
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            } else if (document.msExitFullscreen) {
+                document.msExitFullscreen();
+            }
+            reader.classList.remove('fullscreen');
+            isFullscreen = false;
+        }
+    }
+
+    // Page Navigation (Basic Implementation)
+    function previousPage() {
+        if (currentPage > 1) {
+            currentPage--;
+            updatePageInfo();
+            // In a real implementation, you would load the previous page content
+        }
+    }
+
+    function nextPage() {
+        if (currentPage < totalPages) {
+            currentPage++;
+            updatePageInfo();
+            // In a real implementation, you would load the next page content
+        }
+    }
+
+    function updatePageInfo() {
+        const pageInfo = document.getElementById('pageInfo');
+        pageInfo.textContent = `صفحه ${currentPage} از ${totalPages}`;
+    }
+
+    // Save and Load Reader Settings
+    function saveReaderSettings() {
+        const settings = {
+            fontSize: currentFontSize,
+            darkMode: isDarkMode
+        };
+        localStorage.setItem('readerSettings', JSON.stringify(settings));
+    }
+
+    function loadReaderSettings() {
+        const saved = localStorage.getItem('readerSettings');
+        if (saved) {
+            const settings = JSON.parse(saved);
+            currentFontSize = settings.fontSize || 100;
+            isDarkMode = settings.darkMode || false;
+            
+            // Apply settings
+            changeFontSize(0); // This will update the font size
+            if (isDarkMode) {
+                toggleDarkMode(); // This will toggle dark mode on
+            }
+        }
+    }
+
+    // Keyboard Shortcuts
+    document.addEventListener('keydown', function(e) {
+        if (!isFullscreen) return;
+        
+        switch(e.key) {
+            case 'ArrowRight':
+                previousPage();
+                break;
+            case 'ArrowLeft':
+                nextPage();
+                break;
+            case '+':
+            case '=':
+                changeFontSize(1);
+                break;
+            case '-':
+                changeFontSize(-1);
+                break;
+            case 'd':
+            case 'D':
+                toggleDarkMode();
+                break;
+            case 'f':
+            case 'F':
+                if (e.ctrlKey) toggleFullscreen();
+                break;
+            case 'Escape':
+                if (isFullscreen) toggleFullscreen();
+                break;
+        }
+    });
+
+    // Fullscreen Change Event
+    document.addEventListener('fullscreenchange', function() {
+        isFullscreen = !!document.fullscreenElement;
+    });
+
+    // Initialize Reader
+    document.addEventListener('DOMContentLoaded', function() {
+        loadReaderSettings();
+        updatePageInfo();
+        updateFontSizeLabel();
+        
+        // Add animation to reader container
+        const reader = document.getElementById('readerContainer');
+        if (reader) {
+            reader.style.opacity = '0';
+            reader.style.transform = 'translateY(20px)';
+            
+            setTimeout(() => {
+                reader.style.transition = 'all 0.6s ease';
+                reader.style.opacity = '1';
+                reader.style.transform = 'translateY(0)';
+            }, 300);
+        }
+    });
+
+    // Page load simulation (for demo purposes)
+    function simulatePageLoad() {
+        // This would be replaced with actual page loading logic
+        console.log('Loading page content...');
+    }
+</script>
+{% endblock %}

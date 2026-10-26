@@ -1,0 +1,329 @@
+{% extends 'social/base.html' %}
+{% load static %}
+
+{% block title %}ویرایش پروفایل - شبکه اجتماعی مهدوی{% endblock %}
+
+{% block content %}
+<div class="edit-profile">
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">
+                <i class="fas fa-user-edit card-icon"></i>
+                ویرایش پروفایل
+            </h2>
+            <a href="{% url 'social_profile' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-right"></i>
+                بازگشت به پروفایل
+            </a>
+        </div>
+        
+        <div class="profile-form">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <div class="form-section">
+                    <h3 class="section-title">عکس پروفایل</h3>
+                    
+                    <div class="form-group">
+                        <div class="avatar-upload-container">
+                            <div class="current-avatar-preview">
+                                <div class="avatar-preview">
+                                    {% if user.profile_image %}
+                                        <img src="{{ user.profile_image.url }}" alt="{{ user.get_full_name }}" id="avatar-preview">
+                                    {% else %}
+                                        <div class="avatar-placeholder" id="avatar-placeholder">
+                                            {{ user.first_name|first }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="avatar-actions">
+                                    <label for="profile-image-input" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-camera"></i>
+                                        تغییر عکس
+                                    </label>
+                                    {% if user.profile_image %}
+                                    <button type="button" class="btn btn-secondary btn-sm" id="remove-image-btn">
+                                        <i class="fas fa-trash"></i>
+                                        حذف عکس
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <input type="file" id="profile-image-input" name="profile_image" 
+                                   accept="image/*" style="display: none;">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h3 class="section-title">اطلاعات شخصی</h3>
+                    
+                    <div class="form-group">
+                        <label class="form-label">نام</label>
+                        <input type="text" name="first_name" value="{{ user.first_name }}" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">نام خانوادگی</label>
+                        <input type="text" name="last_name" value="{{ user.last_name }}" class="form-control" required>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h3 class="section-title">اطلاعات شبکه اجتماعی</h3>
+                    
+                    <div class="form-group">
+                        <label class="form-label">بیوگرافی</label>
+                        <textarea name="bio" class="form-control" rows="4" placeholder="درباره خودت بنویس...">{{ form.bio.value|default:'' }}</textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">وبسایت</label>
+                        <input type="url" name="website" value="{{ form.website.value|default:'' }}" class="form-control" placeholder="https://...">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-checkbox">
+                            <input type="checkbox" name="is_private" {% if form.is_private.value %}checked{% endif %}>
+                            <span class="checkmark"></span>
+                            حساب خصوصی
+                        </label>
+                        <small class="form-text">در حساب خصوصی، افراد برای دنبال کردن شما نیاز به تایید دارند</small>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i>
+                        ذخیره تغییرات
+                    </button>
+                    <a href="{% url 'social_profile' %}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i>
+                        انصراف
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.edit-profile {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.profile-form {
+    padding: 20px 0;
+}
+
+.form-section {
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border-gold);
+}
+
+.section-title {
+    color: var(--gold);
+    margin-bottom: 20px;
+    font-size: 1.1rem;
+}
+
+.avatar-upload-container {
+    text-align: center;
+}
+
+.current-avatar-preview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.avatar-preview {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid var(--gold);
+    background: linear-gradient(135deg, var(--gold), var(--dark-gold));
+}
+
+.avatar-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    font-weight: bold;
+    color: #000;
+}
+
+.avatar-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.form-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    margin-bottom: 5px;
+}
+
+.form-checkbox input[type="checkbox"] {
+    display: none;
+}
+
+.checkmark {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--gold);
+    border-radius: 4px;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.form-checkbox input[type="checkbox"]:checked + .checkmark {
+    background: var(--gold);
+}
+
+.form-checkbox input[type="checkbox"]:checked + .checkmark::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #000;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+.form-text {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--text-light);
+    opacity: 0.7;
+    margin-top: 5px;
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 30px;
+}
+
+@media (max-width: 768px) {
+    .avatar-actions {
+        flex-direction: column;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const fileInput = document.getElementById('profile-image-input');
+    const avatarPreview = document.getElementById('avatar-preview');
+    const avatarPlaceholder = document.getElementById('avatar-placeholder');
+    const removeImageBtn = document.getElementById('remove-image-btn');
+    
+    // پیش‌نمایش عکس هنگام انتخاب
+    fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                // مخفی کردن placeholder و نمایش عکس
+                if (avatarPlaceholder) {
+                    avatarPlaceholder.style.display = 'none';
+                }
+                
+                if (avatarPreview) {
+                    avatarPreview.src = e.target.result;
+                } else {
+                    // اگر عکس قبلی وجود نداشت، ایجاد کن
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.id = 'avatar-preview';
+                    img.style.width = '100%';
+                    img.style.height = '100%';
+                    img.style.objectFit = 'cover';
+                    
+                    const avatarPreviewDiv = document.querySelector('.avatar-preview');
+                    avatarPreviewDiv.innerHTML = '';
+                    avatarPreviewDiv.appendChild(img);
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+    
+    // حذف عکس پروفایل
+    if (removeImageBtn) {
+        removeImageBtn.addEventListener('click', function() {
+            if (confirm('آیا از حذف عکس پروفایل مطمئن هستید؟')) {
+                fetch('{% url "remove_profile_image" %}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken'),
+                        'Content-Type': 'application/json',
+                    },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // نمایش placeholder
+                        if (avatarPreview) {
+                            avatarPreview.style.display = 'none';
+                        }
+                        
+                        const avatarPreviewDiv = document.querySelector('.avatar-preview');
+                        avatarPreviewDiv.innerHTML = `
+                            <div class="avatar-placeholder" id="avatar-placeholder">
+                                {{ user.first_name|first }}
+                            </div>
+                        `;
+                        
+                        // مخفی کردن دکمه حذف
+                        removeImageBtn.style.display = 'none';
+                        
+                        location.reload();
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            }
+        });
+    }
+});
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}

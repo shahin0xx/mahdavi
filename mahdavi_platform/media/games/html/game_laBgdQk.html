@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بوم نقاشی</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .tools {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .color-picker {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 5px;
+            margin-bottom: 15px;
+        }
+        
+        .color {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid #ddd;
+            transition: transform 0.2s;
+        }
+        
+        .color:hover {
+            transform: scale(1.1);
+        }
+        
+        .color.active {
+            border: 2px solid #333;
+        }
+        
+        button {
+            padding: 8px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #45a049;
+        }
+        
+        #clearBtn {
+            background-color: #f44336;
+        }
+        
+        #clearBtn:hover {
+            background-color: #d32f2f;
+        }
+        
+        canvas {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: white;
+            cursor: crosshair;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .instructions {
+            margin-top: 15px;
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>بوم نقاشی</h1>
+        
+        <div class="tools">
+            <button id="clearBtn">پاک کردن بوم</button>
+            <button id="saveBtn">ذخیره نقاشی</button>
+        </div>
+        
+        <div class="color-picker">
+            <div class="color active" style="background-color: #000000;" data-color="#000000"></div>
+            <div class="color" style="background-color: #ff0000;" data-color="#ff0000"></div>
+            <div class="color" style="background-color: #0000ff;" data-color="#0000ff"></div>
+            <div class="color" style="background-color: #008000;" data-color="#008000"></div>
+            <div class="color" style="background-color: #ffff00;" data-color="#ffff00"></div>
+            <div class="color" style="background-color: #ffa500;" data-color="#ffa500"></div>
+            <div class="color" style="background-color: #800080;" data-color="#800080"></div>
+            <div class="color" style="background-color: #ffc0cb;" data-color="#ffc0cb"></div>
+            <div class="color" style="background-color: #a52a2a;" data-color="#a52a2a"></div>
+            <div class="color" style="background-color: #ffffff; border: 1px solid #ccc;" data-color="#ffffff"></div>
+        </div>
+        
+        <canvas id="paintCanvas" width="800" height="500"></canvas>
+        
+        <div class="instructions">
+            برای نقاشی کردن، کلیک کنید و موس را حرکت دهید. برای تغییر رنگ، روی رنگ مورد نظر کلیک کنید.
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('paintCanvas');
+        const ctx = canvas.getContext('2d');
+        const clearBtn = document.getElementById('clearBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const colors = document.querySelectorAll('.color');
+        
+        let isDrawing = false;
+        let lastX = 0;
+        let lastY = 0;
+        let currentColor = '#000000';
+        
+        // تنظیمات اولیه بوم
+        ctx.lineJoin = 'round';
+        ctx.lineCap = 'round';
+        ctx.lineWidth = 3;
+        
+        // شروع نقاشی
+        function startDrawing(e) {
+            isDrawing = true;
+            [lastX, lastY] = [e.offsetX, e.offsetY];
+        }
+        
+        // نقاشی کردن
+        function draw(e) {
+            if (!isDrawing) return;
+            
+            ctx.strokeStyle = currentColor;
+            ctx.beginPath();
+            ctx.moveTo(lastX, lastY);
+            ctx.lineTo(e.offsetX, e.offsetY);
+            ctx.stroke();
+            
+            [lastX, lastY] = [e.offsetX, e.offsetY];
+        }
+        
+        // پایان نقاشی
+        function stopDrawing() {
+            isDrawing = false;
+        }
+        
+        // پاک کردن بوم
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+        
+        // تغییر رنگ
+        function changeColor(e) {
+            // حذف کلاس active از همه رنگ‌ها
+            colors.forEach(color => color.classList.remove('active'));
+            
+            // اضافه کردن کلاس active به رنگ انتخاب شده
+            e.target.classList.add('active');
+            
+            // تغییر رنگ فعلی
+            currentColor = e.target.getAttribute('data-color');
+        }
+        
+        // ذخیره نقاشی
+        function saveDrawing() {
+            const dataURL = canvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.download = 'نقاشی-من.png';
+            link.href = dataURL;
+            link.click();
+        }
+        
+        // رویدادهای موس
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+        
+        // رویدادهای لمسی برای دستگاه‌های لمسی
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const mouseEvent = new MouseEvent('mousedown', {
+                clientX: touch.clientX,
+                clientY: touch.clientY
+            });
+            canvas.dispatchEvent(mouseEvent);
+        });
+        
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const mouseEvent = new MouseEvent('mousemove', {
+                clientX: touch.clientX,
+                clientY: touch.clientY
+            });
+            canvas.dispatchEvent(mouseEvent);
+        });
+        
+        canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            const mouseEvent = new MouseEvent('mouseup', {});
+            canvas.dispatchEvent(mouseEvent);
+        });
+        
+        // رویدادهای دکمه‌ها
+        clearBtn.addEventListener('click', clearCanvas);
+        saveBtn.addEventListener('click', saveDrawing);
+        
+        // رویدادهای رنگ‌ها
+        colors.forEach(color => color.addEventListener('click', changeColor));
+    </script>
+</body>
+</html>

@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مدیریت گروه - {{ room.name }}</title>
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/font-face.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --telegram-bg: #0e1621;
+            --telegram-secondary: #17212b;
+            --telegram-accent: #2b5278;
+            --telegram-green: #00af9c;
+            --telegram-text: #e6eaed;
+            --telegram-text-secondary: #7f91a4;
+            --gold: #d4af37;
+            --dark-gold: #b8941f;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Vazir', sans-serif;
+        }
+
+        body {
+            background: var(--telegram-bg);
+            color: var(--telegram-text);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .top-nav {
+            background: var(--telegram-secondary);
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--telegram-accent);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .back-button {
+            background: none;
+            border: none;
+            color: var(--telegram-text);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: background 0.3s ease;
+        }
+
+        .back-button:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .nav-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin: 0;
+            color: var(--telegram-text);
+        }
+
+        .manage-room-container {
+            height: calc(100vh - 60px);
+            overflow-y: auto;
+            padding: 20px;
+            background: var(--telegram-bg);
+        }
+
+        .info-card {
+            background: var(--telegram-secondary);
+            border-radius: 12px;
+            border: 1px solid var(--telegram-accent);
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 16px;
+            background: var(--telegram-accent);
+            border-bottom: 1px solid var(--telegram-accent);
+        }
+
+        .card-header h3 {
+            margin: 0;
+            color: var(--telegram-text);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-content {
+            padding: 16px;
+        }
+
+        .user-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--gold), var(--dark-gold));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #000;
+            font-size: 1rem;
+        }
+
+        .user-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .user-badges {
+            display: flex;
+            gap: 8px;
+        }
+
+        .badge {
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+
+        .badge-creator {
+            background: var(--gold);
+            color: #000;
+        }
+
+        .badge-admin {
+            background: var(--telegram-accent);
+            color: var(--telegram-text);
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .btn-secondary {
+            background: var(--telegram-accent);
+            color: var(--telegram-text);
+        }
+
+        .btn-secondary:hover {
+            background: #3a6d9c;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--telegram-text);
+            font-weight: 600;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--telegram-bg);
+            border: 1px solid var(--telegram-accent);
+            border-radius: 8px;
+            color: var(--telegram-text);
+            font-size: 0.95rem;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--telegram-green);
+        }
+
+        .danger-zone {
+            border: 1px solid #e74c3c;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-top: 30px;
+        }
+
+        .danger-header {
+            background: rgba(231, 76, 60, 0.2);
+            padding: 16px;
+            border-bottom: 1px solid #e74c3c;
+        }
+
+        .danger-header h3 {
+            margin: 0;
+            color: #e74c3c;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .danger-content {
+            padding: 16px;
+        }
+
+        .warning-text {
+            color: #e74c3c;
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+
+        .manage-room-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .manage-room-container::-webkit-scrollbar-track {
+            background: var(--telegram-secondary);
+        }
+
+        .manage-room-container::-webkit-scrollbar-thumb {
+            background: var(--telegram-accent);
+            border-radius: 3px;
+        }
+
+        .manage-room-container::-webkit-scrollbar-thumb:hover {
+            background: var(--telegram-green);
+        }
+
+        @media (max-width: 768px) {
+            .manage-room-container {
+                padding: 15px;
+            }
+            
+            .top-nav {
+                padding: 10px 12px;
+            }
+            
+            .user-item {
+                flex-direction: column;
+                gap: 12px;
+                align-items: flex-start;
+            }
+            
+            .user-actions {
+                width: 100%;
+                justify-content: flex-end;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="top-nav">
+        <button class="back-button" onclick="location.href='{% url 'chat_room' room.id %}'">
+            <i class="fas fa-arrow-right"></i>
+        </button>
+        <h1 class="nav-title">مدیریت گروه: {{ room.name }}</h1>
+    </div>
+
+    <div class="manage-room-container">
+        <div class="info-card">
+            <div class="card-header">
+                <h3>
+                    <i class="fas fa-info-circle"></i>
+                    اطلاعات گروه
+                </h3>
+            </div>
+            <div class="card-content">
+                <p><strong>نام:</strong> {{ room.name }}</p>
+                <p><strong>توضیحات:</strong> {{ room.description|default:"-" }}</p>
+                <p><strong>ایجاد شده توسط:</strong> {{ room.created_by.get_full_name }}</p>
+                <p><strong>تعداد اعضا:</strong> {{ room.participants.count }}</p>
+                <p><strong>تاریخ ایجاد:</strong> {{ room.created_date|date:"Y/m/d H:i" }}</p>
+            </div>
+        </div>
+
+        <div class="info-card">
+            <div class="card-header">
+                <h3>
+                    <i class="fas fa-users"></i>
+                    اعضای گروه
+                </h3>
+            </div>
+            <div class="card-content">
+                {% for participant in room.participants.all %}
+                <div class="user-item">
+                    <div class="user-info">
+                        <div class="user-avatar">
+                            {{ participant.first_name|first }}
+                        </div>
+                        <div class="user-details">
+                            <div class="user-name">{{ participant.get_full_name }}</div>
+                            <div class="user-badges">
+                                {% if participant == room.created_by %}
+                                <span class="badge badge-creator">سازنده</span>
+                                {% elif participant in room.admins.all %}
+                                <span class="badge badge-admin">مدیر</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="user-actions">
+                        {% if participant != request.user and participant != room.created_by %}
+                            {% if room.created_by == request.user or request.user in room.admins.all %}
+                            <form method="post" style="display: inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="toggle_admin">
+                                <input type="hidden" name="user_id" value="{{ participant.id }}">
+                                <button type="submit" class="btn btn-secondary">
+                                    {% if participant in room.admins.all %}
+                                    <i class="fas fa-user-minus"></i>
+                                    حذف مدیریت
+                                    {% else %}
+                                    <i class="fas fa-user-plus"></i>
+                                    مدیر کردن
+                                    {% endif %}
+                                </button>
+                            </form>
+                            
+                            <form method="post" style="display: inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="remove_participant">
+                                <input type="hidden" name="user_id" value="{{ participant.id }}">
+                                <button type="submit" class="btn btn-danger" onclick="return confirm('آیا از حذف {{ participant.get_full_name }} اطمینان دارید؟')">
+                                    <i class="fas fa-trash"></i>
+                                    حذف
+                                </button>
+                            </form>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        {% if room.created_by == request.user or request.user in room.admins.all %}
+        <div class="info-card">
+            <div class="card-header">
+                <h3>
+                    <i class="fas fa-user-plus"></i>
+                    اضافه کردن عضو جدید
+                </h3>
+            </div>
+            <div class="card-content">
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="add_participants">
+                    
+                    <div class="form-group">
+                        <label class="form-label">شماره تلفن کاربر</label>
+                        <input type="text" name="phone" class="form-control" placeholder="09xxxxxxxxx" maxlength="11" required>
+                    </div>
+                    
+                    <button type="submit" class="btn" style="background: var(--telegram-green); color: white;">
+                        <i class="fas fa-plus"></i>
+                        اضافه کردن کاربر
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if room.created_by == request.user %}
+        <div class="danger-zone">
+            <div class="danger-header">
+                <h3>
+                    <i class="fas fa-exclamation-triangle"></i>
+                    حذف گروه
+                </h3>
+            </div>
+            <div class="danger-content">
+                <p class="warning-text">
+                    <i class="fas fa-exclamation-circle"></i>
+                    توجه: با حذف گروه، تمامی پیام‌ها و اطلاعات آن پاک می‌شود و این عمل غیرقابل بازگشت است.
+                </p>
+                <form method="post" onsubmit="return confirm('آیا از حذف این گروه اطمینان دارید؟ این عمل غیرقابل بازگشت است.')">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="delete_room">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash"></i>
+                        حذف گروه
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+    setInterval(function() {
+        location.reload();
+    }, 30000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,401 @@
+{% extends "base.html" %}
+
+{% block title %}درخواست نامعتبر - پلتفرم مهدوی{% endblock %}
+
+{% block content %}
+<div class="error-container">
+    <div class="error-content">
+        <div class="error-animation">
+            <div class="error-circle">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="error-particles">
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+            </div>
+        </div>
+        
+        <h1 class="error-code">۴۰۰</h1>
+        <h2 class="error-title">درخواست نامعتبر</h2>
+        <p class="error-description">
+            درخواست ارسال شده توسط مرورگر شما معتبر نمی‌باشد. ممکن است آدرس وارد شده نادرست باشد یا اطلاعات ارسالی مشکل داشته باشد.
+        </p>
+        
+        <div class="error-stats">
+            <div class="stat">
+                <span class="stat-number">کد خطا</span>
+                <span class="stat-label">Bad Request</span>
+            </div>
+            <div class="stat">
+                <span class="stat-number">زمان</span>
+                <span class="stat-label" id="currentTime"></span>
+            </div>
+            <div class="stat">
+                <span class="stat-number">وضعیت</span>
+                <span class="stat-label">Client Error</span>
+            </div>
+        </div>
+
+        <div class="error-actions">
+            <a href="{% url 'home' %}" class="btn btn-primary btn-lg">
+                <i class="fas fa-home"></i>
+                صفحه اصلی
+            </a>
+            <button onclick="history.back()" class="btn btn-outline btn-lg">
+                <i class="fas fa-arrow-right"></i>
+                بازگشت
+            </button>
+            <a href="{% url 'contact' %}" class="btn btn-outline btn-lg">
+                <i class="fas fa-headset"></i>
+                پشتیبانی
+            </a>
+        </div>
+
+        <div class="error-tips">
+            <h4>راه‌حل‌های پیشنهادی:</h4>
+            <div class="tips-grid">
+                <div class="tip-card">
+                    <i class="fas fa-sync-alt"></i>
+                    <span>صفحه را رفرش کنید</span>
+                </div>
+                <div class="tip-card">
+                    <i class="fas fa-cookie"></i>
+                    <span>کوکی‌ها را پاک کنید</span>
+                </div>
+                <div class="tip-card">
+                    <i class="fas fa-link"></i>
+                    <span>آدرس را بررسی کنید</span>
+                </div>
+                <div class="tip-card">
+                    <i class="fas fa-redo"></i>
+                    <span>دوباره تلاش کنید</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .error-container {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        background: linear-gradient(135deg, 
+            rgba(15, 15, 26, 0.95) 0%, 
+            rgba(26, 26, 46, 0.9) 50%, 
+            rgba(10, 10, 18, 0.95) 100%);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .error-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><pattern id="grain" width="200" height="200" patternUnits="userSpaceOnUse"><circle cx="100" cy="100" r="1.5" fill="%23D4AF37" opacity="0.1"/></pattern><rect width="1000" height="1000" fill="url(%23grain)"/></svg>');
+        animation: grain 8s steps(10) infinite;
+    }
+
+    @keyframes grain {
+        0%, 100% { transform: translate(0, 0); }
+        10% { transform: translate(-5%, -10%); }
+        20% { transform: translate(-15%, 5%); }
+        30% { transform: translate(7%, -25%); }
+        40% { transform: translate(-5%, 25%); }
+        50% { transform: translate(-15%, 10%); }
+        60% { transform: translate(15%, 0%); }
+        70% { transform: translate(0%, 15%); }
+        80% { transform: translate(3%, 35%); }
+        90% { transform: translate(-10%, 10%); }
+    }
+
+    .error-content {
+        text-align: center;
+        max-width: 700px;
+        background: rgba(26, 26, 46, 0.8);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--border-gold);
+        border-radius: 30px;
+        padding: 4rem 3rem;
+        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+        position: relative;
+        z-index: 2;
+    }
+
+    .error-animation {
+        position: relative;
+        margin-bottom: 2rem;
+    }
+
+    .error-circle {
+        width: 120px;
+        height: 120px;
+        background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+        font-size: 3rem;
+        color: white;
+        box-shadow: 0 10px 30px rgba(255, 107, 107, 0.4);
+        animation: pulse 2s ease-in-out infinite;
+        position: relative;
+        z-index: 2;
+    }
+
+    .error-particles {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 200px;
+        height: 200px;
+    }
+
+    .particle {
+        position: absolute;
+        width: 8px;
+        height: 8px;
+        background: var(--gold-light);
+        border-radius: 50%;
+        animation: float 3s ease-in-out infinite;
+    }
+
+    .particle:nth-child(1) { top: 20%; left: 20%; animation-delay: 0s; }
+    .particle:nth-child(2) { top: 60%; left: 80%; animation-delay: 0.5s; }
+    .particle:nth-child(3) { top: 80%; left: 40%; animation-delay: 1s; }
+    .particle:nth-child(4) { top: 30%; left: 70%; animation-delay: 1.5s; }
+    .particle:nth-child(5) { top: 70%; left: 20%; animation-delay: 2s; }
+
+    @keyframes pulse {
+        0%, 100% { 
+            transform: scale(1);
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.4);
+        }
+        50% { 
+            transform: scale(1.05);
+            box-shadow: 0 15px 40px rgba(255, 107, 107, 0.6);
+        }
+    }
+
+    @keyframes float {
+        0%, 100% { 
+            transform: translate(0, 0);
+            opacity: 1;
+        }
+        50% { 
+            transform: translate(20px, -20px);
+            opacity: 0.5;
+        }
+    }
+
+    .error-code {
+        font-size: 8rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 1rem;
+        line-height: 1;
+        text-shadow: 0 0 50px rgba(255, 107, 107, 0.3);
+    }
+
+    .error-title {
+        font-size: 2.5rem;
+        color: var(--text-primary);
+        margin-bottom: 1.5rem;
+        font-weight: 700;
+    }
+
+    .error-description {
+        color: var(--text-secondary);
+        font-size: 1.2rem;
+        line-height: 1.7;
+        margin-bottom: 3rem;
+        max-width: 500px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .error-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 2rem;
+        margin-bottom: 3rem;
+        padding: 2rem;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .stat {
+        text-align: center;
+    }
+
+    .stat-number {
+        display: block;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--primary-gold);
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        display: block;
+        color: var(--text-muted);
+        font-size: 0.9rem;
+    }
+
+    .error-actions {
+        display: flex;
+        gap: 1.5rem;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-bottom: 3rem;
+    }
+
+    .error-tips {
+        background: rgba(212, 175, 55, 0.1);
+        border: 1px solid var(--border-gold);
+        border-radius: 20px;
+        padding: 2rem;
+    }
+
+    .error-tips h4 {
+        color: var(--primary-gold);
+        margin-bottom: 1.5rem;
+        font-weight: 600;
+        text-align: center;
+    }
+
+    .tips-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+
+    .tip-card {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        transition: all 0.3s ease;
+    }
+
+    .tip-card:hover {
+        background: rgba(212, 175, 55, 0.2);
+        transform: translateX(-5px);
+    }
+
+    .tip-card i {
+        color: var(--primary-gold);
+        font-size: 1.2rem;
+        width: 30px;
+    }
+
+    .tip-card span {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+
+    @media (max-width: 768px) {
+        .error-content {
+            padding: 3rem 2rem;
+            margin: 1rem;
+        }
+        
+        .error-code {
+            font-size: 5rem;
+        }
+        
+        .error-title {
+            font-size: 2rem;
+        }
+        
+        .error-stats {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        
+        .error-actions {
+            flex-direction: column;
+        }
+        
+        .error-actions .btn {
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .tips-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .error-content {
+            padding: 2rem 1.5rem;
+        }
+        
+        .error-code {
+            font-size: 4rem;
+        }
+        
+        .error-title {
+            font-size: 1.5rem;
+        }
+        
+        .error-description {
+            font-size: 1rem;
+        }
+    }
+</style>
+
+<script>
+    // Update current time
+    function updateTime() {
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('fa-IR');
+        document.getElementById('currentTime').textContent = timeString;
+    }
+    
+    setInterval(updateTime, 1000);
+    updateTime();
+
+    // Add floating animation to error content
+    document.addEventListener('DOMContentLoaded', function() {
+        const errorContent = document.querySelector('.error-content');
+        errorContent.style.opacity = '0';
+        errorContent.style.transform = 'translateY(30px)';
+        
+        setTimeout(() => {
+            errorContent.style.transition = 'all 0.8s ease';
+            errorContent.style.opacity = '1';
+            errorContent.style.transform = 'translateY(0)';
+        }, 300);
+
+        // Add hover effect to tip cards
+        const tipCards = document.querySelectorAll('.tip-card');
+        tipCards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateX(-5px) scale(1.02)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateX(0) scale(1)';
+            });
+        });
+    });
+</script>
+{% endblock %}

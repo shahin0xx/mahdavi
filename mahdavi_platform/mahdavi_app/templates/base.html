@@ -1,0 +1,2189 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}پلتفرم مهدوی - مسیر نورانی به سوی امام زمان (عج){% endblock %}</title>
+    
+    <!-- فونت‌ها و آیکون‌ها -->
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* رنگ‌بندی طلایی اسلامی */
+            --primary-gold: #D4AF37;
+            --dark-gold: #B8860B;
+            --light-gold: #FFD700;
+            --dark-bg: #0F0F1A;
+            --darker-bg: #0A0A12;
+            --card-bg: #1A1A2E;
+            --card-hover: #25253D;
+            --text-primary: #F8FAFC;
+            --text-secondary: #CBD5E1;
+            --text-muted: #94A3B8;
+            --border-gold: rgba(212, 175, 55, 0.3);
+            --success: #27ae60;
+            --error: #e74c3c;
+            --warning: #f39c12;
+            --info: #3498db;
+            
+            /* سایه‌ها و افکت‌ها */
+            --glow-gold: 0 0 30px rgba(212, 175, 55, 0.4);
+            --glow-blue: 0 0 30px rgba(59, 130, 246, 0.3);
+            --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.5);
+            --shadow-xl: 0 15px 40px rgba(0, 0, 0, 0.6);
+            
+            /* انیمیشن‌ها */
+            --transition-fast: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-normal: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-slow: 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Vazirmatn', sans-serif;
+        }
+        
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        body {
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            line-height: 1.7;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(61, 43, 86, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(13, 94, 61, 0.1) 0%, transparent 50%);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* ========== صفحه لودینگ ========== */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--dark-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity var(--transition-normal);
+        }
+
+        .loading-content {
+            text-align: center;
+            position: relative;
+        }
+
+        .loading-logo {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, var(--primary-gold), var(--light-gold));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 2rem;
+            animation: pulse 2s infinite, rotate 3s linear infinite;
+            box-shadow: var(--glow-gold);
+        }
+
+        .loading-logo i {
+            font-size: 3rem;
+            color: var(--dark-bg);
+        }
+
+        .loading-text {
+            color: var(--primary-gold);
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            animation: textGlow 2s infinite alternate;
+        }
+
+        .loading-subtext {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        .progress-container {
+            width: 300px;
+            height: 8px;
+            background: rgba(30, 30, 30, 0.8);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 2rem auto;
+            border: 1px solid var(--border-gold);
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--primary-gold), var(--dark-gold));
+            border-radius: 10px;
+            transition: width 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                rgba(255,255,255,0.4) 50%, 
+                transparent 100%);
+            animation: shimmer 2s infinite;
+        }
+
+        .arabic-text {
+            font-size: 1.8rem;
+            margin: 1.5rem 0;
+            color: var(--primary-gold);
+            font-family: 'Scheherazade New', serif;
+        }
+
+        .hadith {
+            font-style: italic;
+            text-align: center;
+            padding: 1.2rem;
+            margin: 1.5rem 0;
+            background: rgba(212, 175, 55, 0.1);
+            border-radius: 10px;
+            border: 1px solid var(--border-gold);
+            color: var(--text-secondary);
+            line-height: 1.7;
+            font-size: 1.1rem;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes textGlow {
+            0% { text-shadow: 0 0 5px rgba(212, 175, 55, 0.5); }
+            100% { text-shadow: 0 0 20px rgba(212, 175, 55, 0.8); }
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* ========== نوبار اصلی ========== */
+        .mahdavi-navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 90px;
+            background: rgba(15, 15, 26, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-gold);
+            z-index: 1000;
+            transition: all var(--transition-normal);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-scrolled {
+            background: rgba(10, 10, 18, 0.98);
+            box-shadow: var(--shadow-xl);
+            height: 80px;
+            border-bottom: 2px solid var(--primary-gold);
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* لوگو */
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: var(--primary-gold);
+            font-size: 1.8rem;
+            font-weight: 700;
+            padding: 12px 20px;
+            border-radius: 20px;
+            transition: all var(--transition-fast);
+            position: relative;
+            overflow: hidden;
+            background: rgba(212, 175, 55, 0.1);
+            border: 1px solid transparent;
+        }
+
+        .logo::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.2), transparent);
+            transition: right var(--transition-slow);
+        }
+
+        .logo:hover::before {
+            right: 100%;
+        }
+
+        .logo:hover {
+            background: rgba(212, 175, 55, 0.15);
+            border-color: var(--primary-gold);
+            transform: translateY(-2px);
+            box-shadow: var(--glow-gold);
+        }
+
+        .logo-icon {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, var(--primary-gold), var(--light-gold));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--dark-bg);
+            font-size: 1.3rem;
+            box-shadow: var(--shadow-lg);
+            transition: all var(--transition-normal);
+        }
+
+        .logo:hover .logo-icon {
+            transform: rotate(15deg) scale(1.1);
+        }
+
+        .logo-text {
+            background: linear-gradient(135deg, var(--primary-gold), var(--light-gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 800;
+        }
+
+        /* منوی اصلی */
+        .nav-menu {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(26, 26, 46, 0.8);
+            padding: 8px;
+            border-radius: 25px;
+            border: 1px solid var(--border-gold);
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .nav-item {
+            position: relative;
+            list-style: none;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 20px;
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-weight: 600;
+            border-radius: 15px;
+            transition: all var(--transition-fast);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.1), transparent);
+            transition: right var(--transition-slow);
+        }
+
+        .nav-link:hover::before {
+            right: 100%;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: var(--primary-gold);
+            background: rgba(212, 175, 55, 0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);
+        }
+
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 6px;
+            height: 6px;
+            background: var(--primary-gold);
+            border-radius: 50%;
+            box-shadow: var(--glow-gold);
+            animation: pulse 2s infinite;
+        }
+
+        /* منوی کشویی */
+        .nav-dropdown {
+            position: relative;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            min-width: 260px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-gold);
+            border-radius: 20px;
+            padding: 12px;
+            margin-top: 15px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(15px);
+            transition: all var(--transition-fast);
+            box-shadow: var(--shadow-xl);
+            z-index: 1000;
+            backdrop-filter: blur(20px);
+        }
+
+        .nav-dropdown:hover .dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            text-decoration: none;
+            color: var(--text-secondary);
+            border-radius: 12px;
+            transition: all var(--transition-fast);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dropdown-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.1), transparent);
+            transition: right var(--transition-slow);
+        }
+
+        .dropdown-item:hover::before {
+            right: 100%;
+        }
+
+        .dropdown-item:hover {
+            background: var(--card-hover);
+            color: var(--primary-gold);
+            transform: translateX(-8px);
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);
+        }
+
+        /* بخش کاربر */
+        .nav-user {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 10px 16px;
+            border-radius: 20px;
+            transition: all var(--transition-fast);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            background: rgba(212, 175, 55, 0.05);
+            border: 1px solid transparent;
+        }
+
+        .user-profile::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.1), transparent);
+            transition: right var(--transition-slow);
+        }
+
+        .user-profile:hover::before {
+            right: 100%;
+        }
+
+        .user-profile:hover {
+            background: rgba(212, 175, 55, 0.1);
+            border-color: var(--border-gold);
+            transform: translateY(-2px);
+        }
+
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid var(--primary-gold);
+            overflow: hidden;
+            position: relative;
+            box-shadow: var(--shadow-lg);
+            transition: all var(--transition-normal);
+        }
+
+        .user-profile:hover .user-avatar {
+            transform: scale(1.1);
+            box-shadow: var(--glow-gold);
+        }
+
+        .avatar-placeholder {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary-gold), var(--light-gold));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--dark-bg);
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+        }
+
+        .user-level {
+            font-size: 0.8rem;
+            color: var(--primary-gold);
+            background: rgba(212, 175, 55, 0.1);
+            padding: 4px 10px;
+            border-radius: 12px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        /* دکمه‌ها */
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 15px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: right var(--transition-slow);
+        }
+
+        .btn:hover::before {
+            right: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-gold), var(--dark-gold));
+            color: var(--dark-bg);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--glow-gold);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--text-primary);
+            border: 1px solid var(--border-gold);
+        }
+
+        .btn-outline:hover {
+            background: rgba(212, 175, 55, 0.1);
+            border-color: var(--primary-gold);
+            color: var(--primary-gold);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+        }
+
+        .btn-error {
+            background: var(--error);
+            color: white;
+        }
+
+        .btn-info {
+            background: var(--info);
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 0.85rem;
+        }
+
+        .btn-lg {
+            padding: 15px 30px;
+            font-size: 1.1rem;
+        }
+
+        /* سایدبار */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            right: -350px;
+            width: 320px;
+            height: 100vh;
+            background: rgba(26, 26, 46, 0.98);
+            backdrop-filter: blur(20px);
+            border-left: 2px solid var(--border-gold);
+            transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 9999;
+            overflow-y: auto;
+            padding: 1.5rem;
+            box-shadow: -5px 0 30px rgba(0, 0, 0, 0.8);
+        }
+
+        .sidebar.active {
+            right: 0;
+        }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-gold);
+        }
+
+        .sidebar-title {
+            color: var(--primary-gold);
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .close-sidebar {
+            background: none;
+            border: none;
+            color: var(--primary-gold);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            transition: all 0.3s ease;
+            border-radius: 6px;
+        }
+
+        .close-sidebar:hover {
+            background: rgba(212, 175, 55, 0.1);
+            transform: scale(1.1);
+        }
+
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.2rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+            background: rgba(30, 30, 30, 0.7);
+            font-size: 1rem;
+        }
+
+        .sidebar-link:hover {
+            background: rgba(212, 175, 55, 0.1);
+            border-color: var(--border-gold);
+            transform: translateX(-5px);
+        }
+
+        .sidebar-link.active {
+            background: linear-gradient(135deg, var(--primary-gold), var(--dark-gold));
+            color: #000;
+            font-weight: bold;
+        }
+
+        .sidebar-link i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .user-sidebar-info {
+            background: rgba(30, 30, 30, 0.8);
+            padding: 1.5rem;
+            border-radius: 10px;
+            border: 1px solid var(--border-gold);
+            margin-top: 2rem;
+            text-align: center;
+        }
+
+        .user-avatar-sidebar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-gold), var(--dark-gold));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #000;
+            font-size: 1.5rem;
+            margin: 0 auto 1rem;
+        }
+
+        .user-name-sidebar {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .user-level-sidebar {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 0.3rem;
+        }
+
+        .user-points-sidebar {
+            font-size: 0.9rem;
+            color: var(--primary-gold);
+        }
+
+        .admin-section {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-gold);
+        }
+
+        .admin-title {
+            color: var(--primary-gold);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        /* محو کننده سایدبار */
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 9998;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* منوی موبایل */
+        .mobile-menu-btn {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 10px;
+            transition: all var(--transition-fast);
+            background: rgba(212, 175, 55, 0.1);
+        }
+
+        .mobile-menu-btn:hover {
+            background: rgba(212, 175, 55, 0.2);
+            transform: scale(1.1);
+        }
+
+        .mobile-menu-btn span {
+            width: 25px;
+            height: 3px;
+            background: var(--text-primary);
+            transition: var(--transition-fast);
+            border-radius: 2px;
+        }
+
+        .mobile-menu-btn.active span:nth-child(1) {
+            transform: rotate(45deg) translate(6px, 6px);
+            background: var(--primary-gold);
+        }
+
+        .mobile-menu-btn.active span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .mobile-menu-btn.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(6px, -6px);
+            background: var(--primary-gold);
+        }
+
+        /* محتوای اصلی */
+        .main-content {
+            min-height: 100vh;
+            padding-top: 90px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .main-content.loaded {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* کارت‌ها */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-gold);
+            border-radius: 20px;
+            padding: 2rem;
+            transition: all var(--transition-fast);
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.05), transparent);
+            transition: right var(--transition-slow);
+        }
+
+        .card:hover::before {
+            right: 100%;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            border-color: var(--primary-gold);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .golden-border {
+            border: 2px solid var(--primary-gold);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-gold);
+        }
+
+        .card-title {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            color: var(--primary-gold);
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        /* گرید سیستم */
+        .grid {
+            display: grid;
+            gap: 2rem;
+        }
+
+        .grid-2 {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .grid-3 {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .grid-4 {
+            grid-template-columns: repeat(4, 1fr);
+        }
+
+        /* پیام‌ها */
+        .messages-container {
+            position: fixed;
+            top: 100px;
+            right: 2rem;
+            z-index: 1002;
+            max-width: 400px;
+        }
+
+        .message {
+            background: var(--card-bg);
+            border: 1px solid var(--border-gold);
+            border-radius: 15px;
+            padding: 1.2rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            animation: slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .message::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 4px;
+            height: 100%;
+        }
+
+        .message.success {
+            border-left: 4px solid var(--success);
+        }
+
+        .message.error {
+            border-left: 4px solid var(--error);
+        }
+
+        .message.warning {
+            border-left: 4px solid var(--warning);
+        }
+
+        .message.info {
+            border-left: 4px solid var(--info);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* کنترل صدا */
+        .audio-control-container {
+            position: fixed;
+            bottom: 2rem;
+            left: 2rem;
+            z-index: 1000;
+        }
+
+        .music-control {
+            background: rgba(212, 175, 55, 0.2);
+            border: 1px solid var(--border-gold);
+            border-radius: 50%;
+            width: 55px;
+            height: 55px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .music-control:hover {
+            background: rgba(212, 175, 55, 0.3);
+            transform: scale(1.1);
+        }
+
+        .music-control i {
+            color: var(--primary-gold);
+            font-size: 1.4rem;
+        }
+
+        .music-playing {
+            background: rgba(212, 175, 55, 0.4);
+            animation: soundPulse 2s infinite;
+        }
+
+        @keyframes soundPulse {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.4);
+            }
+            50% {
+                box-shadow: 0 0 0 8px rgba(212, 175, 55, 0.2);
+            }
+        }
+
+        /* فوتر */
+        .footer {
+            background: var(--card-bg);
+            border-top: 1px solid var(--border-gold);
+            padding: 4rem 0 2rem;
+            margin-top: 4rem;
+            position: relative;
+        }
+
+        .footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--primary-gold), transparent);
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 3rem;
+        }
+
+        .footer-column h4 {
+            color: var(--primary-gold);
+            margin-bottom: 1.5rem;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 0.8rem;
+        }
+
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all var(--transition-fast);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary-gold);
+            transform: translateX(-5px);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 3rem;
+            margin-top: 3rem;
+            border-top: 1px solid var(--border-gold);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .quran-verse {
+            font-family: 'Scheherazade New', serif;
+            font-size: 1.4rem;
+            text-align: center;
+            line-height: 2;
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 12px;
+            border: 1px solid var(--border-gold);
+            color: var(--text-primary);
+        }
+
+        /* رسپانسیو */
+        @media (max-width: 1200px) {
+            .footer-content {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .grid-4 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 992px) {
+            .nav-menu {
+                display: none;
+            }
+            
+            .mobile-menu-btn {
+                display: flex;
+            }
+            
+            .user-info {
+                display: none;
+            }
+            
+            .grid-3 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-container {
+                padding: 0 1rem;
+            }
+            
+            .container {
+                padding: 0 1rem;
+            }
+            
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+            
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+            
+            .messages-container {
+                right: 1rem;
+                left: 1rem;
+                max-width: none;
+            }
+            
+            .audio-control-container {
+                bottom: 1rem;
+                left: 1rem;
+            }
+            
+            .music-control {
+                width: 50px;
+                height: 50px;
+            }
+            
+            .music-control i {
+                font-size: 1.3rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .mahdavi-navbar {
+                height: 80px;
+            }
+            
+            .nav-scrolled {
+                height: 70px;
+            }
+            
+            .main-content {
+                padding-top: 80px;
+            }
+            
+            .sidebar {
+                width: 280px;
+            }
+            
+            .btn-lg {
+                padding: 12px 24px;
+                font-size: 1rem;
+            }
+            
+            .card {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- پخش کننده صدا -->
+    <audio id="background-music" loop>
+        <!-- منبع صدا از طریق JavaScript تنظیم می‌شود -->
+    </audio>
+
+    <!-- صفحه لودینگ -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-content">
+            <div class="loading-logo">
+                <i class="fas fa-star-and-crescent"></i>
+            </div>
+            <div class="loading-text">پلتفرم مهدوی</div>
+            <div class="loading-subtext">مسیر نورانی به سوی امام زمان (عج)</div>
+            
+            <div class="arabic-text">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>
+            
+            <div class="hadith">"مهدی از ما اهل بیت است، زمین را پر از عدل و داد می‌کند"</div>
+            
+            <div class="progress-container">
+                <div class="progress-bar" id="loading-progress"></div>
+            </div>
+            
+            <div class="loading-subtext" id="loading-status">آماده سازی محتوای معنوی...</div>
+        </div>
+    </div>
+
+    <!-- نوبار اصلی -->
+    <nav class="mahdavi-navbar" id="navbar">
+        <div class="nav-container">
+            <!-- دکمه همبرگر -->
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+            <!-- برند و لوگو -->
+            <div class="nav-brand">
+                <a href="{% url 'home' %}" class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-star-and-crescent"></i>
+                    </div>
+                    <span class="logo-text">مهدوی</span>
+                </a>
+            </div>
+
+            <!-- منوی اصلی -->
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="{% url 'home' %}" class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+                        <i class="fas fa-home"></i>
+                        <span>خانه</span>
+                    </a>
+                </li>
+                
+                <li class="nav-item">
+                    <a href="{% url 'index' %}" class="nav-link {% if request.resolver_match.url_name == 'index' %}active{% endif %}">
+                        <i class="fas fa-compass"></i>
+                        <span>ایستگاه‌ها</span>
+                    </a>
+                </li>
+
+                <li class="nav-item nav-dropdown">
+                    <a href="#" class="nav-link {% if 'library' in request.resolver_match.url_name or 'quran' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="fas fa-book"></i>
+                        <span>کتابخانه</span>
+                    </a>
+                    <div class="dropdown-menu">
+                        <a href="{% url 'quran' %}" class="dropdown-item">
+                            <i class="fas fa-book-quran"></i>
+                            <span>قرآن کریم</span>
+                        </a>
+                        <a href="{% url 'library_home' %}" class="dropdown-item">
+                            <i class="fas fa-book-open"></i>
+                            <span>کتابخانه دیجیتال</span>
+                        </a>
+                        <a href="{% url 'zecr' %}" class="dropdown-item">
+                            <i class="fas fa-hands-praying"></i>
+                            <span>اذکار و ادعیه</span>
+                        </a>
+                    </div>
+                </li>
+                
+                <li class="nav-item">
+                    <a href="{% url 'social_home' %}" class="nav-link {% if request.resolver_match.url_name == 'social_home' %}active{% endif %}">
+                        <i class="fas fa-users"></i>
+                        <span>شبکه اجتماعی</span>
+                    </a>
+                </li>
+                
+                <li class="nav-item">
+                    <a href="{% url 'shop_home' %}" class="nav-link {% if request.resolver_match.url_name == 'shop_home' %}active{% endif %}">
+                        <i class="fas fa-store"></i>
+                        <span>فروشگاه</span>
+                    </a>
+                </li>
+                
+                <li class="nav-item">
+                    <a href="{% url 'charity_home' %}" class="nav-link {% if request.resolver_match.url_name == 'charity_home' %}active{% endif %}">
+                        <i class="fas fa-hand-holding-heart"></i>
+                        <span>خیریه</span>
+                    </a>
+                </li>
+            </ul>
+
+            <!-- بخش کاربر و اقدامات -->
+            <div class="nav-user">
+                {% if user.is_authenticated %}
+                <!-- پروفایل کاربر -->
+                <div class="user-profile" onclick="toggleSidebar()">
+                    <div class="user-avatar">
+                        {% if user.profile_image %}
+                            <img src="{{ user.profile_image.url }}" alt="{{ user.get_full_name }}" class="avatar-img">
+                        {% else %}
+                            <div class="avatar-placeholder">
+                                {{ user.first_name|first }}{{ user.last_name|first }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="user-info">
+                        <div class="user-name">{{ user.get_full_name|default:user.username }}</div>
+                        {% if user.userprofile.level %}
+                            <div class="user-level">سطح: {{ user.userprofile.level }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- دکمه‌های اقدام -->
+                <div class="nav-actions">
+                    <a href="{% url 'dashboard' %}" class="btn btn-primary">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>داشبورد</span>
+                    </a>
+                </div>
+                {% else %}
+                <!-- دکمه‌های ورود و ثبت‌نام -->
+                <div class="nav-actions">
+                    <a href="{% url 'login' %}" class="btn btn-outline">
+                        <i class="fas fa-sign-in-alt"></i>
+                        <span>ورود</span>
+                    </a>
+                    <a href="{% url 'register' %}" class="btn btn-primary">
+                        <i class="fas fa-user-plus"></i>
+                        <span>ثبت‌نام</span>
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- سایدبار -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3 class="sidebar-title">منوی ناوبری</h3>
+            <button class="close-sidebar" id="closeSidebar">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <!-- لینک‌های اصلی -->
+            <a href="{% url 'home' %}" class="sidebar-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+                <i class="fas fa-home"></i>
+                صفحه اصلی
+            </a>
+            
+            <a href="{% url 'index' %}" class="sidebar-link {% if request.resolver_match.url_name == 'index' %}active{% endif %}">
+                <i class="fas fa-compass"></i>
+                ایستگاه‌ها
+            </a>
+            
+            <a href="{% url 'time' %}" class="sidebar-link {% if request.resolver_match.url_name == 'time' %}active{% endif %}">
+                <i class="fas fa-clock"></i>
+                اوقات شرعی
+            </a>
+            
+            {% if user.is_authenticated %}
+            <!-- بخش کاربری -->
+            <a href="{% url 'dashboard' %}" class="sidebar-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                <i class="fas fa-tachometer-alt"></i>
+                پیشخوان
+            </a>
+            
+            <a href="{% url 'user_achievements' %}" class="sidebar-link">
+                <i class="fas fa-trophy"></i>
+                نشان‌ها
+            </a>
+            
+            <a href="{% url 'map' %}" class="sidebar-link {% if request.resolver_match.url_name == 'map' %}active{% endif %}">
+                <i class="fas fa-map-marker-alt"></i>
+                نقشه مساجد
+            </a>
+            
+            <a href="{% url 'user_statistics' %}" class="sidebar-link">
+                <i class="fas fa-chart-bar"></i>
+                آمار من
+            </a>
+            
+            <a href="{% url 'user_daily_stats' %}" class="sidebar-link">
+                <i class="fas fa-chart-line"></i>
+                آمار روزانه
+            </a>
+            
+            <a href="{% url 'station_leaderboard' %}" class="sidebar-link">
+                <i class="fas fa-ranking-star"></i>
+                رتبه‌بندی
+            </a>
+            
+            <a href="{% url 'quran' %}" class="sidebar-link {% if request.resolver_match.url_name == 'quran' %}active{% endif %}">
+                <i class="fas fa-quran"></i>
+                قرآن
+            </a>
+            
+            <a href="{% url 'zecr' %}" class="sidebar-link {% if request.resolver_match.url_name == 'zecr' %}active{% endif %}">
+                <i class="fas fa-pray"></i>
+                ذکرهای هفته
+            </a>
+            
+            <a href="{% url 'games_list' %}" class="sidebar-link">
+                <i class="fas fa-gamepad"></i>
+                بازی‌ها
+            </a>
+            
+            <a href="{% url 'chat_home' %}" class="sidebar-link">
+                <i class="fas fa-comments"></i>
+                پیام‌رسان
+            </a>
+            
+            <a href="{% url 'social_home' %}" class="sidebar-link {% if request.resolver_match.url_name == 'social_home' %}active{% endif %}">
+                <i class="fas fa-users"></i>
+                شبکه اجتماعی
+            </a>
+            
+            <a href="{% url 'shop_home' %}" class="sidebar-link {% if request.resolver_match.url_name == 'shop_home' %}active{% endif %}">
+                <i class="fas fa-store"></i>
+                فروشگاه
+            </a>
+            
+            <a href="{% url 'charity_home' %}" class="sidebar-link {% if request.resolver_match.url_name == 'charity_home' %}active{% endif %}">
+                <i class="fas fa-hand-holding-heart"></i>
+                خیریه
+            </a>
+            
+            <a href="{% url 'profile' %}" class="sidebar-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
+                <i class="fas fa-user"></i>
+                پروفایل
+            </a>
+            
+            <!-- بخش مدیریت -->
+            {% if user.is_staff %}
+            <div class="admin-section">
+                <h4 class="admin-title">مدیریت سیستم</h4>
+                
+                <a href="{% url 'admin_dashboard' %}" class="sidebar-link">
+                    <i class="fas fa-crown"></i>
+                    مدیریت سیستم
+                </a>
+                
+                <a href="{% url 'game_management' %}" class="sidebar-link">
+                    <i class="fas fa-cogs"></i>
+                    مدیریت بازی‌ها
+                </a>
+                
+                <a href="{% url 'shop_management' %}" class="sidebar-link">
+                    <i class="fas fa-store-alt"></i>
+                    مدیریت فروشگاه
+                </a>
+                
+                <a href="{% url 'product_management' %}" class="sidebar-link">
+                    <i class="fas fa-boxes"></i>
+                    مدیریت محصولات
+                </a>
+                
+                <a href="{% url 'category_management' %}" class="sidebar-link">
+                    <i class="fas fa-tags"></i>
+                    مدیریت دسته‌ها
+                </a>
+            </div>
+            {% endif %}
+            
+            <a href="{% url 'logout' %}" class="sidebar-link">
+                <i class="fas fa-sign-out-alt"></i>
+                خروج
+            </a>
+            
+            {% else %}
+            <!-- لینک‌های کاربران مهمان -->
+            <a href="{% url 'login' %}" class="sidebar-link {% if request.resolver_match.url_name == 'login' %}active{% endif %}">
+                <i class="fas fa-sign-in-alt"></i>
+                ورود
+            </a>
+            
+            <a href="{% url 'register' %}" class="sidebar-link {% if request.resolver_match.url_name == 'register' %}active{% endif %}">
+                <i class="fas fa-user-plus"></i>
+                ثبت نام
+            </a>
+            {% endif %}
+        </nav>
+        
+        {% if user.is_authenticated %}
+        <div class="user-sidebar-info">
+            <div class="user-avatar-sidebar">
+                {{ user.first_name|first }}
+            </div>
+            <div class="user-name-sidebar">{{ user.get_full_name }}</div>
+            <div class="user-level-sidebar">
+                {% if user.userprofile.level %}
+                    سطح: {{ user.userprofile.level }}
+                {% else %}
+                    سطح: علاقه‌مند
+                {% endif %}
+            </div>
+            <div class="user-points-sidebar">
+                {% if user.userprofile.points %}
+                    امتیاز: {{ user.userprofile.points }}
+                {% else %}
+                    امتیاز: ۰
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- محو کننده سایدبار -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- پیام‌ها -->
+    <div class="messages-container" id="messagesContainer">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="message {{ message.tags }}">
+                    <i class="fas 
+                        {% if message.tags == 'success' %}fa-check-circle
+                        {% elif message.tags == 'error' %}fa-exclamation-circle
+                        {% elif message.tags == 'warning' %}fa-exclamation-triangle
+                        {% else %}fa-info-circle{% endif %}">
+                    </i>
+                    <span>{{ message }}</span>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <!-- محتوای اصلی -->
+    <main class="main-content" id="mainContent">
+        {% block content %}
+        <!-- محتوای صفحات دیگر اینجا قرار می‌گیرد -->
+        {% endblock %}
+    </main>
+
+    <!-- فوتر -->
+    <footer class="footer">
+        <div class="quran-verse">
+            ﴿وَعَدَ اللَّهُ الَّذِينَ آمَنُوا مِنكُمْ وَعَمِلُوا الصَّالِحَاتِ لَيَسْتَخْلِفَنَّهُمْ فِي الْأَرْضِ﴾
+        </div>
+        <div class="footer-content">
+            <div class="footer-column">
+                <h4>پلتفرم مهدوی</h4>
+                <ul class="footer-links">
+                    <li><a href="{% url 'home' %}"><i class="fas fa-home"></i>صفحه اصلی</a></li>
+                    <li><a href="{% url 'charity_home' %}"><i class="fas fa-hand-holding-heart"></i>خیریه</a></li>
+                    <li><a href="{% url 'charity_projects' %}"><i class="fas fa-project-diagram"></i>پروژه‌های خیریه</a></li>
+                    <li><a href="#"><i class="fas fa-info-circle"></i>درباره ما</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-column">
+                <h4>امکانات</h4>
+                <ul class="footer-links">
+                    <li><a href="{% url 'index' %}"><i class="fas fa-compass"></i>ایستگاه‌های آموزشی</a></li>
+                    <li><a href="{% url 'social_home' %}"><i class="fas fa-users"></i>شبکه اجتماعی</a></li>
+                    <li><a href="{% url 'library_home' %}"><i class="fas fa-book-open"></i>کتابخانه دیجیتال</a></li>
+                    <li><a href="{% url 'games_list' %}"><i class="fas fa-gamepad"></i>بازی‌های معنوی</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-column">
+                <h4>محتوای مذهبی</h4>
+                <ul class="footer-links">
+                    <li><a href="{% url 'quran' %}"><i class="fas fa-book-quran"></i>قرآن کریم</a></li>
+                    <li><a href="#"><i class="fas fa-book-open"></i>تفسیر و معارف</a></li>
+                    <li><a href="{% url 'zecr' %}"><i class="fas fa-hands-praying"></i>اذکار و ادعیه</a></li>
+                    <li><a href="{% url 'time' %}"><i class="fas fa-clock"></i>اوقات شرعی</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-column">
+                <h4>حساب کاربری</h4>
+                <ul class="footer-links">
+                    {% if user.is_authenticated %}
+                        <li><a href="{% url 'profile' %}"><i class="fas fa-user"></i>پروفایل من</a></li>
+                        <li><a href="{% url 'dashboard' %}"><i class="fas fa-tachometer-alt"></i>داشبورد</a></li>
+                        <li><a href="#"><i class="fas fa-cog"></i>تنظیمات</a></li>
+                        <li><a href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i>خروج</a></li>
+                    {% else %}
+                        <li><a href="{% url 'login' %}"><i class="fas fa-sign-in-alt"></i>ورود به حساب</a></li>
+                        <li><a href="{% url 'register' %}"><i class="fas fa-user-plus"></i>ثبت‌نام جدید</a></li>
+                        <li><a href="{% url 'forgot_password' %}"><i class="fas fa-key"></i>بازیابی رمز عبور</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+        </div>
+    </footer>
+
+    <!-- کنترل صدا -->
+    <div class="audio-control-container">
+        <div id="music-control" class="music-control">
+            <i id="music-icon" class="fas fa-volume-up"></i>
+        </div>
+    </div>
+
+    <script>
+        // مدیریت وضعیت صدا در سراسر برنامه
+        class AudioStateManager {
+            constructor() {
+                this.audioElement = document.getElementById('background-music');
+                this.isPersistent = false;
+                this.currentTime = 0;
+                this.isPlaying = false;
+                this.volume = 0.6;
+                this.currentSource = '';
+                
+                this.init();
+            }
+            
+            init() {
+                // بازیابی وضعیت از sessionStorage
+                this.restoreState();
+                
+                // تنظیم event listeners
+                this.setupEventListeners();
+                
+                // تنظیم منبع صدا
+                this.setupAudioSource();
+            }
+            
+            restoreState() {
+                const savedState = sessionStorage.getItem('mahdaviAudioState');
+                if (savedState) {
+                    const state = JSON.parse(savedState);
+                    this.currentTime = state.currentTime || 0;
+                    this.isPlaying = state.isPlaying || false;
+                    this.volume = state.volume || 0.6;
+                    this.currentSource = state.currentSource || '';
+                    
+                    this.audioElement.volume = this.volume;
+                    this.audioElement.currentTime = this.currentTime;
+                }
+            }
+            
+            saveState() {
+                const state = {
+                    currentTime: this.audioElement.currentTime,
+                    isPlaying: this.isPlaying,
+                    volume: this.volume,
+                    currentSource: this.currentSource,
+                    timestamp: Date.now()
+                };
+                sessionStorage.setItem('mahdaviAudioState', JSON.stringify(state));
+            }
+            
+            setupEventListeners() {
+                // ذخیره وضعیت به صورت دوره‌ای
+                setInterval(() => this.saveState(), 1000);
+                
+                // ذخیره وضعیت هنگام تغییر زمان
+                this.audioElement.addEventListener('timeupdate', () => {
+                    this.currentTime = this.audioElement.currentTime;
+                });
+                
+                // مدیریت رویدادهای پخش
+                this.audioElement.addEventListener('play', () => {
+                    this.isPlaying = true;
+                    this.saveState();
+                });
+                
+                this.audioElement.addEventListener('pause', () => {
+                    this.isPlaying = false;
+                    this.saveState();
+                });
+                
+                // مدیریت خطاها
+                this.audioElement.addEventListener('error', (e) => {
+                    console.error('خطای پخش صدا:', e);
+                    this.handleAudioError();
+                });
+                
+                // مدیریت پایان صدا
+                this.audioElement.addEventListener('ended', () => {
+                    this.isPlaying = false;
+                    this.saveState();
+                });
+            }
+            
+            async setupAudioSource() {
+                try {
+                    // اگر منبع فعلی وجود دارد، از آن استفاده کن
+                    if (this.currentSource) {
+                        this.audioElement.src = this.currentSource;
+                        await this.audioElement.load();
+                        
+                        // اگر قبلاً در حال پخش بود، ادامه بده
+                        if (this.isPlaying) {
+                            this.audioElement.currentTime = this.currentTime;
+                            await this.audioElement.play();
+                        }
+                        return;
+                    }
+                    
+                    // در غیر این صورت، منبع جدید دریافت کن
+                    await this.fetchNewAudioSource();
+                } catch (error) {
+                    console.error('خطا در تنظیم منبع صدا:', error);
+                }
+            }
+            
+            async fetchNewAudioSource() {
+                try {
+                    const response = await fetch('/api/active-audio/');
+                    
+                    if (!response.ok) {
+                        throw new Error(`خطای سرور: ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    
+                    if (data.success && data.url) {
+                        this.currentSource = data.url;
+                        this.audioElement.src = this.currentSource;
+                        await this.audioElement.load();
+                        this.saveState();
+                        
+                        // پخش خودکار اگر کاربر اجازه داده باشد
+                        await this.autoPlay();
+                    } else {
+                        throw new Error(data.error || 'خطای نامشخص در دریافت صدا');
+                    }
+                } catch (error) {
+                    console.error('خطا در دریافت منبع صدا:', error);
+                    this.fallbackToDefaultAudio();
+                }
+            }
+            
+            async autoPlay() {
+                try {
+                    // بررسی اینکه آیا کاربر قبلاً پخش را متوقف کرده
+                    const userStopped = sessionStorage.getItem('audioPlaying') === 'false';
+                    
+                    if (!userStopped && this.isPlaying) {
+                        await this.audioElement.play();
+                        sessionStorage.setItem('audioPlaying', 'true');
+                    }
+                } catch (error) {
+                    console.log('پخش خودکار بلاک شده:', error);
+                    sessionStorage.setItem('audioPlaying', 'false');
+                }
+            }
+            
+            fallbackToDefaultAudio() {
+                // استفاده از یک فایل صوتی پیش‌فرض
+                const defaultAudio = '/static/audio/default.mp3';
+                this.currentSource = defaultAudio;
+                this.audioElement.src = defaultAudio;
+                this.audioElement.load();
+                this.saveState();
+            }
+            
+            handleAudioError() {
+                // تلاش برای بارگذاری مجدد پس از تأخیر
+                setTimeout(() => {
+                    this.fetchNewAudioSource();
+                }, 5000);
+            }
+            
+            toggle() {
+                if (this.isPlaying) {
+                    this.pause();
+                } else {
+                    this.play();
+                }
+            }
+            
+            async play() {
+                try {
+                    await this.audioElement.play();
+                    this.isPlaying = true;
+                    sessionStorage.setItem('audioPlaying', 'true');
+                    this.saveState();
+                } catch (error) {
+                    console.error('خطا در پخش صدا:', error);
+                }
+            }
+            
+            pause() {
+                this.audioElement.pause();
+                this.isPlaying = false;
+                sessionStorage.setItem('audioPlaying', 'false');
+                this.saveState();
+            }
+            
+            setVolume(volume) {
+                this.volume = Math.max(0, Math.min(1, volume));
+                this.audioElement.volume = this.volume;
+                this.saveState();
+            }
+        }
+
+        // مدیریت لودینگ
+        document.addEventListener('DOMContentLoaded', function() {
+            const progressBar = document.getElementById('loading-progress');
+            const loadingText = document.getElementById('loading-status');
+            const loadingScreen = document.getElementById('loadingScreen');
+            const mainContent = document.getElementById('mainContent');
+            
+            const loadingSteps = [
+                { text: "بارگذاری محتوای قرآنی...", progress: 20 },
+                { text: "آماده سازی درس‌های مهدوی...", progress: 40 },
+                { text: "بارگذاری ادعیه و زیارات...", progress: 60 },
+                { text: "تنظیم سیستم صوتی...", progress: 80 },
+                { text: "آخرین تنظیمات...", progress: 95 }
+            ];
+            
+            let currentStep = 0;
+            
+            function updateLoading() {
+                if (currentStep < loadingSteps.length) {
+                    const step = loadingSteps[currentStep];
+                    loadingText.textContent = step.text;
+                    progressBar.style.width = step.progress + '%';
+                    currentStep++;
+                    setTimeout(updateLoading, 800);
+                } else {
+                    // اتمام لودینگ
+                    progressBar.style.width = '100%';
+                    loadingText.textContent = "آماده!";
+                    
+                    setTimeout(() => {
+                        loadingScreen.style.opacity = '0';
+                        setTimeout(() => {
+                            loadingScreen.style.display = 'none';
+                            mainContent.classList.add('loaded');
+                        }, 500);
+                    }, 500);
+                }
+            }
+            
+            // شروع لودینگ
+            setTimeout(updateLoading, 500);
+        });
+
+        // مدیریت اسکرول نوبار
+        function handleNavbarScroll() {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('nav-scrolled');
+            } else {
+                navbar.classList.remove('nav-scrolled');
+            }
+        }
+
+        // مدیریت سایدبار
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const sidebar = document.getElementById('sidebar');
+        const closeSidebar = document.getElementById('closeSidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        
+        function openSidebar() {
+            sidebar.classList.add('active');
+            sidebarOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            mobileMenuBtn.classList.add('active');
+        }
+        
+        function closeSidebarFunc() {
+            sidebar.classList.remove('active');
+            sidebarOverlay.classList.remove('active');
+            document.body.style.overflow = 'auto';
+            mobileMenuBtn.classList.remove('active');
+        }
+        
+        function toggleSidebar() {
+            if (sidebar.classList.contains('active')) {
+                closeSidebarFunc();
+            } else {
+                openSidebar();
+            }
+        }
+        
+        mobileMenuBtn.addEventListener('click', openSidebar);
+        closeSidebar.addEventListener('click', closeSidebarFunc);
+        sidebarOverlay.addEventListener('click', closeSidebarFunc);
+        
+        // بستن سایدبار با کلید ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeSidebarFunc();
+            }
+        });
+
+        // مدیریت پیام‌ها
+        function initMessages() {
+            const messages = document.querySelectorAll('.message');
+            
+            messages.forEach(message => {
+                setTimeout(() => {
+                    message.style.opacity = '0';
+                    message.style.transform = 'translateX(100%)';
+                    setTimeout(() => message.remove(), 300);
+                }, 5000);
+                
+                message.addEventListener('click', () => {
+                    message.style.opacity = '0';
+                    message.style.transform = 'translateX(100%)';
+                    setTimeout(() => message.remove(), 300);
+                });
+            });
+        }
+
+        // مدیریت پخش موسیقی با سیستم جدید
+        class AudioPlayer {
+            constructor() {
+                this.audioManager = new AudioStateManager();
+                this.musicControl = document.getElementById('music-control');
+                this.musicIcon = document.getElementById('music-icon');
+                
+                this.init();
+            }
+            
+            init() {
+                this.setupEventListeners();
+                this.updateUI();
+            }
+            
+            setupEventListeners() {
+                this.musicControl.addEventListener('click', () => {
+                    this.toggle();
+                });
+                
+                // به‌روزرسانی UI بر اساس تغییرات وضعیت
+                setInterval(() => {
+                    this.updateUI();
+                }, 1000);
+            }
+            
+            toggle() {
+                this.audioManager.toggle();
+                this.updateUI();
+            }
+            
+            updateUI() {
+                if (this.audioManager.isPlaying) {
+                    this.musicIcon.className = 'fas fa-volume-up';
+                    this.musicControl.classList.add('music-playing');
+                } else {
+                    this.musicIcon.className = 'fas fa-volume-mute';
+                    this.musicControl.classList.remove('music-playing');
+                }
+            }
+        }
+        
+        // راه‌اندازی پخش کننده
+        let audioPlayer;
+        document.addEventListener('DOMContentLoaded', function() {
+            audioPlayer = new AudioPlayer();
+            initMessages();
+            handleNavbarScroll();
+            window.addEventListener('scroll', handleNavbarScroll);
+        });
+
+        // انیمیشن‌های پیشرفته برای نوبار
+        function initNavbarAnimations() {
+            const navLinks = document.querySelectorAll('.nav-link');
+            const logo = document.querySelector('.logo');
+            
+            // انیمیشن hover برای لینک‌ها
+            navLinks.forEach(link => {
+                link.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-3px)';
+                });
+                
+                link.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                });
+            });
+            
+            // انیمیشن لوگو
+            if (logo) {
+                logo.addEventListener('mouseenter', function() {
+                    this.querySelector('.logo-icon').style.transform = 'rotate(15deg) scale(1.1)';
+                });
+                
+                logo.addEventListener('mouseleave', function() {
+                    this.querySelector('.logo-icon').style.transform = 'rotate(0) scale(1)';
+                });
+            }
+        }
+
+        // مدیریت لینک‌ها برای جلوگیری از قطع صدا
+        function setupLinkHandlers() {
+            // جلوگیری از بارگذاری کامل صفحه برای لینک‌های داخلی
+            document.addEventListener('click', function(e) {
+                const link = e.target.closest('a');
+                if (!link) return;
+                
+                const href = link.getAttribute('href');
+                
+                // فقط برای لینک‌های داخلی
+                if (href && href.startsWith('/') && !href.startsWith('//')) {
+                    e.preventDefault();
+                    
+                    // ذخیره وضعیت فعلی صدا
+                    if (window.audioPlayer) {
+                        window.audioPlayer.audioManager.saveState();
+                    }
+                    
+                    // انتقال به صفحه جدید با حفظ وضعیت صدا
+                    setTimeout(() => {
+                        window.location.href = href;
+                    }, 100);
+                }
+            });
+        }
+
+        // تابع کمکی برای صفحات فرزند
+        window.MahdaviApp = {
+            // اسکرول به المان
+            scrollTo: function(elementId) {
+                const element = document.getElementById(elementId);
+                if (element) {
+                    element.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            },
+            
+            // نمایش نوتیفیکیشن
+            showNotification: function(message, type = 'success') {
+                const container = document.getElementById('messagesContainer');
+                const notification = document.createElement('div');
+                notification.className = `message ${type}`;
+                notification.innerHTML = `
+                    <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
+                    <span>${message}</span>
+                `;
+                container.appendChild(notification);
+                initMessages();
+            },
+            
+            // فرمت اعداد
+            formatNumber: function(num) {
+                return new Intl.NumberFormat('fa-IR').format(num);
+            },
+
+            // باز کردن سایدبار
+            openSidebar: openSidebar,
+
+            // بستن سایدبار
+            closeSidebar: closeSidebarFunc,
+            
+            // کنترل صدا
+            getAudioPlayer: function() {
+                return audioPlayer;
+            },
+            
+            // پخش صدا
+            playAudio: function() {
+                if (audioPlayer) {
+                    audioPlayer.audioManager.play();
+                }
+            },
+            
+            // توقف صدا
+            pauseAudio: function() {
+                if (audioPlayer) {
+                    audioPlayer.audioManager.pause();
+                }
+            },
+            
+            // تنظیم حجم صدا
+            setVolume: function(volume) {
+                if (audioPlayer) {
+                    audioPlayer.audioManager.setVolume(volume);
+                }
+            }
+        };
+
+        // مقداردهی اولیه
+        document.addEventListener('DOMContentLoaded', function() {
+            // مدیریت اسکرول
+            window.addEventListener('scroll', handleNavbarScroll);
+            
+            // مقداردهی اولیه کامپوننت‌ها
+            initMessages();
+            initNavbarAnimations();
+            setupLinkHandlers();
+            
+            // بارگذاری تم ذخیره شده
+            const savedTheme = localStorage.getItem('mahdavi-theme');
+            if (savedTheme === 'light') {
+                document.body.classList.add('light-theme');
+            }
+
+            // مدیریت لینک‌های داخلی برای اسکرول نرم
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+
+            // رفع مشکل userprofile در صورت عدم وجود
+            const userLevel = document.querySelector('.user-level-sidebar');
+            const userPoints = document.querySelector('.user-points-sidebar');
+            
+            if (userLevel && userLevel.textContent.includes('سطح: None')) {
+                userLevel.textContent = 'سطح: علاقه‌مند';
+            }
+            
+            if (userPoints && userPoints.textContent.includes('امتیاز: None')) {
+                userPoints.textContent = 'امتیاز: ۰';
+            }
+            
+            // بازیابی وضعیت صدا هنگام بارگذاری صفحه
+            setTimeout(() => {
+                if (window.audioPlayer && window.audioPlayer.audioManager) {
+                    const savedState = sessionStorage.getItem('mahdaviAudioState');
+                    if (savedState) {
+                        const state = JSON.parse(savedState);
+                        if (state.isPlaying) {
+                            window.audioPlayer.audioManager.audioElement.currentTime = state.currentTime;
+                            window.audioPlayer.audioManager.play();
+                        }
+                    }
+                }
+            }, 1000);
+        });
+
+        // مدیریت خطاهای全局
+        window.addEventListener('error', function(e) {
+            console.error('خطا در برنامه:', e.error);
+            MahdaviApp.showNotification('خطایی رخ داده است', 'error');
+        });
+
+        // ذخیره وضعیت صدا قبل از بسته شدن صفحه
+        window.addEventListener('beforeunload', function() {
+            if (window.audioPlayer && window.audioPlayer.audioManager) {
+                window.audioPlayer.audioManager.saveState();
+            }
+        });
+
+        // مدیریت visibility change (تبدیل تب)
+        document.addEventListener('visibilitychange', function() {
+            if (window.audioPlayer && window.audioPlayer.audioManager) {
+                if (document.hidden) {
+                    // صفحه مخفی شده - ذخیره وضعیت
+                    window.audioPlayer.audioManager.saveState();
+                } else {
+                    // صفحه دوباره visible شده - بازیابی وضعیت
+                    const savedState = sessionStorage.getItem('mahdaviAudioState');
+                    if (savedState) {
+                        const state = JSON.parse(savedState);
+                        if (state.isPlaying && Date.now() - state.timestamp < 30000) {
+                            // اگر کمتر از 30 ثانیه گذشته، ادامه بده
+                            window.audioPlayer.audioManager.audioElement.currentTime = state.currentTime;
+                            window.audioPlayer.audioManager.play();
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

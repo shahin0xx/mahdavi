@@ -1,0 +1,467 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    /* استایل‌های اختصاصی صفحه اوقات شرعی */
+    .city-selector {
+        background-color: rgba(255, 255, 255, 0.15);
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+        border: 1px solid var(--border-gold);
+    }
+    
+    .form-group {
+        margin-bottom: 15px;
+    }
+    
+    .form-label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: bold;
+        color: var(--gold);
+    }
+    
+    select, button {
+        width: 100%;
+        padding: 12px 15px;
+        border-radius: 8px;
+        border: none;
+        font-size: 1rem;
+        background-color: rgba(255, 255, 255, 0.9);
+    }
+    
+    .prayer-btn {
+        background: linear-gradient(to right, var(--gold), var(--dark-gold));
+        color: #333;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 10px;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+    
+    .prayer-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(212, 175, 55, 0.4);
+    }
+    
+    /* نمایش اوقات شرعی */
+    .prayer-times {
+        display: none;
+        background-color: rgba(255, 255, 255, 0.15);
+        padding: 20px;
+        border-radius: 10px;
+        margin-top: 20px;
+        border: 1px solid var(--border-gold);
+    }
+    
+    .prayer-header {
+        text-align: center;
+        margin-bottom: 20px;
+        color: var(--gold);
+        font-family: 'Lateef', serif;
+        font-size: 1.5rem;
+    }
+    
+    .date-info {
+        text-align: center;
+        margin-bottom: 15px;
+        font-size: 1.1rem;
+        color: var(--gold);
+        font-family: 'Lateef', serif;
+    }
+    
+    .prayer-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 15px;
+    }
+    
+    .prayer-item {
+        background-color: rgba(255, 255, 255, 0.1);
+        padding: 15px;
+        border-radius: 8px;
+        text-align: center;
+        transition: all 0.3s ease;
+        border: 1px solid var(--border-gold);
+    }
+    
+    .prayer-item:hover {
+        transform: translateY(-5px);
+        background-color: rgba(255, 255, 255, 0.2);
+    }
+    
+    .prayer-name {
+        font-weight: bold;
+        margin-bottom: 8px;
+        color: var(--gold);
+        font-family: 'Lateef', serif;
+    }
+    
+    .prayer-time {
+        font-size: 1.2rem;
+        font-weight: bold;
+        font-family: 'Lateef', serif;
+    }
+    
+    /* انیمیشن لودینگ */
+    .loading {
+        display: none;
+        text-align: center;
+        margin: 20px 0;
+    }
+    
+    .spinner {
+        border: 5px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top: 5px solid var(--gold);
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    /* پیام خطا */
+    .error-message {
+        display: none;
+        background-color: rgba(255, 0, 0, 0.2);
+        color: #ff6b6b;
+        padding: 15px;
+        border-radius: 8px;
+        text-align: center;
+        margin-top: 20px;
+        border: 1px solid rgba(255, 0, 0, 0.3);
+    }
+    
+    .success-message {
+        display: none;
+        background-color: rgba(0, 255, 0, 0.2);
+        color: #6bff6b;
+        padding: 15px;
+        border-radius: 8px;
+        text-align: center;
+        margin-top: 20px;
+        border: 1px solid rgba(0, 255, 0, 0.3);
+    }
+    
+    /* واکنشگرا */
+    @media (max-width: 600px) {
+        .prayer-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">
+            <i class="fas fa-clock card-icon"></i>
+            انتخاب شهر
+        </h2>
+    </div>
+    
+    <div class="city-selector">
+        <div class="form-group">
+            <label for="province" class="form-label">استان:</label>
+            <select id="province" class="form-control">
+                <option value="">لطفا استان انتخاب کنید</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="city" class="form-label">شهر:</label>
+            <select id="city" class="form-control">
+                <option value="">ابتدا استان را انتخاب کنید</option>
+            </select>
+        </div>
+        
+        <button id="get-times" class="prayer-btn">
+            <i class="fas fa-search"></i> دریافت اوقات شرعی
+        </button>
+    </div>
+    
+    <div class="loading">
+        <div class="spinner"></div>
+        <p>در حال دریافت اطلاعات...</p>
+    </div>
+    
+    <div class="error-message" id="error-message">
+        خطا در دریافت اطلاعات. لطفا دوباره تلاش کنید.
+    </div>
+    
+    <div class="success-message" id="success-message">
+        اطلاعات با موفقیت دریافت شد.
+    </div>
+</div>
+
+<div class="card prayer-times" id="prayer-times">
+    <div class="card-header">
+        <h2 class="card-title">
+            <i class="fas fa-praying-hands card-icon"></i>
+            <span id="prayer-header">اوقات شرعی</span>
+        </h2>
+    </div>
+    
+    <div class="date-info" id="date-info"></div>
+    <div class="prayer-grid" id="prayer-grid">
+        <!-- اوقات شرعی در اینجا نمایش داده می‌شود -->
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const provinceSelect = document.getElementById('province');
+        const citySelect = document.getElementById('city');
+        const getTimesBtn = document.getElementById('get-times');
+        const prayerTimesSection = document.getElementById('prayer-times');
+        const prayerHeader = document.getElementById('prayer-header');
+        const dateInfo = document.getElementById('date-info');
+        const prayerGrid = document.getElementById('prayer-grid');
+        const loading = document.querySelector('.loading');
+        const errorMessage = document.getElementById('error-message');
+        const successMessage = document.getElementById('success-message');
+        
+        // لیست استان‌ها و شهرهای ایران
+        const iranCities = {
+            "آذربایجان شرقی": ["تبریز", "مراغه", "مرند", "میانه", "اهر", "اسکو", "آذرشهر", "بناب", "سراب", "شبستر", "هریس", "هشترود", "کلیبر", "جلفا", "چاراویماق", "خداآفرین", "عجبشیر", "ملکان"],
+            "آذربایجان غربی": ["ارومیه", "خوی", "مهاباد", "میاندوآب", "سلماس", "اشنویه", "بوکان", "پیرانشهر", "تکاب", "شاهین دژ", "چالدران", "ماکو", "نقده", "سردشت", "شوط", "چایپاره"],
+            "اردبیل": ["اردبیل", "پارس آباد", "خلخال", "مشکین شهر", "گرمی", "نمین", "نیر", "بیله سوار", "کوثر", "سرعین"],
+            "اصفهان": ["اصفهان", "کاشان", "خمینی شهر", "نجف آباد", "شهرضا", "فلاورجان", "آران و بیدگل", "مبارکه", "نطنز", "سمیرم", "شاهین شهر", "گلپایگان", "لنجان", "زرین شهر", "تیران", "فریدونشهر", "دهاقان", "خوانسار", "برخوار", "چادگان", "خور و بیابانک", "بویین و میاندشت"],
+            "البرز": ["کرج", "هشتگرد", "نظرآباد", "طالقان", "ساوجبلاغ", "اشتهارد", "فردیس", "ماهدشت", "مشکین دشت", "کوهسار", "گلسار", "چهارباغ"],
+            "ایلام": ["ایلام", "دهلران", "آبدانان", "مهران", "دره شهر", "ایوان", "سرابله", "بدره", "چرداول", "ملکشاهی"],
+            "بوشهر": ["بوشهر", "برازجان", "گناوه", "خورموج", "عسلویه", "کنگان", "جم", "دشتستان", "دشتی", "دیر", "تنگستان", "دیلم"],
+            "تهران": ["تهران", "اسلامشهر", "ری", "ورامین", "شهریار", "پاکدشت", "قدس", "ملارد", "بهارستان", "قرچک", "پردیس", "دماوند", "شمیرانات", "فیروزکوه", "رباط کریم", "پیشوا"],
+            "چهارمحال و بختیاری": ["شهرکرد", "بروجن", "فارسان", "لردگان", "اردل", "سامان", "کیار", "کوهرنگ", "بن", "فلارد"],
+            "خراسان جنوبی": ["بیرجند", "قائن", "فردوس", "نهبندان", "سربیشه", "درمیان", "طبس", "خوسف", "زیرکوه", "سرایان", "بشرویه"],
+            "خراسان رضوی": ["مشهد", "نیشابور", "سبزوار", "تربت حیدریه", "قوچان", "کاشمر", "تایباد", "خواف", "درگز", "چناران", "فریمان", "سرخس", "بردسکن", "گناباد", "رشتخوار", "جوین", "بجستان", "خلیل آباد", "داورزن", "زاوه", "جغتای", "کلات", "مه ولات", "فیروزه", "باخرز"],
+            "خراسان شمالی": ["بجنورد", "اسفراین", "شیروان", "فاروج", "گرمه", "جاجرم", "مانه و سملقان", "راز و جرگلان"],
+            "خوزستان": ["اهواز", "دزفول", "آبادان", "خرمشهر", "مسجدسلیمان", "شوشتر", "شوش", "اندیمشک", "بندر ماهشهر", "بهبهان", "رامهرمز", "ایذه", "هفتگل", "گتوند", "لالی", "اندیکا", "باوی", "حمیدیه", "کارون", "هویزه", "باغ ملک"],
+            "زنجان": ["زنجان", "ابهر", "خرمدره", "قیدار", "خدابنده", "ماهنشان", "طارم", "سلطانیه", "ایجرود", "آببر"],
+            "سمنان": ["سمنان", "شاهرود", "دامغان", "گرمسار", "مهدی شهر", "میامی", "آرادان", "سرخه", "مهدیشهر"],
+            "سیستان و بلوچستان": ["زاهدان", "زابل", "ایرانشهر", "چابهار", "خاش", "سراوان", "نیکشهر", "کنارک", "سرباز", "دلگان", "میرجاوه", "سیب و سوران", "قصرقند", "زهک", "هیرمند", "هامون", "نیمروز"],
+            "فارس": ["شیراز", "مرودشت", "جهرم", "کازرون", "فسا", "لار", "داراب", "فیروزآباد", "اقلید", "آباده", "نی ریز", "استهبان", "لامرد", "ممسنی", "سپیدان", "فراشبند", "قیر و کارزین", "بوانات", "خرامه", "خنج", "زرین دشت", "کوار", "گراش", "بیضا", "ارسنجان", "پاسارگاد", "خرم بید", "رستم", "سروستان", "شیراز", "صفاشهر", "قیروکارزین", "مهر"],
+            "قزوین": ["قزوین", "تاکستان", "آبیک", "بوئین زهرا", "البرز", "آوج"],
+            "قم": ["قم"],
+            "کردستان": ["سنندج", "سقز", "مریوان", "بانه", "بیجار", "قروه", "کامیاران", "دهگلان", "دیواندره", "سروآباد"],
+            "کرمان": ["کرمان", "رفسنجان", "سیرجان", "بم", "جیرفت", "زرند", "کهنوج", "انار", "شهربابک", "راور", "بافت", "عنبرآباد", "کوهبنان", "منوجان", "قلعه گنج", "فهرج", "ریگان", "رابر", "فاریاب"],
+            "کرمانشاه": ["کرمانشاه", "اسلام آباد غرب", "پاوه", "هرسین", "کنگاور", "سنقر", "جوانرود", "دالاهو", "روانسر", "ثلاث باباجانی", "قصر شیرین", "گیلانغرب", "سرپل ذهاب"],
+            "کهگیلویه و بویراحمد": ["یاسوج", "گچساران", "دنا", "بهمئی", "لنده", "باشت", "چرام", "بویراحمد"],
+            "گلستان": ["گرگان", "گنبد کاووس", "علی آباد", "مینودشت", "ترکمن", "کردکوی", "بندر گز", "آق قلا", "گالیکش", "مراوه تپه", "رامیان", "کلاله"],
+            "گیلان": ["رشت", "انزلی", "لاهیجان", "لنگرود", "آستارا", "تالش", "صومعه سرا", "رودبار", "فومن", "ماسال", "شفت", "سیاهکل", "املش", "رضوانشهر", "آستانه اشرفیه", "بندرانزلی"],
+            "لرستان": ["خرم آباد", "بروجرد", "دورود", "کوهدشت", "الیگودرز", "ازنا", "پلدختر", "سلسله", "دلفان", "رومشکان"],
+            "مازندران": ["ساری", "بابل", "آمل", "قائم شهر", "تنکابن", "نور", "نوشهر", "چالوس", "رامسر", "بهشهر", "جویبار", "فریدونکنار", "عباس آباد", "محمودآباد", "سیمرغ", "سوادکوه", "بابلسر", "گلوگاه", "میاندورود", "کلاردشت", "سوادکوه شمالی"],
+            "مرکزی": ["اراک", "ساوه", "خمین", "محلات", "تفرش", "شازند", "دلیجان", "زرندیه", "کمیجان", "فراهان", "آشتیان"],
+            "هرمزگان": ["بندرعباس", "قشم", "میناب", "بندر لنگه", "رودان", "جاسک", "حاجی آباد", "بستک", "خمیر", "پارسیان", "ابوموسی", "سیریک", "قشم", "حاجی آباد"],
+            "همدان": ["همدان", "ملایر", "نهاوند", "تویسرکان", "کبودرآهنگ", "رزن", "اسدآباد", "بهار", "فامنین"],
+            "یزد": ["یزد", "میبد", "اردکان", "بافق", "ابرکوه", "تفت", "خاتم", "صدوق", "مهریز", "اشکذر"]
+        };
+        
+        // پر کردن لیست استان‌ها
+        Object.keys(iranCities).forEach(province => {
+            const option = document.createElement('option');
+            option.value = province;
+            option.textContent = province;
+            provinceSelect.appendChild(option);
+        });
+        
+        // هنگام تغییر استان، شهرهای آن استان را بارگذاری کن
+        provinceSelect.addEventListener('change', function() {
+            const selectedProvince = this.value;
+            citySelect.innerHTML = '<option value="">لطفا شهر انتخاب کنید</option>';
+            
+            if (selectedProvince && iranCities[selectedProvince]) {
+                iranCities[selectedProvince].forEach(city => {
+                    const option = document.createElement('option');
+                    option.value = city;
+                    option.textContent = city;
+                    citySelect.appendChild(option);
+                });
+            }
+        });
+        
+        // دریافت اوقات شرعی
+        getTimesBtn.addEventListener('click', function() {
+            const city = citySelect.value;
+            const province = provinceSelect.value;
+            
+            if (!city || !province) {
+                showError('لطفا استان و شهر خود را انتخاب کنید.');
+                return;
+            }
+            
+            getPrayerTimes(city, province);
+        });
+        
+        // تابع دریافت اوقات شرعی از API
+        async function getPrayerTimes(city, province) {
+            showLoading();
+            hideError();
+            hideSuccess();
+            
+            try {
+                // استفاده از API عمومی برای دریافت اوقات شرعی
+                const response = await fetch(`https://api.aladhan.com/v1/timingsByCity?city=${city}&country=Iran&method=7`);
+                
+                if (!response.ok) {
+                    throw new Error('خطا در دریافت اطلاعات');
+                }
+                
+                const data = await response.json();
+                
+                if (data.code === 200) {
+                    displayPrayerTimes(data.data, city, province);
+                    showSuccess();
+                } else {
+                    throw new Error('اطلاعات دریافت نشد');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showError('خطا در دریافت اطلاعات اوقات شرعی. لطفا دوباره تلاش کنید.');
+                
+                // نمایش داده‌های نمونه در صورت خطا
+                displaySamplePrayerTimes(city, province);
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        // نمایش اوقات شرعی
+        function displayPrayerTimes(data, city, province) {
+            const timings = data.timings;
+            const date = data.date;
+            
+            prayerHeader.textContent = `اوقات شرعی ${city} - ${province}`;
+            dateInfo.textContent = `${date.hijri.weekday.fa} ${date.hijri.day} ${date.hijri.month.fa} ${date.hijri.year} - ${date.gregorian.weekday.fa} ${date.gregorian.day} ${date.gregorian.month.fa} ${date.gregorian.year}`;
+            
+            prayerGrid.innerHTML = '';
+            
+            // اوقات شرعی اصلی - اصلاح شده برای نمایش اذان مغرب
+            const mainPrayers = {
+                "اذان صبح": timings.Fajr,
+                "طلوع آفتاب": timings.Sunrise,
+                "اذان ظهر": timings.Dhuhr,
+                "غروب آفتاب": timings.Sunset,
+                "اذان مغرب": timings.Maghrib, // اینجا اصلاح شد
+                "عشاء": timings.Isha,
+                "نیمه شب شرعی": timings.Midnight
+            };
+            
+            Object.keys(mainPrayers).forEach(prayer => {
+                const prayerItem = document.createElement('div');
+                prayerItem.className = 'prayer-item';
+                
+                const prayerName = document.createElement('div');
+                prayerName.className = 'prayer-name';
+                prayerName.textContent = prayer;
+                
+                const prayerTime = document.createElement('div');
+                prayerTime.className = 'prayer-time';
+                prayerTime.textContent = mainPrayers[prayer];
+                
+                prayerItem.appendChild(prayerName);
+                prayerItem.appendChild(prayerTime);
+                prayerGrid.appendChild(prayerItem);
+            });
+            
+            prayerTimesSection.style.display = 'block';
+        }
+        
+        // نمایش داده‌های نمونه در صورت عدم دسترسی به API
+        function displaySamplePrayerTimes(city, province) {
+            // داده‌های نمونه برای اوقات شرعی
+            const sampleTimes = {
+                "اذان صبح": "04:45",
+                "طلوع آفتاب": "06:15",
+                "اذان ظهر": "12:45",
+                "غروب آفتاب": "19:15",
+                "اذان مغرب": "19:35",
+                "عشاء": "20:15",
+                "نیمه شب شرعی": "23:45"
+            };
+            
+            prayerHeader.textContent = `اوقات شرعی ${city} - ${province} (نمونه)`;
+            dateInfo.textContent = `پنجشنبه ۱۵ شهریور ۱۴۰۳ - ۲۷ صفر ۱۴۴۵`;
+            
+            prayerGrid.innerHTML = '';
+            
+            Object.keys(sampleTimes).forEach(prayer => {
+                const prayerItem = document.createElement('div');
+                prayerItem.className = 'prayer-item';
+                
+                const prayerName = document.createElement('div');
+                prayerName.className = 'prayer-name';
+                prayerName.textContent = prayer;
+                
+                const prayerTime = document.createElement('div');
+                prayerTime.className = 'prayer-time';
+                prayerTime.textContent = sampleTimes[prayer];
+                
+                prayerItem.appendChild(prayerName);
+                prayerItem.appendChild(prayerTime);
+                prayerGrid.appendChild(prayerItem);
+            });
+            
+            prayerTimesSection.style.display = 'block';
+            showSuccess('اطلاعات نمونه نمایش داده می‌شود (API در دسترس نیست)');
+        }
+        
+        // توابع کمکی برای نمایش/پنهان کردن عناصر
+        function showLoading() {
+            loading.style.display = 'block';
+        }
+        
+        function hideLoading() {
+            loading.style.display = 'none';
+        }
+        
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+        }
+        
+        function hideError() {
+            errorMessage.style.display = 'none';
+        }
+        
+        function showSuccess(message) {
+            if (message) successMessage.textContent = message;
+            successMessage.style.display = 'block';
+            setTimeout(() => {
+                successMessage.style.display = 'none';
+            }, 3000);
+        }
+        
+        function hideSuccess() {
+            successMessage.style.display = 'none';
+        }
+        
+        // بارگذاری خودکار اوقات شرعی برای تهران
+        window.onload = function() {
+            provinceSelect.value = "تهران";
+            provinceSelect.dispatchEvent(new Event('change'));
+            setTimeout(() => {
+                citySelect.value = "تهران";
+                getPrayerTimes("تهران", "تهران");
+            }, 500);
+        };
+    });
+</script>
+{% endblock %}

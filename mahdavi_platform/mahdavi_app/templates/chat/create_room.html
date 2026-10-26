@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ایجاد گروه جدید - پیام‌رسان</title>
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/font-face.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --telegram-bg: #0e1621;
+            --telegram-secondary: #17212b;
+            --telegram-accent: #2b5278;
+            --telegram-green: #00af9c;
+            --telegram-text: #e6eaed;
+            --telegram-text-secondary: #7f91a4;
+            --gold: #d4af37;
+            --dark-gold: #b8941f;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Vazir', sans-serif;
+        }
+
+        body {
+            background: var(--telegram-bg);
+            color: var(--telegram-text);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .top-nav {
+            background: var(--telegram-secondary);
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--telegram-accent);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .back-button {
+            background: none;
+            border: none;
+            color: var(--telegram-text);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: background 0.3s ease;
+        }
+
+        .back-button:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .nav-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin: 0;
+            color: var(--telegram-text);
+        }
+
+        .create-room-container {
+            height: calc(100vh - 60px);
+            overflow-y: auto;
+            padding: 20px;
+            background: var(--telegram-bg);
+        }
+
+        .form-card {
+            background: var(--telegram-secondary);
+            border-radius: 12px;
+            border: 1px solid var(--telegram-accent);
+            padding: 20px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--telegram-text);
+            font-weight: 600;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--telegram-bg);
+            border: 1px solid var(--telegram-accent);
+            border-radius: 8px;
+            color: var(--telegram-text);
+            font-size: 0.95rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--telegram-green);
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--telegram-bg);
+            border: 1px solid var(--telegram-accent);
+            border-radius: 8px;
+            color: var(--telegram-text);
+            font-size: 0.95rem;
+            cursor: pointer;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: var(--telegram-green);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .btn-primary {
+            background: var(--telegram-green);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #009688;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: var(--telegram-accent);
+            color: var(--telegram-text);
+        }
+
+        .btn-secondary:hover {
+            background: #3a6d9c;
+        }
+
+        .info-text {
+            color: var(--telegram-text-secondary);
+            font-size: 0.9rem;
+            margin-top: 8px;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 768px) {
+            .create-room-container {
+                padding: 15px;
+            }
+            
+            .top-nav {
+                padding: 10px 12px;
+            }
+            
+            .form-card {
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="top-nav">
+        <button class="back-button" onclick="location.href='{% url 'chat_home' %}'">
+            <i class="fas fa-arrow-right"></i>
+        </button>
+        <h1 class="nav-title">ایجاد گروه جدید</h1>
+    </div>
+
+    <div class="create-room-container">
+        <div class="form-card">
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label class="form-label" for="id_name">نام گروه</label>
+                    <input type="text" name="name" class="form-control" id="id_name" placeholder="نام گروه را وارد کنید" required maxlength="100">
+                    <p class="info-text">نامی برای گروه خود انتخاب کنید</p>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="id_description">توضیحات (اختیاری)</label>
+                    <textarea name="description" class="form-control" id="id_description" rows="3" placeholder="توضیحات گروه (اختیاری)"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="id_room_type">نوع اتاق</label>
+                    <select name="room_type" class="form-select" id="id_room_type" required>
+                        <option value="group">گروهی</option>
+                        <option value="private">خصوصی</option>
+                    </select>
+                    <p class="info-text">گروهی: برای گفتگوهای چند نفره | خصوصی: برای گفتگوهای دو نفره</p>
+                </div>
+
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-plus-circle"></i>
+                        ایجاد گروه
+                    </button>
+                </div>
+
+                <div class="form-group">
+                    <button type="button" class="btn btn-secondary" onclick="location.href='{% url 'chat_home' %}'">
+                        <i class="fas fa-arrow-right"></i>
+                        بازگشت
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('id_room_type').addEventListener('change', function() {
+            const roomType = this.value;
+            const nameInput = document.getElementById('id_name');
+            
+            if (roomType === 'private') {
+                nameInput.placeholder = 'نام گفتگو را وارد کنید';
+                document.querySelector('.info-text').textContent = 'نامی برای گفتگوی خصوصی خود انتخاب کنید';
+            } else {
+                nameInput.placeholder = 'نام گروه را وارد کنید';
+                document.querySelector('.info-text').textContent = 'نامی برای گروه خود انتخاب کنید';
+            }
+        });
+
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const name = document.getElementById('id_name').value.trim();
+            if (!name) {
+                e.preventDefault();
+                alert('لطفاً نام گروه را وارد کنید');
+                return;
+            }
+        });
+    </script>
+</body>
+</html>

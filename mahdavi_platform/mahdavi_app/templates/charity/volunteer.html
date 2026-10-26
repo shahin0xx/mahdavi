@@ -1,0 +1,819 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}درخواست داوطلبی - {{ project.title }} - پلتفرم مهدوی{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* متغیرهای مهدوی */
+    :root {
+        --charity-primary: #D4AF37;
+        --charity-secondary: #FFD700;
+        --charity-accent: #F39C12;
+        --charity-gradient: linear-gradient(135deg, var(--charity-primary), var(--charity-secondary));
+    }
+
+    /* استایل اصلی */
+    .volunteer-container {
+        background: linear-gradient(180deg, 
+            rgba(15, 15, 26, 1) 0%,
+            rgba(26, 26, 46, 0.95) 50%,
+            rgba(15, 15, 26, 1) 100%);
+        min-height: 100vh;
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* هدر صفحه */
+    .volunteer-header {
+        padding: 5rem 2rem 3rem;
+        position: relative;
+        text-align: center;
+        background: linear-gradient(180deg, 
+            rgba(15, 15, 26, 0.9) 0%,
+            rgba(26, 26, 46, 0.7) 100%);
+    }
+
+    .volunteer-title {
+        font-size: 3rem;
+        font-weight: 900;
+        background: var(--charity-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 1rem;
+        animation: titleGlow 4s infinite alternate;
+    }
+
+    .volunteer-subtitle {
+        font-size: 1.2rem;
+        color: var(--text-secondary);
+        max-width: 600px;
+        margin: 0 auto 2rem;
+        line-height: 1.6;
+    }
+
+    /* محتوای اصلی */
+    .volunteer-content {
+        padding: 2rem;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    /* کارت فرم */
+    .form-card {
+        background: linear-gradient(145deg, 
+            rgba(26, 26, 46, 0.8) 0%,
+            rgba(15, 15, 26, 0.9) 100%);
+        border-radius: 25px;
+        padding: 3rem;
+        border: 1px solid rgba(212, 175, 55, 0.2);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+    }
+
+    .form-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--charity-gradient);
+    }
+
+    /* نمایش پروژه */
+    .project-display {
+        background: linear-gradient(135deg, 
+            rgba(212, 175, 55, 0.1) 0%,
+            rgba(212, 175, 55, 0.05) 100%);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 3rem;
+        border: 1px solid rgba(212, 175, 55, 0.2);
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+        transition: all 0.3s ease;
+    }
+
+    .project-display:hover {
+        border-color: var(--charity-primary);
+        transform: translateY(-5px);
+    }
+
+    .project-image {
+        width: 100px;
+        height: 100px;
+        border-radius: 20px;
+        object-fit: cover;
+        border: 3px solid var(--charity-primary);
+        box-shadow: 0 10px 20px rgba(212, 175, 55, 0.3);
+    }
+
+    .project-info h3 {
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        font-size: 1.5rem;
+    }
+
+    .project-info p {
+        color: var(--text-secondary);
+        margin-bottom: 1rem;
+        line-height: 1.6;
+    }
+
+    .project-tags {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .project-tag {
+        background: rgba(212, 175, 55, 0.1);
+        color: var(--charity-primary);
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-size: 0.9rem;
+        border: 1px solid rgba(212, 175, 55, 0.2);
+    }
+
+    /* فرم */
+    .form-group {
+        margin-bottom: 2rem;
+    }
+
+    .form-label {
+        display: block;
+        color: var(--text-primary);
+        font-weight: 700;
+        margin-bottom: 0.8rem;
+        font-size: 1.1rem;
+    }
+
+    .form-label .required {
+        color: #e74c3c;
+        margin-right: 0.3rem;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 1rem 1.5rem;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        color: var(--text-primary);
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--charity-primary);
+        box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    textarea.form-control {
+        min-height: 150px;
+        resize: vertical;
+    }
+
+    .form-text {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+        display: block;
+    }
+
+    /* اطلاعات کاربر */
+    .user-info-section {
+        background: rgba(212, 175, 55, 0.05);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid rgba(212, 175, 55, 0.1);
+    }
+
+    .user-info-section h4 {
+        color: var(--charity-primary);
+        margin-bottom: 1.5rem;
+        font-size: 1.3rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .user-info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .user-info-item {
+        background: rgba(255, 255, 255, 0.02);
+        padding: 1rem;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .user-info-label {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin-bottom: 0.3rem;
+        display: block;
+    }
+
+    .user-info-value {
+        color: var(--text-primary);
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+
+    /* شرایط */
+    .terms-section {
+        background: rgba(52, 152, 219, 0.05);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid rgba(52, 152, 219, 0.1);
+    }
+
+    .terms-section h4 {
+        color: #3498db;
+        margin-bottom: 1rem;
+        font-size: 1.3rem;
+    }
+
+    .terms-list {
+        list-style: none;
+        padding: 0;
+        margin-bottom: 1.5rem;
+    }
+
+    .terms-list li {
+        color: var(--text-secondary);
+        margin-bottom: 0.8rem;
+        padding-right: 1.5rem;
+        position: relative;
+    }
+
+    .terms-list li:before {
+        content: '✓';
+        position: absolute;
+        right: 0;
+        color: #2ecc71;
+        font-weight: bold;
+    }
+
+    .form-check {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.8rem;
+    }
+
+    .form-check-input {
+        margin-top: 0.3rem;
+        width: 1.2rem;
+        height: 1.2rem;
+        cursor: pointer;
+    }
+
+    .form-check-input:checked {
+        background-color: var(--charity-primary);
+        border-color: var(--charity-primary);
+    }
+
+    .form-check-label {
+        color: var(--text-primary);
+        cursor: pointer;
+        flex: 1;
+    }
+
+    .form-check-label a {
+        color: var(--charity-primary);
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+
+    .form-check-label a:hover {
+        color: var(--charity-secondary);
+        text-decoration: underline;
+    }
+
+    /* دکمه ارسال */
+    .submit-btn {
+        width: 100%;
+        padding: 1.2rem;
+        background: var(--charity-gradient);
+        color: var(--dark-bg);
+        border: none;
+        border-radius: 15px;
+        font-size: 1.2rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        box-shadow: 0 10px 30px rgba(212, 175, 55, 0.3);
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(212, 175, 55, 0.4);
+    }
+
+    .submit-btn:active {
+        transform: translateY(-2px);
+    }
+
+    /* شمارشگر کاراکتر */
+    .char-counter {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .char-count {
+        color: var(--charity-primary);
+        font-weight: 600;
+    }
+
+    .char-count.warning {
+        color: #e74c3c;
+    }
+
+    /* رسپانسیو */
+    @media (max-width: 768px) {
+        .volunteer-title {
+            font-size: 2.2rem;
+        }
+        
+        .form-card {
+            padding: 2rem;
+        }
+        
+        .project-display {
+            flex-direction: column;
+            text-align: center;
+            gap: 1.5rem;
+        }
+        
+        .project-image {
+            width: 120px;
+            height: 120px;
+        }
+        
+        .user-info-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .volunteer-title {
+            font-size: 1.8rem;
+        }
+        
+        .volunteer-header {
+            padding: 3rem 1rem 2rem;
+        }
+        
+        .volunteer-content {
+            padding: 1rem;
+        }
+        
+        .form-card {
+            padding: 1.5rem;
+        }
+    }
+
+    /* انیمیشن‌ها */
+    @keyframes titleGlow {
+        0% {
+            text-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
+        }
+        100% {
+            text-shadow: 0 0 40px rgba(212, 175, 55, 0.8);
+        }
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.7;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="volunteer-container">
+    <!-- هدر صفحه -->
+    <section class="volunteer-header">
+        <h1 class="volunteer-title">درخواست همکاری داوطلبانه</h1>
+        <p class="volunteer-subtitle">
+            فرم ثبت درخواست همکاری داوطلبانه با پروژه "{{ project.title }}"
+        </p>
+    </section>
+
+    <!-- محتوای اصلی -->
+    <section class="volunteer-content">
+        <div class="form-card">
+            <!-- نمایش پروژه -->
+            <div class="project-display">
+                {% if project.main_image %}
+                <img src="{{ project.main_image.url }}" 
+                     alt="{{ project.title }}"
+                     class="project-image">
+                {% else %}
+                <div class="project-image" style="background: var(--charity-gradient); display: flex; align-items: center; justify-content: center;">
+                    <i class="fas fa-hands-helping fa-2x" style="color: var(--dark-bg);"></i>
+                </div>
+                {% endif %}
+                
+                <div class="project-info">
+                    <h3>{{ project.title }}</h3>
+                    <p>{{ project.short_description|truncatewords:30 }}</p>
+                    
+                    <div class="project-tags">
+                        <span class="project-tag">
+                            <i class="fas fa-tag ml-2"></i>
+                            {{ project.category.name }}
+                        </span>
+                        <span class="project-tag">
+                            <i class="fas fa-map-marker-alt ml-2"></i>
+                            {{ project.location }}
+                        </span>
+                        <span class="project-tag">
+                            <i class="fas fa-users ml-2"></i>
+                            {{ project.volunteers_needed }} نفر مورد نیاز
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- فرم درخواست -->
+            <form method="post" id="volunteerForm">
+                {% csrf_token %}
+                
+                <!-- انگیزه همکاری -->
+                <div class="form-group">
+                    <label class="form-label">
+                        <span class="required">*</span>
+                        انگیزه و دلایل همکاری
+                    </label>
+                    <textarea 
+                        name="motivation" 
+                        class="form-control" 
+                        placeholder="دلایل خود برای همکاری با این پروژه را شرح دهید..."
+                        required
+                        minlength="20"
+                    >{{ form.motivation.value|default:'' }}</textarea>
+                    <span class="form-text">
+                        حداقل ۲۰ کاراکتر. انگیزه‌های خود را به طور کامل شرح دهید.
+                    </span>
+                    <div class="char-counter">
+                        <span class="char-count" id="motivationCount">0</span>
+                        <span>کاراکتر</span>
+                    </div>
+                </div>
+
+                <!-- مهارت‌ها و تجربیات -->
+                <div class="form-group">
+                    <label class="form-label">
+                        مهارت‌ها و تجربیات مرتبط
+                    </label>
+                    <textarea 
+                        name="skills" 
+                        class="form-control" 
+                        placeholder="مهارت‌ها، تخصص‌ها و تجربیات مرتبط خود را ذکر کنید..."
+                    >{{ form.skills.value|default:'' }}</textarea>
+                    <span class="form-text">
+                        مهارت‌های شما به ما کمک می‌کند بهترین نقش را برایتان در نظر بگیریم.
+                    </span>
+                    <div class="char-counter">
+                        <span class="char-count" id="skillsCount">0</span>
+                        <span>کاراکتر</span>
+                    </div>
+                </div>
+
+                <!-- ساعات قابل اختصاص -->
+                <div class="form-group">
+                    <label class="form-label">
+                        <span class="required">*</span>
+                        ساعات قابل اختصاص در هفته
+                    </label>
+                    <div style="max-width: 200px;">
+                        <input 
+                            type="number" 
+                            name="available_hours" 
+                            class="form-control" 
+                            min="1" 
+                            max="40" 
+                            value="{{ form.available_hours.value|default:'5' }}"
+                            required
+                        >
+                    </div>
+                    <span class="form-text">
+                        تعداد ساعاتی که می‌توانید در هفته به پروژه اختصاص دهید.
+                    </span>
+                </div>
+
+                <!-- اطلاعات کاربر -->
+                <div class="user-info-section">
+                    <h4>
+                        <i class="fas fa-user-circle"></i>
+                        اطلاعات شما
+                    </h4>
+                    
+                    <div class="user-info-grid">
+                        <div class="user-info-item">
+                            <span class="user-info-label">نام و نام خانوادگی</span>
+                            <span class="user-info-value">{{ user.get_full_name }}</span>
+                        </div>
+                        
+                        <div class="user-info-item">
+                            <span class="user-info-label">شماره تماس</span>
+                            <span class="user-info-value">{{ user.phone }}</span>
+                        </div>
+                        
+                        <div class="user-info-item">
+                            <span class="user-info-label">ایمیل</span>
+                            <span class="user-info-value">{{ user.email|default:"-" }}</span>
+                        </div>
+                        
+                        <div class="user-info-item">
+                            <span class="user-info-label">گروه سنی</span>
+                            <span class="user-info-value">{{ user.get_age_group_display }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- شرایط و قوانین -->
+                <div class="terms-section">
+                    <h4>
+                        <i class="fas fa-file-contract"></i>
+                        شرایط و قوانین همکاری
+                    </h4>
+                    
+                    <ul class="terms-list">
+                        <li>متعهد می‌شوم اطلاعات ارائه شده صحیح و کامل باشد</li>
+                        <li>پذیرش مسئولیت‌های محوله با بهترین کیفیت</li>
+                        <li>احترام به قوانین و مقررات پروژه</li>
+                        <li>همکاری تیمی و احترام به سایر داوطلبان</li>
+                        <li>رعایت حریم خصوصی و محرمانگی اطلاعات پروژه</li>
+                    </ul>
+                    
+                    <div class="form-check">
+                        <input 
+                            class="form-check-input" 
+                            type="checkbox" 
+                            id="agreeTerms" 
+                            required
+                        >
+                        <label class="form-check-label" for="agreeTerms">
+                            با تمامی 
+                            <a href="#" target="_blank">شرایط و قوانین</a> 
+                            همکاری داوطلبانه موافقم
+                        </label>
+                    </div>
+                </div>
+
+                <!-- دکمه ارسال -->
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-paper-plane"></i>
+                    ارسال درخواست داوطلبی
+                </button>
+            </form>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+class VolunteerForm {
+    constructor() {
+        this.form = document.getElementById('volunteerForm');
+        this.init();
+    }
+
+    init() {
+        this.initCharCounters();
+        this.initFormValidation();
+        this.initAnimations();
+    }
+
+    initCharCounters() {
+        const motivationTextarea = this.form.querySelector('textarea[name="motivation"]');
+        const skillsTextarea = this.form.querySelector('textarea[name="skills"]');
+        
+        const motivationCounter = document.getElementById('motivationCount');
+        const skillsCounter = document.getElementById('skillsCount');
+        
+        this.updateCounter(motivationTextarea, motivationCounter, 20);
+        this.updateCounter(skillsTextarea, skillsCounter, 0);
+        
+        motivationTextarea.addEventListener('input', () => {
+            this.updateCounter(motivationTextarea, motivationCounter, 20);
+        });
+        
+        skillsTextarea.addEventListener('input', () => {
+            this.updateCounter(skillsTextarea, skillsCounter, 0);
+        });
+    }
+
+    updateCounter(textarea, counterElement, minLength) {
+        const count = textarea.value.length;
+        counterElement.textContent = count;
+        
+        if (minLength > 0 && count < minLength) {
+            counterElement.classList.add('warning');
+            counterElement.style.color = '#e74c3c';
+        } else {
+            counterElement.classList.remove('warning');
+            counterElement.style.color = 'var(--charity-primary)';
+        }
+    }
+
+    initFormValidation() {
+        this.form.addEventListener('submit', (e) => {
+            if (!this.validateForm()) {
+                e.preventDefault();
+                this.showValidationErrors();
+            }
+        });
+    }
+
+    validateForm() {
+        let isValid = true;
+        
+        // بررسی انگیزه
+        const motivation = this.form.querySelector('textarea[name="motivation"]');
+        if (motivation.value.trim().length < 20) {
+            isValid = false;
+            this.highlightField(motivation, false);
+        } else {
+            this.highlightField(motivation, true);
+        }
+        
+        // بررسی ساعات
+        const hours = this.form.querySelector('input[name="available_hours"]');
+        if (!hours.value || parseInt(hours.value) < 1) {
+            isValid = false;
+            this.highlightField(hours, false);
+        } else {
+            this.highlightField(hours, true);
+        }
+        
+        // بررسی شرایط
+        const terms = document.getElementById('agreeTerms');
+        if (!terms.checked) {
+            isValid = false;
+            this.highlightField(terms, false);
+        } else {
+            this.highlightField(terms, true);
+        }
+        
+        return isValid;
+    }
+
+    highlightField(field, isValid) {
+        if (field.type === 'checkbox') {
+            const label = field.parentElement;
+            if (isValid) {
+                label.style.color = '';
+            } else {
+                label.style.color = '#e74c3c';
+                label.style.animation = 'pulse 1s infinite';
+            }
+        } else {
+            if (isValid) {
+                field.style.borderColor = '';
+                field.style.boxShadow = '';
+            } else {
+                field.style.borderColor = '#e74c3c';
+                field.style.boxShadow = '0 0 0 3px rgba(231, 76, 60, 0.1)';
+            }
+        }
+    }
+
+    showValidationErrors() {
+        const toast = document.createElement('div');
+        toast.style.cssText = `
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(231, 76, 60, 0.3);
+            z-index: 10000;
+            animation: slideDown 0.3s ease;
+        `;
+        
+        toast.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <i class="fas fa-exclamation-triangle"></i>
+                <div>
+                    <strong>لطفاً فرم را کامل کنید</strong>
+                    <div style="font-size: 0.9rem; opacity: 0.9;">تمام فیلدهای لازم را پر کنید</div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateX(-50%) translateY(-20px)';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+
+    initAnimations() {
+        // انیمیشن ورود فرم
+        const formCard = document.querySelector('.form-card');
+        formCard.style.opacity = '0';
+        formCard.style.transform = 'translateY(30px)';
+        
+        setTimeout(() => {
+            formCard.style.transition = 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
+            formCard.style.opacity = '1';
+            formCard.style.transform = 'translateY(0)';
+        }, 300);
+        
+        // افکت hover روی کارت پروژه
+        const projectCard = document.querySelector('.project-display');
+        projectCard.addEventListener('mousemove', (e) => {
+            this.handleCardHover(e, projectCard);
+        });
+        
+        projectCard.addEventListener('mouseleave', () => {
+            projectCard.style.transform = 'translateY(-5px)';
+        });
+    }
+
+    handleCardHover(e, card) {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        
+        const rotateY = ((x - centerX) / centerX) * 3;
+        const rotateX = ((centerY - y) / centerY) * 3;
+        
+        card.style.transform = `
+            perspective(1000px)
+            rotateX(${rotateX}deg)
+            rotateY(${rotateY}deg)
+            translateY(-5px)
+        `;
+    }
+}
+
+// راه‌اندازی
+document.addEventListener('DOMContentLoaded', () => {
+    // اضافه کردن استایل‌های داینامیک
+    const styleSheet = document.createElement('style');
+    styleSheet.textContent = `
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.7;
+            }
+        }
+    `;
+    document.head.appendChild(styleSheet);
+    
+    // راه‌اندازی فرم
+    const volunteerForm = new VolunteerForm();
+    window.VolunteerForm = volunteerForm;
+});
+</script>
+{% endblock %}

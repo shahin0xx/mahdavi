@@ -1,0 +1,1012 @@
+{% extends "base.html" %}
+
+{% block title %}کتابخانه مهدوی - گنجینه معارف مهدویت{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Variables */
+    :root {
+        --gold-primary: #D4AF37;
+        --gold-secondary: #FFD700;
+        --gold-light: #F7EF8A;
+        --gold-dark: #B8860B;
+        --gold-gradient: linear-gradient(135deg, #D4AF37 0%, #FFD700 50%, #F7EF8A 100%);
+        --success: #00d9a6;
+        --warning: #ffc107;
+        --info: #17a2b8;
+    }
+
+    /* Hero Section با افکت پیشرفته */
+    .library-hero {
+        min-height: 90vh;
+        background: 
+            radial-gradient(ellipse at 20% 50%, rgba(212, 175, 55, 0.15) 0%, transparent 50%),
+            radial-gradient(ellipse at 80% 20%, rgba(255, 215, 0, 0.1) 0%, transparent 50%),
+            linear-gradient(135deg, #0F0F1A 0%, #1A1A2E 50%, #0A0A12 100%);
+        display: flex;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+
+    .hero-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+        position: relative;
+        z-index: 3;
+    }
+
+    .hero-badge {
+        background: var(--gold-gradient);
+        color: var(--dark-bg);
+        padding: 0.75rem 1.5rem;
+        border-radius: 25px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 2rem;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+
+    .hero-title {
+        font-size: 4rem;
+        font-weight: 800;
+        line-height: 1.1;
+        margin-bottom: 1.5rem;
+        background: var(--gold-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-shadow: 0 0 60px rgba(212, 175, 55, 0.4);
+    }
+
+    .hero-subtitle {
+        font-size: 1.4rem;
+        color: var(--text-secondary);
+        margin-bottom: 3rem;
+        line-height: 1.6;
+        max-width: 600px;
+    }
+
+    .hero-stats {
+        display: flex;
+        gap: 3rem;
+        margin-bottom: 3rem;
+        flex-wrap: wrap;
+    }
+
+    .hero-stat {
+        text-align: center;
+    }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 800;
+        background: var(--gold-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        display: block;
+        line-height: 1;
+    }
+
+    .stat-label {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+    }
+
+    /* Featured Books Marquee */
+    .marquee-section {
+        background: rgba(212, 175, 55, 0.05);
+        padding: 2rem 0;
+        border-top: 1px solid var(--border-gold);
+        border-bottom: 1px solid var(--border-gold);
+        margin-bottom: 4rem;
+        overflow: hidden;
+    }
+
+    .marquee-container {
+        display: flex;
+        animation: marquee 30s linear infinite;
+    }
+
+    .marquee-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0 2rem;
+        white-space: nowrap;
+    }
+
+    .marquee-discount {
+        background: #dc3545;
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 700;
+    }
+
+    @keyframes marquee {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-50%); }
+    }
+
+    /* Discount Banner */
+    .discount-banner {
+        background: var(--gold-gradient);
+        padding: 3rem 2rem;
+        text-align: center;
+        border-radius: 20px;
+        margin: 4rem auto;
+        max-width: 1200px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 20px 40px rgba(212, 175, 55, 0.3);
+    }
+
+    .discount-banner::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="stars" width="50" height="50" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.3)"/></pattern></defs><rect width="100" height="100" fill="url(%23stars)"/></svg>');
+        opacity: 0.3;
+    }
+
+    .discount-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: var(--dark-bg);
+        margin-bottom: 1rem;
+        position: relative;
+        z-index: 2;
+    }
+
+    .discount-subtitle {
+        font-size: 1.2rem;
+        color: var(--dark-bg);
+        opacity: 0.9;
+        margin-bottom: 2rem;
+        position: relative;
+        z-index: 2;
+    }
+
+    .discount-timer {
+        background: rgba(10, 10, 18, 0.9);
+        color: var(--gold-light);
+        padding: 1rem 2rem;
+        border-radius: 15px;
+        font-size: 1.5rem;
+        font-weight: 700;
+        display: inline-flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        position: relative;
+        z-index: 2;
+    }
+
+    /* Category Navigation */
+    .category-nav {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-bottom: 4rem;
+        padding: 0 2rem;
+    }
+
+    .category-tab {
+        background: var(--card-bg);
+        border: 1px solid var(--border-gold);
+        border-radius: 25px;
+        padding: 1rem 2rem;
+        color: var(--text-primary);
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .category-tab:hover,
+    .category-tab.active {
+        background: var(--gold-gradient);
+        color: var(--dark-bg);
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(212, 175, 55, 0.3);
+        text-decoration: none;
+    }
+
+    /* Book Showcase Grid */
+    .showcase-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-bottom: 4rem;
+        padding: 0 2rem;
+    }
+
+    .showcase-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border-gold);
+        border-radius: 20px;
+        overflow: hidden;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+    }
+
+    .showcase-card.featured {
+        border: 2px solid var(--gold-primary);
+        box-shadow: 0 15px 35px rgba(212, 175, 55, 0.2);
+    }
+
+    .showcase-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 25px 50px rgba(212, 175, 55, 0.3);
+    }
+
+    .book-badge-container {
+        position: absolute;
+        top: 1rem;
+        left: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        z-index: 2;
+    }
+
+    .book-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .badge-popular {
+        background: #dc3545;
+        color: white;
+    }
+
+    .badge-new {
+        background: var(--success);
+        color: white;
+    }
+
+    .badge-free {
+        background: var(--info);
+        color: white;
+    }
+
+    .book-image {
+        width: 100%;
+        height: 200px;
+        background: var(--gold-gradient);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--dark-bg);
+        font-size: 3rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .book-content {
+        padding: 1.5rem;
+    }
+
+    .book-title {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        line-height: 1.3;
+    }
+
+    .book-author {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .book-description {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        line-height: 1.5;
+        margin-bottom: 1.5rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .book-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .book-price {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .current-price {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--gold-primary);
+    }
+
+    .original-price {
+        font-size: 1rem;
+        color: var(--text-muted);
+        text-decoration: line-through;
+    }
+
+    .book-rating {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        color: var(--gold-primary);
+    }
+
+    .book-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+    }
+
+    /* Special Offers */
+    .offers-section {
+        background: linear-gradient(135deg, #1A1A2E 0%, #25253D 100%);
+        padding: 4rem 2rem;
+        margin: 4rem 0;
+        border-radius: 30px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .offers-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="%23D4AF37" opacity="0.1"/></pattern><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+    }
+
+    .offer-card {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border-gold);
+        border-radius: 20px;
+        padding: 2rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        position: relative;
+        z-index: 2;
+    }
+
+    .offer-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--gold-primary);
+        box-shadow: 0 15px 30px rgba(212, 175, 55, 0.2);
+    }
+
+    .offer-icon {
+        font-size: 3rem;
+        color: var(--gold-primary);
+        margin-bottom: 1rem;
+    }
+
+    .offer-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+    }
+
+    .offer-description {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+
+    /* Testimonials */
+    .testimonials-section {
+        padding: 4rem 2rem;
+        margin: 4rem 0;
+    }
+
+    .testimonial-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border-gold);
+        border-radius: 20px;
+        padding: 2rem;
+        position: relative;
+    }
+
+    .testimonial-card::before {
+        content: '"';
+        font-size: 4rem;
+        color: var(--gold-primary);
+        opacity: 0.3;
+        position: absolute;
+        top: 1rem;
+        right: 2rem;
+    }
+
+    .testimonial-text {
+        color: var(--text-secondary);
+        font-size: 1rem;
+        line-height: 1.6;
+        margin-bottom: 1.5rem;
+        font-style: italic;
+    }
+
+    .testimonial-author {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .author-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: var(--gold-gradient);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--dark-bg);
+        font-weight: 700;
+    }
+
+    .author-info h4 {
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+        font-weight: 600;
+    }
+
+    .author-info p {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+    }
+
+    /* Floating Elements */
+    .floating-elements {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    .floating-element {
+        position: absolute;
+        font-size: 2rem;
+        opacity: 0.1;
+        animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-20px) rotate(180deg); }
+    }
+
+    /* Responsive */
+    @media (max-width: 1200px) {
+        .hero-title {
+            font-size: 3.5rem;
+        }
+        
+        .showcase-grid {
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        }
+    }
+
+    @media (max-width: 768px) {
+        .library-hero {
+            min-height: 80vh;
+        }
+        
+        .hero-title {
+            font-size: 2.5rem;
+        }
+        
+        .hero-stats {
+            gap: 2rem;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+        }
+        
+        .category-nav {
+            gap: 0.5rem;
+        }
+        
+        .category-tab {
+            padding: 0.75rem 1.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .discount-title {
+            font-size: 2rem;
+        }
+        
+        .discount-timer {
+            font-size: 1.2rem;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .book-actions {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .hero-title {
+            font-size: 2rem;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.1rem;
+        }
+        
+        .hero-stats {
+            gap: 1.5rem;
+        }
+        
+        .showcase-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .category-tab {
+            padding: 0.5rem 1rem;
+            font-size: 0.8rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="library-hero">
+    <div class="floating-elements">
+        <div class="floating-element" style="top: 20%; left: 5%; animation-delay: 0s;">📚</div>
+        <div class="floating-element" style="top: 60%; right: 10%; animation-delay: 2s;">🕌</div>
+        <div class="floating-element" style="bottom: 30%; left: 15%; animation-delay: 4s;">🌟</div>
+        <div class="floating-element" style="top: 40%; right: 20%; animation-delay: 1s;">📖</div>
+        <div class="floating-element" style="bottom: 20%; right: 5%; animation-delay: 3s;">✨</div>
+    </div>
+    
+    <div class="hero-content">
+        <div class="hero-badge">
+            <i class="fas fa-crown"></i>
+            کتابخانه تخصصی مهدویت
+        </div>
+        
+        <h1 class="hero-title">
+            گنجینه‌ای از معارف
+            <span style="display: block; background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                مهدویت و انتظار
+            </span>
+        </h1>
+        
+        <p class="hero-subtitle">
+            بزرگترین مجموعه دیجیتال منابع مهدوی با بیش از ۵۰۰ عنوان کتاب، مقاله و پژوهش تخصصی
+        </p>
+        
+        <div class="hero-stats">
+            <div class="hero-stat">
+                <span class="stat-number">۵۰۰+</span>
+                <span class="stat-label">عنوان کتاب</span>
+            </div>
+            <div class="hero-stat">
+                <span class="stat-number">۱۵۰+</span>
+                <span class="stat-label">نویسنده فعال</span>
+            </div>
+            <div class="hero-stat">
+                <span class="stat-number">۱۰K+</span>
+                <span class="stat-label">دانلود ماهانه</span>
+            </div>
+            <div class="hero-stat">
+                <span class="stat-number">۹۸٪</span>
+                <span class="stat-label">رضایت کاربران</span>
+            </div>
+        </div>
+        
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+            <a href="#featured" class="btn btn-primary btn-lg">
+                <i class="fas fa-rocket"></i>
+                شروع اکتشاف
+            </a>
+            <a href="{% url 'book_list' %}" class="btn btn-outline btn-lg">
+                <i class="fas fa-book-open"></i>
+                مشاهده همه کتاب‌ها
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Marquee Section -->
+<div class="marquee-section">
+    <div class="marquee-container">
+        {% for i in "123456789" %}
+        <div class="marquee-item">
+            <span class="marquee-discount">تخفیف ویژه</span>
+            <span style="color: var(--text-primary);">کتاب "{{ i }} نشانه ظهور" با ۳۰٪ تخفیف</span>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Discount Banner -->
+<div class="discount-banner">
+    <h2 class="discount-title">فصل مطالعه مهدوی</h2>
+    <p class="discount-subtitle">تا ۵۰٪ تخفیف برای خریدهای بالای ۱۰۰,۰۰۰ تومان</p>
+    <div class="discount-timer">
+        <span>⏳ زمان باقیمانده:</span>
+        <span id="countdown">۲۳:۵۹:۵۹</span>
+    </div>
+    <a href="{% url 'book_list' %}?discount=true" class="btn btn-lg" style="background: var(--dark-bg); color: var(--gold-primary);">
+        <i class="fas fa-gift"></i>
+        مشاهده پیشنهادهای ویژه
+    </a>
+</div>
+
+<!-- Category Navigation -->
+<div class="category-nav">
+    <a href="#" class="category-tab active">
+        <i class="fas fa-star"></i>
+        همه کتاب‌ها
+    </a>
+    <a href="#" class="category-tab">
+        <i class="fas fa-fire"></i>
+        پرفروش‌ها
+    </a>
+    <a href="#" class="category-tab">
+        <i class="fas fa-bolt"></i>
+        جدیدترین‌ها
+    </a>
+    <a href="#" class="category-tab">
+        <i class="fas fa-gift"></i>
+        رایگان‌ها
+    </a>
+    <a href="#" class="category-tab">
+        <i class="fas fa-crown"></i>
+        ویژه‌ها
+    </a>
+</div>
+
+<!-- Featured Books Section -->
+<section id="featured" style="padding: 0 2rem;">
+    <div class="modern-header" style="text-align: center; margin-bottom: 3rem;">
+        <h2 class="modern-title" style="font-size: 2.5rem; margin-bottom: 1rem;">کتاب‌های منتخب</h2>
+        <p class="modern-subtitle" style="font-size: 1.1rem;">برترین آثار مهدوی انتخاب شده توسط کارشناسان</p>
+    </div>
+    
+    <div class="showcase-grid">
+        {% for book in featured_books|slice:":6" %}
+        <div class="showcase-card {% if forloop.first %}featured{% endif %}">
+            <div class="book-badge-container">
+                {% if forloop.first %}
+                <span class="book-badge badge-popular">
+                    <i class="fas fa-fire"></i>
+                    پرفروش
+                </span>
+                {% endif %}
+                {% if book.is_free %}
+                <span class="book-badge badge-free">
+                    <i class="fas fa-gift"></i>
+                    رایگان
+                </span>
+                {% endif %}
+                {% if forloop.counter <= 2 %}
+                <span class="book-badge badge-new">
+                    <i class="fas fa-star"></i>
+                    جدید
+                </span>
+                {% endif %}
+            </div>
+            
+            <div class="book-image">
+                <i class="fas fa-book"></i>
+            </div>
+            
+            <div class="book-content">
+                <h3 class="book-title">{{ book.title }}</h3>
+                <p class="book-author">
+                    <i class="fas fa-user-edit"></i>
+                    {{ book.author }}
+                </p>
+                
+                <p class="book-description">
+                    {{ book.short_description|truncatewords:20 }}
+                </p>
+                
+                <div class="book-meta">
+                    <div class="book-price">
+                        {% if book.is_free %}
+                        <span class="current-price">رایگان</span>
+                        {% else %}
+                        <span class="current-price">{{ book.final_price }} تومان</span>
+                        {% if book.discount %}
+                        <span class="original-price">{{ book.original_price }} تومان</span>
+                        {% endif %}
+                        {% endif %}
+                    </div>
+                    
+                    <div class="book-rating">
+                        <i class="fas fa-star"></i>
+                        <span>۴.۸</span>
+                    </div>
+                </div>
+                
+                <div class="book-actions">
+                    <a href="{% url 'book_detail' book.id %}" class="btn btn-outline">
+                        <i class="fas fa-eye"></i>
+                        مشاهده
+                    </a>
+                    {% if book.is_free %}
+                    <a href="{% url 'download_book' book.id %}" class="btn btn-primary">
+                        <i class="fas fa-download"></i>
+                        دانلود
+                    </a>
+                    {% else %}
+                    <a href="{% url 'add_book_to_cart' book.id %}" class="btn btn-primary">
+                        <i class="fas fa-shopping-cart"></i>
+                        افزودن به سبد
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- Special Offers -->
+<section class="offers-section">
+    <div class="container">
+        <div class="modern-header" style="text-align: center; margin-bottom: 3rem;">
+            <h2 class="modern-title" style="color: white; font-size: 2.5rem; margin-bottom: 1rem;">خدمات ویژه</h2>
+            <p class="modern-subtitle" style="color: var(--text-secondary);">امکانات منحصر به فرد کتابخانه مهدوی</p>
+        </div>
+        
+        <div class="grid grid-3">
+            <div class="offer-card">
+                <div class="offer-icon">
+                    <i class="fas fa-headphones"></i>
+                </div>
+                <h3 class="offer-title">نسخه صوتی</h3>
+                <p class="offer-description">
+                    دسترسی به نسخه صوتی کتاب‌ها با گویندگان حرفه‌ای
+                </p>
+            </div>
+            
+            <div class="offer-card">
+                <div class="offer-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h3 class="offer-title">گروه‌های مطالعاتی</h3>
+                <p class="offer-description">
+                    تشکیل گروه‌های مطالعاتی و بحث‌های علمی حول کتاب‌ها
+                </p>
+            </div>
+            
+            <div class="offer-card">
+                <div class="offer-icon">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+                <h3 class="offer-title">دوره‌های آموزشی</h3>
+                <p class="offer-description">
+                    دوره‌های تخصصی بر اساس کتاب‌های منتخب کتابخانه
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials -->
+<section class="testimonials-section">
+    <div class="container">
+        <div class="modern-header" style="text-align: center; margin-bottom: 3rem;">
+            <h2 class="modern-title" style="font-size: 2.5rem; margin-bottom: 1rem;">نظرات کاربران</h2>
+            <p class="modern-subtitle">تجربه مطالعه کنندگان کتابخانه مهدوی</p>
+        </div>
+        
+        <div class="grid grid-2">
+            <div class="testimonial-card">
+                <p class="testimonial-text">
+                    کتابخانه مهدوی واقعاً تحولی در دسترسی به منابع معتبر مهدوی ایجاد کرده است. کیفیت کتاب‌ها و امکانات مطالعه عالی است.
+                </p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">م.ح</div>
+                    <div class="author-info">
+                        <h4>محمد حسینی</h4>
+                        <p>پژوهشگر مهدویت</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="testimonial-card">
+                <p class="testimonial-text">
+                    امکانات ویژه‌ای مثل گروه‌های مطالعاتی و نسخه صوتی، این کتابخانه را از سایرین متمایز کرده است.
+                </p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">ف.ر</div>
+                    <div class="author-info">
+                        <h4>فاطمه رضایی</h4>
+                        <p>طلبه حوزه علمیه</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Final CTA -->
+<div class="discount-banner" style="margin-top: 4rem;">
+    <h2 class="discount-title">همین حالا عضو شوید</h2>
+    <p class="discount-subtitle">به خانواده ۱۰,۰۰۰+ نفری مطالعه کنندگان مهدوی بپیوندید</p>
+    <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-bottom: 2rem;">
+        <div style="background: rgba(10, 10, 18, 0.9); color: var(--gold-light); padding: 1rem 2rem; border-radius: 15px;">
+            <div style="font-size: 2rem; font-weight: 700;">۱۰,۰۰۰+</div>
+            <div style="font-size: 0.9rem;">عضو فعال</div>
+        </div>
+        <div style="background: rgba(10, 10, 18, 0.9); color: var(--gold-light); padding: 1rem 2rem; border-radius: 15px;">
+            <div style="font-size: 2rem; font-weight: 700;">۵۰۰+</div>
+            <div style="font-size: 0.9rem;">عنوان کتاب</div>
+        </div>
+        <div style="background: rgba(10, 10, 18, 0.9); color: var(--gold-light); padding: 1rem 2rem; border-radius: 15px;">
+            <div style="font-size: 2rem; font-weight: 700;">۹۸٪</div>
+            <div style="font-size: 0.9rem;">رضایت کاربران</div>
+        </div>
+    </div>
+    {% if user.is_authenticated %}
+    <a href="{% url 'book_list' %}" class="btn btn-lg" style="background: var(--dark-bg); color: var(--gold-primary);">
+        <i class="fas fa-book-open"></i>
+        ادامه مطالعه
+    </a>
+    {% else %}
+    <a href="{% url 'register' %}" class="btn btn-lg" style="background: var(--dark-bg); color: var(--gold-primary);">
+        <i class="fas fa-user-plus"></i>
+        عضویت رایگان
+    </a>
+    {% endif %}
+</div>
+
+<script>
+    // Countdown Timer
+    function updateCountdown() {
+        const now = new Date();
+        const endOfDay = new Date();
+        endOfDay.setHours(23, 59, 59, 999);
+        
+        const diff = endOfDay - now;
+        
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+        
+        document.getElementById('countdown').textContent = 
+            `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+    
+    setInterval(updateCountdown, 1000);
+    updateCountdown();
+
+    // Category Tab Interactions
+    document.querySelectorAll('.category-tab').forEach(tab => {
+        tab.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.category-tab').forEach(t => {
+                t.classList.remove('active');
+            });
+            
+            // Add active class to clicked tab
+            this.classList.add('active');
+            
+            // Here you would typically filter the book grid
+            // For demo, we'll just show a notification
+            const categoryName = this.textContent.trim();
+            MahdaviApp.showNotification(`در حال نمایش ${categoryName}`, 'info');
+        });
+    });
+
+    // Book Card Animations
+    document.addEventListener('DOMContentLoaded', function() {
+        const bookCards = document.querySelectorAll('.showcase-card');
+        
+        bookCards.forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(30px)';
+            
+            setTimeout(() => {
+                card.style.transition = 'all 0.6s ease';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, index * 100);
+        });
+
+        // Stats Counter Animation
+        const statNumbers = document.querySelectorAll('.stat-number');
+        statNumbers.forEach(stat => {
+            const target = parseInt(stat.textContent);
+            const duration = 2000;
+            const step = target / (duration / 16);
+            let current = 0;
+            
+            const timer = setInterval(() => {
+                current += step;
+                if (current >= target) {
+                    current = target;
+                    clearInterval(timer);
+                }
+                stat.textContent = Math.floor(current) + (stat.textContent.includes('+') ? '+' : '');
+            }, 16);
+        });
+    });
+
+    // Marquee Animation Control
+    const marquee = document.querySelector('.marquee-container');
+    let isPaused = false;
+
+    marquee.addEventListener('mouseenter', () => {
+        isPaused = true;
+        marquee.style.animationPlayState = 'paused';
+    });
+
+    marquee.addEventListener('mouseleave', () => {
+        isPaused = false;
+        marquee.style.animationPlayState = 'running';
+    });
+
+    // Add to Cart Animation
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.btn-primary') && e.target.closest('.btn-primary').textContent.includes('سبد')) {
+            const btn = e.target.closest('.btn-primary');
+            const originalText = btn.innerHTML;
+            
+            btn.innerHTML = '<i class="fas fa-check"></i> اضافه شد!';
+            btn.style.background = 'var(--success)';
+            
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.style.background = '';
+            }, 2000);
+            
+            // Show floating notification
+            MahdaviApp.showNotification('کتاب با موفقیت به سبد خرید اضافه شد', 'success');
+        }
+    });
+</script>
+{% endblock %}

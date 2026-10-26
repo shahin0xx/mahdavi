@@ -1,0 +1,1537 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}دست‌های مهربان | خیریه مهدوی{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* متغیرهای اضافی برای خیریه */
+    :root {
+        --charity-primary: #D4AF37;
+        --charity-secondary: #FFD700;
+        --charity-accent: #F39C12;
+        --charity-success: #27ae60;
+        --charity-danger: #e74c3c;
+        --charity-light: #FFE55C;
+        --charity-gradient: linear-gradient(135deg, var(--charity-primary), var(--charity-secondary));
+        --charity-gradient-dark: linear-gradient(135deg, #B8860B, #D4AF37);
+    }
+
+    /* استایل‌های اصلی */
+    .charity-home {
+        background: linear-gradient(180deg, 
+            rgba(15, 15, 26, 1) 0%,
+            rgba(26, 26, 46, 0.95) 50%,
+            rgba(15, 15, 26, 1) 100%);
+        min-height: 100vh;
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* افکت پارالکس پس‌زمینه */
+    .charity-bg-pattern {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: 
+            radial-gradient(circle at 20% 30%, rgba(212, 175, 55, 0.1) 0%, transparent 50%),
+            radial-gradient(circle at 80% 70%, rgba(243, 156, 18, 0.08) 0%, transparent 50%),
+            url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="pattern" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="0.5" fill="rgba(212,175,55,0.1)"/><circle cx="5" cy="5" r="0.3" fill="rgba(212,175,55,0.05)"/></pattern></defs><rect width="100" height="100" fill="url(%23pattern)"/></svg>');
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    /* === هیرو سکشن === */
+    .charity-hero {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        position: relative;
+        padding: 6rem 0;
+        overflow: hidden;
+    }
+
+    .hero-content-wrapper {
+        position: relative;
+        z-index: 10;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 2rem;
+    }
+
+    /* عنوان اصلی با افکت مخصوص */
+    .hero-title-container {
+        text-align: center;
+        margin-bottom: 4rem;
+        position: relative;
+    }
+
+    .hero-main-title {
+        font-size: 4.5rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, 
+            var(--charity-primary) 0%,
+            var(--charity-secondary) 30%,
+            var(--charity-light) 70%,
+            var(--charity-primary) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 1.5rem;
+        line-height: 1.1;
+        position: relative;
+        display: inline-block;
+        animation: titleGlow 4s infinite alternate;
+        text-shadow: 0 0 50px rgba(212, 175, 55, 0.3);
+    }
+
+    .hero-main-title::before,
+    .hero-main-title::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        width: 100px;
+        height: 4px;
+        background: var(--charity-gradient);
+        border-radius: 2px;
+        transform: translateY(-50%);
+    }
+
+    .hero-main-title::before {
+        right: calc(100% + 2rem);
+    }
+
+    .hero-main-title::after {
+        left: calc(100% + 2rem);
+    }
+
+    .hero-subtitle {
+        font-size: 1.8rem;
+        color: var(--text-secondary);
+        line-height: 1.6;
+        max-width: 800px;
+        margin: 0 auto;
+        opacity: 0.9;
+        font-weight: 300;
+        position: relative;
+        padding: 2rem;
+        background: rgba(212, 175, 55, 0.05);
+        border-radius: 20px;
+        border: 1px solid rgba(212, 175, 55, 0.1);
+        backdrop-filter: blur(10px);
+    }
+
+    /* کارت‌های آمار */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+        margin: 4rem auto;
+        max-width: 1200px;
+    }
+
+    .stat-card {
+        background: linear-gradient(145deg, 
+            rgba(212, 175, 55, 0.08) 0%,
+            rgba(212, 175, 55, 0.04) 100%);
+        border: 1px solid rgba(212, 175, 55, 0.15);
+        border-radius: 25px;
+        padding: 2.5rem 2rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        backdrop-filter: blur(10px);
+    }
+
+    .stat-card:hover {
+        transform: translateY(-15px) scale(1.02);
+        border-color: var(--charity-primary);
+        box-shadow: 
+            0 20px 40px rgba(212, 175, 55, 0.2),
+            0 0 80px rgba(212, 175, 55, 0.1),
+            inset 0 0 20px rgba(212, 175, 55, 0.05);
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, 
+            transparent,
+            rgba(255, 255, 255, 0.1),
+            transparent);
+        transition: left 0.8s ease;
+    }
+
+    .stat-card:hover::before {
+        left: 100%;
+    }
+
+    .stat-icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 1.5rem;
+        background: var(--charity-gradient);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        color: var(--dark-bg);
+        box-shadow: 
+            0 10px 20px rgba(212, 175, 55, 0.3),
+            inset 0 2px 10px rgba(255, 255, 255, 0.3);
+        transition: all 0.4s ease;
+    }
+
+    .stat-card:hover .stat-icon {
+        transform: rotate(15deg) scale(1.1);
+        box-shadow: 
+            0 15px 30px rgba(212, 175, 55, 0.4),
+            inset 0 4px 15px rgba(255, 255, 255, 0.4);
+    }
+
+    .stat-number {
+        font-size: 3.5rem;
+        font-weight: 800;
+        background: var(--charity-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        display: block;
+        margin-bottom: 0.5rem;
+        font-family: 'Vazirmatn', sans-serif;
+        line-height: 1;
+    }
+
+    .stat-label {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        font-weight: 500;
+        opacity: 0.9;
+    }
+
+    /* دکمه‌های اصلی */
+    .hero-cta-buttons {
+        display: flex;
+        gap: 1.5rem;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 4rem;
+    }
+
+    .cta-btn {
+        padding: 1.2rem 3rem;
+        border-radius: 15px;
+        font-size: 1.2rem;
+        font-weight: 700;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 1rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .cta-btn-primary {
+        background: var(--charity-gradient);
+        color: var(--dark-bg);
+    }
+
+    .cta-btn-primary:hover {
+        transform: translateY(-5px) scale(1.05);
+        box-shadow: 
+            0 20px 40px rgba(212, 175, 55, 0.4),
+            0 0 60px rgba(212, 175, 55, 0.2);
+    }
+
+    .cta-btn-secondary {
+        background: rgba(212, 175, 55, 0.1);
+        color: var(--charity-primary);
+        border: 2px solid var(--charity-primary);
+    }
+
+    .cta-btn-secondary:hover {
+        background: var(--charity-gradient);
+        color: var(--dark-bg);
+        transform: translateY(-5px);
+        border-color: transparent;
+    }
+
+    .cta-btn::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, 
+            transparent,
+            rgba(255, 255, 255, 0.3),
+            transparent);
+        transition: left 0.6s ease;
+    }
+
+    .cta-btn:hover::after {
+        left: 100%;
+    }
+
+    /* === بخش پروژه‌ها === */
+    .projects-section {
+        padding: 8rem 2rem;
+        position: relative;
+    }
+
+    .section-header {
+        text-align: center;
+        margin-bottom: 5rem;
+        position: relative;
+    }
+
+    .section-title {
+        font-size: 3rem;
+        font-weight: 800;
+        background: var(--charity-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 1rem;
+        display: inline-block;
+        position: relative;
+    }
+
+    .section-title::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100px;
+        height: 4px;
+        background: var(--charity-gradient);
+        border-radius: 2px;
+    }
+
+    .section-subtitle {
+        color: var(--text-secondary);
+        font-size: 1.3rem;
+        max-width: 600px;
+        margin: 0 auto;
+        line-height: 1.6;
+    }
+
+    /* کارت پروژه */
+    .projects-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 2.5rem;
+        margin-top: 3rem;
+    }
+
+    .project-card {
+        background: linear-gradient(145deg, 
+            rgba(26, 26, 46, 0.8) 0%,
+            rgba(15, 15, 26, 0.9) 100%);
+        border-radius: 25px;
+        overflow: hidden;
+        position: relative;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid rgba(212, 175, 55, 0.2);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .project-card:hover {
+        transform: translateY(-20px) scale(1.02);
+        border-color: var(--charity-primary);
+        box-shadow: 
+            0 30px 60px rgba(212, 175, 55, 0.2),
+            0 0 100px rgba(212, 175, 55, 0.1);
+    }
+
+    .project-badge {
+        position: absolute;
+        top: 1.5rem;
+        left: 1.5rem;
+        z-index: 10;
+        padding: 0.5rem 1.5rem;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .badge-urgent {
+        background: linear-gradient(135deg, #e74c3c, #c0392b);
+        color: white;
+        animation: pulseUrgent 2s infinite;
+    }
+
+    .badge-featured {
+        background: var(--charity-gradient);
+        color: var(--dark-bg);
+    }
+
+    .project-image-container {
+        height: 250px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .project-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .project-card:hover .project-image {
+        transform: scale(1.1);
+    }
+
+    .project-content {
+        padding: 2rem;
+    }
+
+    .project-title {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+        line-height: 1.4;
+    }
+
+    .project-description {
+        color: var(--text-secondary);
+        line-height: 1.6;
+        margin-bottom: 1.5rem;
+        font-size: 1rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    /* پیشرفت بار */
+    .progress-section {
+        margin: 2rem 0;
+    }
+
+    .progress-info {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+    }
+
+    .progress-bar-container {
+        height: 10px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: var(--charity-gradient);
+        border-radius: 10px;
+        position: relative;
+        width: 0;
+        transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .progress-fill::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, 
+            transparent,
+            rgba(255, 255, 255, 0.4),
+            transparent);
+        animation: shimmer 2s infinite;
+    }
+
+    /* آمار پروژه */
+    .project-meta {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        margin: 1.5rem 0;
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        padding: 1rem;
+        background: rgba(212, 175, 55, 0.05);
+        border-radius: 12px;
+        border: 1px solid rgba(212, 175, 55, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    .meta-item:hover {
+        background: rgba(212, 175, 55, 0.1);
+        transform: translateY(-3px);
+        border-color: rgba(212, 175, 55, 0.3);
+    }
+
+    .meta-icon {
+        width: 40px;
+        height: 40px;
+        background: var(--charity-gradient);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--dark-bg);
+        font-size: 1.2rem;
+    }
+
+    .meta-content {
+        flex: 1;
+    }
+
+    .meta-value {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--charity-primary);
+        display: block;
+        line-height: 1;
+    }
+
+    .meta-label {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        margin-top: 0.3rem;
+    }
+
+    /* دکمه‌های پروژه */
+    .project-actions {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+
+    .action-btn {
+        padding: 1rem;
+        border-radius: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        text-align: center;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .action-btn-details {
+        background: rgba(212, 175, 55, 0.1);
+        color: var(--charity-primary);
+        border: 1px solid var(--charity-primary);
+    }
+
+    .action-btn-details:hover {
+        background: var(--charity-primary);
+        color: var(--dark-bg);
+        transform: translateY(-3px);
+    }
+
+    .action-btn-donate {
+        background: var(--charity-gradient);
+        color: var(--dark-bg);
+        border: 1px solid transparent;
+    }
+
+    .action-btn-donate:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(212, 175, 55, 0.3);
+    }
+
+    /* === بخش دسته‌بندی‌ها === */
+    .categories-section {
+        padding: 8rem 2rem;
+        background: linear-gradient(180deg, 
+            rgba(15, 15, 26, 1) 0%,
+            rgba(26, 26, 46, 0.95) 100%);
+        position: relative;
+    }
+
+    .categories-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 2rem;
+        margin-top: 4rem;
+    }
+
+    .category-item {
+        background: linear-gradient(145deg, 
+            rgba(212, 175, 55, 0.05) 0%,
+            rgba(212, 175, 55, 0.02) 100%);
+        border-radius: 20px;
+        padding: 2.5rem 2rem;
+        text-align: center;
+        text-decoration: none;
+        color: inherit;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid rgba(212, 175, 55, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .category-item:hover {
+        transform: translateY(-15px) scale(1.05);
+        border-color: var(--charity-primary);
+        box-shadow: 
+            0 20px 40px rgba(212, 175, 55, 0.2),
+            0 0 60px rgba(212, 175, 55, 0.1);
+    }
+
+    .category-icon-wrapper {
+        width: 100px;
+        height: 100px;
+        margin: 0 auto 1.5rem;
+        position: relative;
+    }
+
+    .category-icon {
+        width: 100%;
+        height: 100%;
+        background: var(--charity-gradient);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        color: var(--dark-bg);
+        transition: all 0.4s ease;
+        position: relative;
+        z-index: 2;
+    }
+
+    .category-item:hover .category-icon {
+        transform: rotate(15deg) scale(1.1);
+        box-shadow: 
+            0 15px 30px rgba(212, 175, 55, 0.3),
+            inset 0 4px 15px rgba(255, 255, 255, 0.3);
+    }
+
+    .category-icon-wrapper::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 120px;
+        height: 120px;
+        background: rgba(212, 175, 55, 0.1);
+        border-radius: 50%;
+        animation: pulseRing 3s infinite;
+    }
+
+    .category-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .category-count {
+        color: var(--charity-primary);
+        font-size: 1rem;
+        background: rgba(212, 175, 55, 0.1);
+        padding: 0.5rem 1.5rem;
+        border-radius: 50px;
+        display: inline-block;
+    }
+
+    /* === CTA نهایی === */
+    .final-cta-section {
+        padding: 8rem 2rem;
+        background: linear-gradient(135deg, 
+            rgba(212, 175, 55, 0.95) 0%,
+            rgba(192, 155, 35, 0.9) 50%,
+            rgba(172, 135, 25, 0.95) 100%);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .final-cta-content {
+        text-align: center;
+        position: relative;
+        z-index: 10;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .final-cta-title {
+        font-size: 3.5rem;
+        font-weight: 900;
+        color: var(--dark-bg);
+        margin-bottom: 1.5rem;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        animation: pulse 3s infinite;
+    }
+
+    .final-cta-subtitle {
+        font-size: 1.4rem;
+        color: rgba(15, 15, 26, 0.9);
+        margin-bottom: 3rem;
+        line-height: 1.6;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    /* انیمیشن‌ها */
+    @keyframes titleGlow {
+        0% {
+            text-shadow: 
+                0 0 20px rgba(212, 175, 55, 0.5),
+                0 0 40px rgba(212, 175, 55, 0.3),
+                0 0 60px rgba(212, 175, 55, 0.1);
+        }
+        100% {
+            text-shadow: 
+                0 0 30px rgba(212, 175, 55, 0.8),
+                0 0 60px rgba(212, 175, 55, 0.5),
+                0 0 100px rgba(212, 175, 55, 0.2);
+        }
+    }
+
+    @keyframes pulseUrgent {
+        0%, 100% {
+            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
+        }
+        50% {
+            box-shadow: 0 5px 25px rgba(231, 76, 60, 0.6);
+        }
+    }
+
+    @keyframes pulseRing {
+        0% {
+            transform: translate(-50%, -50%) scale(0.8);
+            opacity: 1;
+        }
+        100% {
+            transform: translate(-50%, -50%) scale(1.2);
+            opacity: 0;
+        }
+    }
+
+    @keyframes shimmer {
+        0% {
+            transform: translateX(-100%);
+        }
+        100% {
+            transform: translateX(100%);
+        }
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.02);
+        }
+    }
+
+    /* ذرات شناور */
+    .floating-particles {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    .particle {
+        position: absolute;
+        color: var(--charity-primary);
+        font-size: 1.5rem;
+        opacity: 0;
+        animation: floatParticle linear infinite;
+    }
+
+    @keyframes floatParticle {
+        0% {
+            transform: translateY(100vh) rotate(0deg);
+            opacity: 0;
+        }
+        10% {
+            opacity: 0.3;
+        }
+        90% {
+            opacity: 0.3;
+        }
+        100% {
+            transform: translateY(-100px) rotate(360deg);
+            opacity: 0;
+        }
+    }
+
+    /* رسپانسیو */
+    @media (max-width: 1200px) {
+        .hero-main-title {
+            font-size: 3.8rem;
+        }
+        
+        .section-title {
+            font-size: 2.5rem;
+        }
+        
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .hero-main-title {
+            font-size: 2.8rem;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.4rem;
+            padding: 1.5rem;
+        }
+        
+        .stats-grid {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+        
+        .stat-number {
+            font-size: 2.8rem;
+        }
+        
+        .section-title {
+            font-size: 2.2rem;
+        }
+        
+        .projects-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .categories-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .final-cta-title {
+            font-size: 2.5rem;
+        }
+        
+        .hero-cta-buttons {
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .cta-btn {
+            width: 100%;
+            max-width: 300px;
+            justify-content: center;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .hero-main-title {
+            font-size: 2.3rem;
+        }
+        
+        .categories-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .project-meta {
+            grid-template-columns: 1fr;
+        }
+        
+        .project-actions {
+            grid-template-columns: 1fr;
+        }
+        
+        .final-cta-title {
+            font-size: 2rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="charity-home">
+    <!-- پس‌زمینه پارالکس -->
+    <div class="charity-bg-pattern"></div>
+    
+    <!-- ذرات شناور -->
+    <div class="floating-particles" id="floatingParticles"></div>
+    
+    <!-- هیرو سکشن -->
+    <section class="charity-hero">
+        <div class="hero-content-wrapper">
+            <div class="hero-title-container">
+                <h1 class="hero-main-title">دست‌های مهربان مهدوی</h1>
+                <p class="hero-subtitle">
+                    در پلتفرم مهدوی، با عشق و ایمان، دنیایی سرشار از مهربانی می‌سازیم. 
+                    به پروژه‌های خیریه بپیوندید و در ساختن آینده‌ای روشن برای همه هم‌گام شوید.
+                </p>
+            </div>
+            
+            <!-- آمار زنده -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-hands-helping"></i>
+                    </div>
+                    <span class="stat-number" data-count="{{ total_projects|default:'50' }}">0</span>
+                    <div class="stat-label">پروژه فعال</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <span class="stat-number" data-count="{{ total_donations|default:'1000' }}">0</span>
+                    <div class="stat-label">کمک مردمی</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-coins"></i>
+                    </div>
+                    <span class="stat-number" data-count="{{ total_amount|default:'50000000' }}">0</span>
+                    <div class="stat-label">تومان جمع‌آوری</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <span class="stat-number" data-count="{{ active_donors|default:'250' }}">0</span>
+                    <div class="stat-label">نیکوکار فعال</div>
+                </div>
+            </div>
+            
+            <!-- دکمه‌های CTA -->
+            <div class="hero-cta-buttons">
+                <a href="{% url 'charity_projects' %}" class="cta-btn cta-btn-primary">
+                    <i class="fas fa-heart"></i>
+                    مشاهده پروژه‌ها
+                </a>
+                
+                {% if not user.is_authenticated %}
+                <a href="{% url 'register' %}" class="cta-btn cta-btn-secondary">
+                    <i class="fas fa-user-plus"></i>
+                    عضویت رایگان
+                </a>
+                {% endif %}
+                
+                <a href="{% url 'charity_projects' %}" class="cta-btn cta-btn-secondary">
+                    <i class="fas fa-hands-helping"></i>
+                    شروع کمک‌رسانی
+                </a>
+            </div>
+        </div>
+    </section>
+    
+    <!-- پروژه‌های فوری -->
+    {% if urgent_projects %}
+    <section class="projects-section">
+        <div class="section-header">
+            <h2 class="section-title">پروژه‌های فوری نیازمند کمک</h2>
+            <p class="section-subtitle">
+                این پروژه‌ها به کمک فوری شما نیاز دارند. هر لحظه می‌تواند زندگی کسی را تغییر دهد.
+            </p>
+        </div>
+        
+        <div class="projects-grid">
+            {% for project in urgent_projects %}
+            <div class="project-card">
+                <span class="project-badge badge-urgent">
+                    <i class="fas fa-exclamation-triangle ml-2"></i>
+                    نیاز فوری
+                </span>
+                
+                <div class="project-image-container">
+                    {% if project.main_image %}
+                    <img src="{{ project.main_image.url }}" alt="{{ project.title }}" class="project-image">
+                    {% else %}
+                    <div style="width: 100%; height: 100%; background: linear-gradient(135deg, var(--charity-primary), var(--charity-secondary)); 
+                               display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-hands-helping fa-4x" style="color: var(--dark-bg);"></i>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="project-content">
+                    <h3 class="project-title">{{ project.title }}</h3>
+                    <p class="project-description">
+                        {{ project.short_description|truncatewords:20|default:"پروژه خیریه برای کمک به نیازمندان" }}
+                    </p>
+                    
+                    <div class="progress-section">
+                        <div class="progress-info">
+                            <span>پیشرفت پروژه</span>
+                            <span>{{ project.progress_percentage|default:"50" }}%</span>
+                        </div>
+                        <div class="progress-bar-container">
+                            <div class="progress-fill" data-width="{{ project.progress_percentage|default:'50' }}"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="project-meta">
+                        <div class="meta-item">
+                            <div class="meta-icon">
+                                <i class="fas fa-coins"></i>
+                            </div>
+                            <div class="meta-content">
+                                <span class="meta-value">{{ project.current_amount|default:"25000000"|floatformat:0 }}</span>
+                                <span class="meta-label">تومان جمع‌شده</span>
+                            </div>
+                        </div>
+                        
+                        <div class="meta-item">
+                            <div class="meta-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="meta-content">
+                                <span class="meta-value">{{ project.donors_count|default:"45" }}</span>
+                                <span class="meta-label">کمک‌کننده</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="project-actions">
+                        <a href="{% url 'charity_project_detail' project.id %}" class="action-btn action-btn-details">
+                            <i class="fas fa-info-circle"></i>
+                            جزئیات
+                        </a>
+                        <a href="{% url 'make_donation' project.id %}" class="action-btn action-btn-donate">
+                            <i class="fas fa-hand-holding-heart"></i>
+                            کمک فوری
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+    
+    <!-- پروژه‌های ویژه -->
+    {% if featured_projects %}
+    <section class="projects-section">
+        <div class="section-header">
+            <h2 class="section-title">پروژه‌های ویژه مهدوی</h2>
+            <p class="section-subtitle">
+                پروژه‌های منتخب با تأثیرگذاری بالا که با همکاری شما تحول‌آفرین خواهند بود.
+            </p>
+        </div>
+        
+        <div class="projects-grid">
+            {% for project in featured_projects %}
+            <div class="project-card">
+                <span class="project-badge badge-featured">
+                    <i class="fas fa-star ml-2"></i>
+                    پروژه ویژه
+                </span>
+                
+                <div class="project-image-container">
+                    {% if project.main_image %}
+                    <img src="{{ project.main_image.url }}" alt="{{ project.title }}" class="project-image">
+                    {% else %}
+                    <div style="width: 100%; height: 100%; background: linear-gradient(135deg, var(--charity-primary), var(--charity-secondary)); 
+                               display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-gem fa-4x" style="color: var(--dark-bg);"></i>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="project-content">
+                    <h3 class="project-title">{{ project.title }}</h3>
+                    <p class="project-description">
+                        {{ project.short_description|truncatewords:20|default:"پروژه خیریه ویژه با تأثیرگذاری بالا" }}
+                    </p>
+                    
+                    <div class="progress-section">
+                        <div class="progress-info">
+                            <span>میزان مشارکت</span>
+                            <span>{{ project.progress_percentage|default:"75" }}%</span>
+                        </div>
+                        <div class="progress-bar-container">
+                            <div class="progress-fill" data-width="{{ project.progress_percentage|default:'75' }}"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="project-meta">
+                        <div class="meta-item">
+                            <div class="meta-icon">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                            <div class="meta-content">
+                                <span class="meta-value">{{ project.location|default:"سراسر کشور" }}</span>
+                                <span class="meta-label">مکان پروژه</span>
+                            </div>
+                        </div>
+                        
+                        <div class="meta-item">
+                            <div class="meta-icon">
+                                <i class="fas fa-user-friends"></i>
+                            </div>
+                            <div class="meta-content">
+                                <span class="meta-value">{{ project.beneficiary_count|default:"100" }}</span>
+                                <span class="meta-label">بهره‌بردار</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="project-actions">
+                        <a href="{% url 'charity_project_detail' project.id %}" class="action-btn action-btn-details">
+                            <i class="fas fa-info-circle"></i>
+                            جزئیات کامل
+                        </a>
+                        <a href="{% url 'make_donation' project.id %}" class="action-btn action-btn-donate">
+                            <i class="fas fa-hand-holding-usd"></i>
+                            مشارکت ویژه
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+    
+    <!-- دسته‌بندی‌ها -->
+    <section class="categories-section">
+        <div class="section-header">
+            <h2 class="section-title">حوزه‌های خیریه مهدوی</h2>
+            <p class="section-subtitle">
+                در هر حوزه‌ای که دلتان می‌خواهد، می‌توانید به پروژه‌های خیریه کمک کنید.
+            </p>
+        </div>
+        
+        <div class="categories-grid">
+            {% for category in categories %}
+            <a href="{% url 'charity_projects' %}" class="category-item">
+                <div class="category-icon-wrapper">
+                    <div class="category-icon">
+                        <i class="{{ category.icon|default:'fas fa-hands-helping' }}"></i>
+                    </div>
+                </div>
+                <h3 class="category-title">{{ category.name|default:"کمک به نیازمندان" }}</h3>
+                <span class="category-count">{{ category.projects.count|default:"15" }} پروژه</span>
+            </a>
+            {% empty %}
+            <!-- دسته‌بندی‌های پیش‌فرض -->
+            <a href="{% url 'charity_projects' %}" class="category-item">
+                <div class="category-icon-wrapper">
+                    <div class="category-icon">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                </div>
+                <h3 class="category-title">آموزش و پرورش</h3>
+                <span class="category-count">15 پروژه</span>
+            </a>
+            
+            <a href="{% url 'charity_projects' %}" class="category-item">
+                <div class="category-icon-wrapper">
+                    <div class="category-icon">
+                        <i class="fas fa-heartbeat"></i>
+                    </div>
+                </div>
+                <h3 class="category-title">سلامت و درمان</h3>
+                <span class="category-count">12 پروژه</span>
+            </a>
+            
+            <a href="{% url 'charity_projects' %}" class="category-item">
+                <div class="category-icon-wrapper">
+                    <div class="category-icon">
+                        <i class="fas fa-home"></i>
+                    </div>
+                </div>
+                <h3 class="category-title">مسکن و اسکان</h3>
+                <span class="category-count">8 پروژه</span>
+            </a>
+            
+            <a href="{% url 'charity_projects' %}" class="category-item">
+                <div class="category-icon-wrapper">
+                    <div class="category-icon">
+                        <i class="fas fa-hands-helping"></i>
+                    </div>
+                </div>
+                <h3 class="category-title">امداد و نجات</h3>
+                <span class="category-count">10 پروژه</span>
+            </a>
+            
+            <a href="{% url 'charity_projects' %}" class="category-item">
+                <div class="category-icon-wrapper">
+                    <div class="category-icon">
+                        <i class="fas fa-book-open"></i>
+                    </div>
+                </div>
+                <h3 class="category-title">فرهنگی و مذهبی</h3>
+                <span class="category-count">18 پروژه</span>
+            </a>
+            
+            <a href="{% url 'charity_projects' %}" class="category-item">
+                <div class="category-icon-wrapper">
+                    <div class="category-icon">
+                        <i class="fas fa-leaf"></i>
+                    </div>
+                </div>
+                <h3 class="category-title">محیط زیست</h3>
+                <span class="category-count">6 پروژه</span>
+            </a>
+            {% endfor %}
+        </div>
+    </section>
+    
+    <!-- CTA نهایی -->
+    <section class="final-cta-section">
+        <div class="final-cta-content">
+            <h2 class="final-cta-title">همین حالا تغییر را آغاز کنید</h2>
+            <p class="final-cta-subtitle">
+                به جمع هزاران نیکوکار مهدوی بپیوندید و در ساختن دنیایی بهتر، 
+                پر از مهربانی و امید، سهیم شوید. هر کمک کوچک، تغییر بزرگی ایجاد می‌کند.
+            </p>
+            
+            <div class="hero-cta-buttons">
+                <a href="{% url 'charity_projects' %}" class="cta-btn" style="background: var(--dark-bg); color: var(--charity-primary);">
+                    <i class="fas fa-rocket"></i>
+                    شروع سفر خیریه
+                </a>
+                
+                {% if not user.is_authenticated %}
+                <a href="{% url 'register' %}" class="cta-btn" style="background: rgba(15, 15, 26, 0.2); color: var(--dark-bg); border: 2px solid var(--dark-bg);">
+                    <i class="fas fa-user-plus"></i>
+                    عضویت سریع
+                </a>
+                {% endif %}
+                
+                <a href="{% url 'charity_projects' %}" class="cta-btn" style="background: transparent; color: var(--dark-bg); border: 2px solid var(--dark-bg);">
+                    <i class="fas fa-question-circle"></i>
+                    راهنمای مشارکت
+                </a>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    class CharityPage {
+        constructor() {
+            this.init();
+        }
+
+        init() {
+            this.initCounters();
+            this.initProgressBars();
+            this.init3DEffects();
+            this.initParticles();
+            this.initScrollAnimations();
+            this.initHoverEffects();
+        }
+
+        // شمارنده‌های انیمیشن دار
+        initCounters() {
+            const counters = document.querySelectorAll('.stat-number');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        this.animateCounter(entry.target);
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.5 });
+
+            counters.forEach(counter => observer.observe(counter));
+        }
+
+        animateCounter(counter) {
+            const target = parseInt(counter.getAttribute('data-count').replace(/,/g, ''));
+            const duration = 2000;
+            const startTime = Date.now();
+            
+            const animate = () => {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                // Easing function
+                const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+                const current = Math.floor(easeOutQuart * target);
+                
+                counter.textContent = current.toLocaleString('fa-IR');
+                
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                } else {
+                    // افکت تکمیل
+                    counter.style.transform = 'scale(1.2)';
+                    setTimeout(() => {
+                        counter.style.transform = 'scale(1)';
+                        counter.style.color = 'var(--charity-primary)';
+                    }, 300);
+                }
+            };
+            
+            animate();
+        }
+
+        // انیمیشن نوارهای پیشرفت
+        initProgressBars() {
+            const progressBars = document.querySelectorAll('.progress-fill');
+            
+            progressBars.forEach(bar => {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            const width = bar.getAttribute('data-width') + '%';
+                            bar.style.width = width;
+                            observer.unobserve(bar);
+                        }
+                    });
+                }, { threshold: 0.5 });
+                
+                observer.observe(bar);
+            });
+        }
+
+        // افکت‌های سه‌بعدی
+        init3DEffects() {
+            const cards = document.querySelectorAll('.project-card, .category-item, .stat-card');
+            
+            cards.forEach(card => {
+                card.addEventListener('mousemove', (e) => {
+                    this.handleCardHover(e, card);
+                });
+                
+                card.addEventListener('mouseleave', () => {
+                    this.resetCardHover(card);
+                });
+            });
+        }
+
+        handleCardHover(e, card) {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            
+            const rotateY = ((x - centerX) / centerX) * 10;
+            const rotateX = ((centerY - y) / centerY) * 10;
+            
+            const translateY = card.classList.contains('project-card') ? '-20px' : '-15px';
+            const scale = 1.02;
+            
+            card.style.transform = `
+                perspective(1000px)
+                rotateX(${rotateX}deg)
+                rotateY(${rotateY}deg)
+                translateY(${translateY})
+                scale(${scale})
+            `;
+            
+            // سایه متحرک
+            const shadowX = (x / rect.width - 0.5) * 40;
+            const shadowY = (y / rect.height - 0.5) * 40;
+            
+            if (card.classList.contains('project-card')) {
+                const badge = card.querySelector('.project-badge');
+                if (badge) {
+                    badge.style.transform = `translate(${shadowX * 0.2}px, ${shadowY * 0.2}px)`;
+                }
+            }
+        }
+
+        resetCardHover(card) {
+            const translateY = card.classList.contains('project-card') ? '-20px' : '-15px';
+            card.style.transform = `translateY(${translateY}) scale(1.02)`;
+            
+            if (card.classList.contains('project-card')) {
+                const badge = card.querySelector('.project-badge');
+                if (badge) {
+                    badge.style.transform = 'translate(0, 0)';
+                }
+            }
+        }
+
+        // ذرات شناور
+        initParticles() {
+            const container = document.getElementById('floatingParticles');
+            if (!container) return;
+
+            const particles = ['❤️', '🤲', '🌟', '✨', '🕌', '☪️', '🕋', '📿', '💫', '🌠'];
+            
+            for (let i = 0; i < 30; i++) {
+                this.createParticle(container, particles);
+            }
+        }
+
+        createParticle(container, particles) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.textContent = particles[Math.floor(Math.random() * particles.length)];
+            
+            // موقعیت تصادفی
+            particle.style.left = `${Math.random() * 100}%`;
+            particle.style.top = `${Math.random() * 100}%`;
+            
+            // اندازه تصادفی
+            const size = Math.random() * 1.5 + 0.5;
+            particle.style.fontSize = `${size}rem`;
+            
+            // شفافیت
+            particle.style.opacity = Math.random() * 0.2 + 0.1;
+            
+            // انیمیشن
+            const duration = Math.random() * 15 + 10;
+            const delay = Math.random() * 5;
+            particle.style.animation = `floatParticle ${duration}s linear infinite`;
+            particle.style.animationDelay = `${delay}s`;
+            
+            container.appendChild(particle);
+            
+            // حذف و ایجاد مجدد برای جلوگیری از انباشت
+            setTimeout(() => {
+                particle.remove();
+                this.createParticle(container, particles);
+            }, duration * 1000);
+        }
+
+        // انیمیشن‌های اسکرول
+        initScrollAnimations() {
+            const elements = document.querySelectorAll('.project-card, .category-item, .stat-card');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, {
+                threshold: 0.1,
+                rootMargin: '0px 0px -100px 0px'
+            });
+            
+            elements.forEach(el => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(50px)';
+                el.style.transition = 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
+                observer.observe(el);
+            });
+        }
+
+        // افکت‌های hover اضافی
+        initHoverEffects() {
+            // افکت ripple روی دکمه‌ها
+            const buttons = document.querySelectorAll('.cta-btn, .action-btn');
+            
+            buttons.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    this.createRipple(e, btn);
+                });
+            });
+            
+            // افکت hover روی آیکون‌ها
+            const icons = document.querySelectorAll('.stat-icon, .category-icon, .meta-icon');
+            
+            icons.forEach(icon => {
+                icon.addEventListener('mouseenter', () => {
+                    icon.style.transform = 'rotate(15deg) scale(1.1)';
+                });
+                
+                icon.addEventListener('mouseleave', () => {
+                    icon.style.transform = 'rotate(0) scale(1)';
+                });
+            });
+        }
+
+        createRipple(e, element) {
+            const ripple = document.createElement('div');
+            const rect = element.getBoundingClientRect();
+            
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - size / 2;
+            const y = e.clientY - rect.top - size / 2;
+            
+            ripple.style.cssText = `
+                position: absolute;
+                top: ${y}px;
+                left: ${x}px;
+                width: ${size}px;
+                height: ${size}px;
+                border-radius: 50%;
+                background: rgba(255, 255, 255, 0.4);
+                transform: scale(0);
+                animation: ripple 0.6s ease-out;
+                pointer-events: none;
+            `;
+            
+            element.appendChild(ripple);
+            
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        }
+    }
+
+    // اضافه کردن استایل‌های CSS داینامیک
+    const dynamicStyles = `
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+        
+        .cta-btn, .action-btn {
+            position: relative;
+            overflow: hidden;
+        }
+    `;
+
+    // راه‌اندازی صفحه
+    document.addEventListener('DOMContentLoaded', () => {
+        // اضافه کردن استایل‌های داینامیک
+        const styleSheet = document.createElement('style');
+        styleSheet.textContent = dynamicStyles;
+        document.head.appendChild(styleSheet);
+        
+        // راه‌اندازی سیستم خیریه
+        const charityPage = new CharityPage();
+        window.CharityPage = charityPage;
+        
+        // پخش صدای ملایم (اختیاری)
+        setTimeout(() => {
+            if (window.MahdaviApp) {
+                window.MahdaviApp.playAudio();
+            }
+        }, 1000);
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,824 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}نقشه مساجد نیشابور - پلتفرم مهدوی{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+    .map-container {
+        padding-top: 100px;
+        min-height: 100vh;
+        background: var(--dark-bg);
+    }
+
+    .map-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .map-title {
+        color: var(--primary-gold);
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        font-family: 'Lateef', serif;
+    }
+
+    .map-subtitle {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .map-content {
+        display: grid;
+        grid-template-columns: 1fr 400px;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    #map {
+        height: 600px;
+        border-radius: 16px;
+        border: 2px solid var(--border-gold);
+        box-shadow: var(--shadow-xl);
+        z-index: 1;
+    }
+
+    .mosque-sidebar {
+        background: var(--card-bg);
+        border: 1px solid var(--border-gold);
+        border-radius: 16px;
+        padding: 1.5rem;
+        height: 600px;
+        display: flex;
+        flex-direction: column;
+        box-shadow: var(--shadow-lg);
+    }
+
+    .sidebar-header {
+        margin-bottom: 1.5rem;
+    }
+
+    .sidebar-title {
+        color: var(--primary-gold);
+        font-size: 1.3rem;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .search-box {
+        position: relative;
+        margin-bottom: 1rem;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 0.75rem 2.5rem 0.75rem 1rem;
+        background: var(--hover-bg);
+        border: 1px solid var(--border-gold);
+        border-radius: 8px;
+        color: var(--text-primary);
+        font-family: inherit;
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: var(--primary-gold);
+        box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+    }
+
+    .search-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--primary-gold);
+    }
+
+    .mosque-list {
+        flex: 1;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .mosque-item {
+        background: var(--hover-bg);
+        border: 1px solid var(--border-gold);
+        border-radius: 12px;
+        padding: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .mosque-item:hover {
+        background: rgba(212, 175, 55, 0.1);
+        border-color: var(--primary-gold);
+        transform: translateX(-5px);
+    }
+
+    .mosque-item.active {
+        background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(180, 150, 50, 0.05));
+        border-color: var(--primary-gold);
+    }
+
+    .mosque-name {
+        color: var(--primary-gold);
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .mosque-address {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+        line-height: 1.4;
+    }
+
+    .mosque-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.8rem;
+        color: var(--text-muted);
+    }
+
+    .mosque-type {
+        background: rgba(212, 175, 55, 0.1);
+        color: var(--primary-gold);
+        padding: 0.25rem 0.5rem;
+        border-radius: 6px;
+    }
+
+    .map-controls {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .control-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1rem;
+        background: var(--card-bg);
+        border: 1px solid var(--border-gold);
+        border-radius: 8px;
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-family: inherit;
+    }
+
+    .control-btn:hover {
+        background: rgba(212, 175, 55, 0.1);
+        color: var(--primary-gold);
+        border-color: var(--primary-gold);
+    }
+
+    .legend {
+        display: flex;
+        gap: 1.5rem;
+        margin-top: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+    }
+
+    .legend-color {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        border: 2px solid var(--border-gold);
+    }
+
+    .quran-verse {
+        background: var(--card-bg);
+        border: 1px solid var(--border-gold);
+        border-radius: 16px;
+        padding: 2rem;
+        margin-top: 2rem;
+        text-align: center;
+    }
+
+    .verse-text {
+        font-family: 'Lateef', serif;
+        font-size: 1.8rem;
+        color: var(--primary-gold);
+        line-height: 2;
+        margin-bottom: 1rem;
+    }
+
+    .verse-reference {
+        color: var(--text-secondary);
+        font-style: italic;
+    }
+
+    /* استایل‌های Leaflet */
+    .leaflet-container {
+        background: var(--dark-bg);
+        font-family: 'Vazir', sans-serif;
+    }
+
+    .leaflet-popup-content-wrapper {
+        background: var(--card-bg);
+        color: var(--text-primary);
+        border-radius: 12px;
+        border: 1px solid var(--border-gold);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .leaflet-popup-tip {
+        background: var(--card-bg);
+        border: 1px solid var(--border-gold);
+    }
+
+    .custom-popup {
+        min-width: 250px;
+    }
+
+    .popup-title {
+        color: var(--primary-gold);
+        font-size: 1.2rem;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
+
+    .popup-address {
+        color: var(--text-secondary);
+        margin-bottom: 1rem;
+        font-size: 0.9rem;
+        line-height: 1.4;
+    }
+
+    .prayer-times {
+        border-top: 1px solid var(--border-gold);
+        padding-top: 1rem;
+    }
+
+    .prayer-times-title {
+        color: var(--primary-gold);
+        font-size: 1rem;
+        margin-bottom: 0.75rem;
+        font-weight: 600;
+    }
+
+    .prayer-time {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.25rem 0;
+        font-size: 0.9rem;
+    }
+
+    .prayer-name {
+        color: var(--text-secondary);
+    }
+
+    .prayer-value {
+        color: var(--primary-gold);
+        font-weight: 600;
+    }
+
+    .custom-marker {
+        background: transparent;
+        border: none;
+    }
+
+    /* ریسپانسیو */
+    @media (max-width: 1024px) {
+        .map-content {
+            grid-template-columns: 1fr;
+        }
+
+        .mosque-sidebar {
+            height: 400px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .map-container {
+            padding-top: 80px;
+        }
+
+        .map-title {
+            font-size: 2rem;
+        }
+
+        .map-controls {
+            flex-direction: column;
+        }
+
+        .control-btn {
+            justify-content: center;
+        }
+
+        .legend {
+            justify-content: center;
+        }
+
+        #map {
+            height: 400px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .map-container {
+            padding-top: 70px;
+        }
+
+        .map-title {
+            font-size: 1.8rem;
+        }
+
+        .verse-text {
+            font-size: 1.4rem;
+        }
+
+        .quran-verse {
+            padding: 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="map-container">
+    <div class="container">
+        <!-- هدر -->
+        <div class="map-header">
+            <h1 class="map-title">نقشه مساجد نیشابور</h1>
+            <p class="map-subtitle">
+                در این نقشه می‌توانید موقعیت مساجد شهر نیشابور را مشاهده کرده 
+                و اطلاعات مربوط به هر مسجد را دریافت کنید.
+            </p>
+        </div>
+
+        <!-- کنترل‌ها -->
+        <div class="map-controls">
+            <button class="control-btn" id="zoom-in">
+                <i class="fas fa-search-plus"></i>
+                بزرگنمایی
+            </button>
+            <button class="control-btn" id="zoom-out">
+                <i class="fas fa-search-minus"></i>
+                کوچکنمایی
+            </button>
+            <button class="control-btn" id="reset-view">
+                <i class="fas fa-crosshairs"></i>
+                بازنشانی نمای
+            </button>
+            <button class="control-btn" id="locate-me">
+                <i class="fas fa-location-arrow"></i>
+                موقعیت من
+            </button>
+        </div>
+
+        <!-- نقشه و سایدبار -->
+        <div class="map-content">
+            <!-- نقشه -->
+            <div id="map"></div>
+
+            <!-- سایدبار مساجد -->
+            <div class="mosque-sidebar">
+                <div class="sidebar-header">
+                    <h2 class="sidebar-title">
+                        <i class="fas fa-mosque"></i>
+                        فهرست مساجد
+                    </h2>
+                    
+                    <div class="search-box">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" class="search-input" id="search-mosque" placeholder="جستجوی مسجد...">
+                    </div>
+                </div>
+
+                <div class="mosque-list" id="mosque-list">
+                    <!-- مساجد به صورت داینامیک پر می‌شوند -->
+                </div>
+            </div>
+        </div>
+
+        <!-- راهنما -->
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #D4AF37;"></div>
+                <span>مسجد جامع</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #0d5e3d;"></div>
+                <span>مسجد محله</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #1e3d59;"></div>
+                <span>مسجد تاریخی</span>
+            </div>
+        </div>
+
+        <!-- آیه قرآن -->
+        <div class="quran-verse">
+            <div class="verse-text">
+                ﴿إِنَّمَا يَعْمُرُ مَسَاجِدَ اللَّهِ مَنْ آمَنَ بِاللَّهِ وَالْيَوْمِ الْآخِرِ وَأَقَامَ الصَّلَاةَ وَآتَى الزَّكَاةَ وَلَمْ يَخْشَ إِلَّا اللَّهَ﴾
+            </div>
+            <div class="verse-reference">سوره توبه، آیه ۱۸</div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    class MahdaviMap {
+        constructor() {
+            this.map = null;
+            this.markers = [];
+            this.mosques = this.getMosquesData();
+            this.currentLocation = null;
+
+            this.initMap();
+            this.initMosques();
+            this.setupEventListeners();
+        }
+
+        initMap() {
+            // ایجاد نقشه با مرکزیت نیشابور
+            this.map = L.map('map').setView([36.2125, 58.7958], 13);
+
+            // اضافه کردن لایه نقشه
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                maxZoom: 18
+            }).addTo(this.map);
+
+            // اضافه کردن کنترل مقیاس
+            L.control.scale({ imperial: false }).addTo(this.map);
+        }
+
+        getMosquesData() {
+            return [
+                {
+                    id: 1,
+                    name: "مسجد جامع نیشابور",
+                    lat: 36.2125,
+                    lng: 58.7958,
+                    address: "خیابان امام خمینی، مرکز شهر نیشابور",
+                    type: "جامع",
+                    description: "مسجد جامع نیشابور از مساجد تاریخی و مهم شهر است که در مرکز شهر واقع شده است.",
+                    prayerTimes: {
+                        fajr: "04:30",
+                        dhuhr: "12:15",
+                        asr: "15:45",
+                        maghrib: "18:30",
+                        isha: "19:45"
+                    }
+                },
+                {
+                    id: 2,
+                    name: "مسجد امام رضا (ع)",
+                    lat: 36.2089,
+                    lng: 58.7912,
+                    address: "بلوار جمهوری اسلامی، نیشابور",
+                    type: "محله",
+                    description: "مسجد امام رضا (ع) یکی از مساجد فعال و پررفتوآمد نیشابور است.",
+                    prayerTimes: {
+                        fajr: "04:32",
+                        dhuhr: "12:17",
+                        asr: "15:47",
+                        maghrib: "18:32",
+                        isha: "19:47"
+                    }
+                },
+                {
+                    id: 3,
+                    name: "مسجد النبی (ص)",
+                    lat: 36.2153,
+                    lng: 58.8021,
+                    address: "خیابان شریعتی، نیشابور",
+                    type: "محله",
+                    description: "مسجد النبی (ص) در منطقه مسکونی شریعتی واقع شده و پذیرای نمازگزاران زیادی است.",
+                    prayerTimes: {
+                        fajr: "04:31",
+                        dhuhr: "12:16",
+                        asr: "15:46",
+                        maghrib: "18:31",
+                        isha: "19:46"
+                    }
+                },
+                {
+                    id: 4,
+                    name: "مسجد قدس",
+                    lat: 36.2067,
+                    lng: 58.7876,
+                    address: "میدان قدس، نیشابور",
+                    type: "محله",
+                    description: "مسجد قدس در میدانی به همین نام واقع شده و از مساجد معروف نیشابور است.",
+                    prayerTimes: {
+                        fajr: "04:33",
+                        dhuhr: "12:18",
+                        asr: "15:48",
+                        maghrib: "18:33",
+                        isha: "19:48"
+                    }
+                },
+                {
+                    id: 5,
+                    name: "مسجد قائم (عج)",
+                    lat: 36.2189,
+                    lng: 58.8093,
+                    address: "بلوار معلم، نیشابور",
+                    type: "محله",
+                    description: "مسجد قائم (عج) در بلوار معلم واقع شده و از مساجد جدید نیشابور است.",
+                    prayerTimes: {
+                        fajr: "04:29",
+                        dhuhr: "12:14",
+                        asr: "15:44",
+                        maghrib: "18:29",
+                        isha: "19:44"
+                    }
+                }
+            ];
+        }
+
+        getMarkerColor(type) {
+            switch(type) {
+                case 'جامع': return '#D4AF37';
+                case 'محله': return '#0d5e3d';
+                case 'تاریخی': return '#1e3d59';
+                default: return '#6c757d';
+            }
+        }
+
+        createCustomIcon(mosque) {
+            const color = this.getMarkerColor(mosque.type);
+            return L.divIcon({
+                html: `
+                    <div style="
+                        background: ${color};
+                        width: 30px;
+                        height: 30px;
+                        border-radius: 50%;
+                        border: 3px solid white;
+                        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        color: white;
+                        font-size: 12px;
+                    ">
+                        <i class="fas fa-mosque"></i>
+                    </div>
+                `,
+                className: 'custom-marker',
+                iconSize: [30, 30],
+                iconAnchor: [15, 15]
+            });
+        }
+
+        initMosques() {
+            const mosqueList = document.getElementById('mosque-list');
+            
+            this.mosques.forEach(mosque => {
+                // ایجاد مارکر
+                const marker = L.marker([mosque.lat, mosque.lng], {
+                    icon: this.createCustomIcon(mosque)
+                });
+
+                // ایجاد پاپ‌آپ
+                const popupContent = this.createPopupContent(mosque);
+                marker.bindPopup(popupContent);
+
+                // اضافه کردن به نقشه
+                marker.addTo(this.map);
+                this.markers.push({ marker, mosque });
+
+                // ایجاد آیتم در لیست
+                const listItem = this.createListItem(mosque);
+                mosqueList.appendChild(listItem);
+
+                // رویداد کلیک
+                marker.on('click', () => {
+                    this.highlightMosque(mosque.id);
+                });
+            });
+        }
+
+        createPopupContent(mosque) {
+            return `
+                <div class="custom-popup">
+                    <div class="popup-title">${mosque.name}</div>
+                    <div class="popup-address">
+                        <i class="fas fa-map-marker-alt"></i>
+                        ${mosque.address}
+                    </div>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem;">
+                        ${mosque.description}
+                    </p>
+                    <div class="prayer-times">
+                        <div class="prayer-times-title">
+                            <i class="fas fa-clock"></i>
+                            اوقات شرعی
+                        </div>
+                        <div class="prayer-time">
+                            <span class="prayer-name">نماز صبح:</span>
+                            <span class="prayer-value">${mosque.prayerTimes.fajr}</span>
+                        </div>
+                        <div class="prayer-time">
+                            <span class="prayer-name">نماز ظهر:</span>
+                            <span class="prayer-value">${mosque.prayerTimes.dhuhr}</span>
+                        </div>
+                        <div class="prayer-time">
+                            <span class="prayer-name">نماز عصر:</span>
+                            <span class="prayer-value">${mosque.prayerTimes.asr}</span>
+                        </div>
+                        <div class="prayer-time">
+                            <span class="prayer-name">نماز مغرب:</span>
+                            <span class="prayer-value">${mosque.prayerTimes.maghrib}</span>
+                        </div>
+                        <div class="prayer-time">
+                            <span class="prayer-name">نماز عشاء:</span>
+                            <span class="prayer-value">${mosque.prayerTimes.isha}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        createListItem(mosque) {
+            const item = document.createElement('div');
+            item.className = 'mosque-item';
+            item.dataset.id = mosque.id;
+
+            item.innerHTML = `
+                <div class="mosque-name">
+                    <i class="fas fa-mosque"></i>
+                    ${mosque.name}
+                </div>
+                <div class="mosque-address">${mosque.address}</div>
+                <div class="mosque-meta">
+                    <span class="mosque-type">${mosque.type}</span>
+                    <span class="prayer-time">صبح: ${mosque.prayerTimes.fajr}</span>
+                </div>
+            `;
+
+            item.addEventListener('click', () => {
+                this.focusOnMosque(mosque.id);
+                this.highlightMosque(mosque.id);
+            });
+
+            return item;
+        }
+
+        focusOnMosque(mosqueId) {
+            const mosqueData = this.mosques.find(m => m.id === mosqueId);
+            if (mosqueData) {
+                this.map.setView([mosqueData.lat, mosqueData.lng], 16);
+                
+                // باز کردن پاپ‌آپ
+                const markerData = this.markers.find(m => m.mosque.id === mosqueId);
+                if (markerData) {
+                    markerData.marker.openPopup();
+                }
+            }
+        }
+
+        highlightMosque(mosqueId) {
+            // حذف هایلایت از همه آیتم‌ها
+            document.querySelectorAll('.mosque-item').forEach(item => {
+                item.classList.remove('active');
+            });
+
+            // هایلایت آیتم انتخاب شده
+            const selectedItem = document.querySelector(`.mosque-item[data-id="${mosqueId}"]`);
+            if (selectedItem) {
+                selectedItem.classList.add('active');
+            }
+        }
+
+        setupEventListeners() {
+            // کنترل‌های نقشه
+            document.getElementById('zoom-in').addEventListener('click', () => {
+                this.map.zoomIn();
+            });
+
+            document.getElementById('zoom-out').addEventListener('click', () => {
+                this.map.zoomOut();
+            });
+
+            document.getElementById('reset-view').addEventListener('click', () => {
+                this.map.setView([36.2125, 58.7958], 13);
+            });
+
+            document.getElementById('locate-me').addEventListener('click', () => {
+                this.locateUser();
+            });
+
+            // جستجو
+            document.getElementById('search-mosque').addEventListener('input', (e) => {
+                this.searchMosques(e.target.value);
+            });
+        }
+
+        searchMosques(searchTerm) {
+            const term = searchTerm.toLowerCase();
+            const items = document.querySelectorAll('.mosque-item');
+
+            items.forEach(item => {
+                const mosqueName = item.querySelector('.mosque-name').textContent.toLowerCase();
+                const mosqueAddress = item.querySelector('.mosque-address').textContent.toLowerCase();
+
+                if (mosqueName.includes(term) || mosqueAddress.includes(term)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        locateUser() {
+            if (!navigator.geolocation) {
+                if (window.MahdaviApp) {
+                    window.MahdaviApp.showNotification('مرورگر شما از قابلیت موقعیت‌یابی پشتیبانی نمی‌کند', 'error');
+                }
+                return;
+            }
+
+            if (window.MahdaviApp) {
+                window.MahdaviApp.showNotification('در حال دریافت موقعیت شما...', 'info');
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const { latitude, longitude } = position.coords;
+                    this.currentLocation = L.marker([latitude, longitude])
+                        .addTo(this.map)
+                        .bindPopup('موقعیت فعلی شما')
+                        .openPopup();
+
+                    this.map.setView([latitude, longitude], 14);
+
+                    if (window.MahdaviApp) {
+                        window.MahdaviApp.showNotification('موقعیت شما با موفقیت شناسایی شد', 'success');
+                    }
+                },
+                (error) => {
+                    let message = 'خطا در دریافت موقعیت';
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            message = 'دسترسی به موقعیت مکانی رد شد';
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            message = 'اطلاعات موقعیت در دسترس نیست';
+                            break;
+                        case error.TIMEOUT:
+                            message = 'دریافت موقعیت زمان‌بر شد';
+                            break;
+                    }
+
+                    if (window.MahdaviApp) {
+                        window.MahdaviApp.showNotification(message, 'error');
+                    }
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 60000
+                }
+            );
+        }
+    }
+
+    // مقداردهی اولیه نقشه وقتی DOM لود شد
+    document.addEventListener('DOMContentLoaded', function() {
+        new MahdaviMap();
+
+        // انیمیشن ورود
+        const elements = document.querySelectorAll('.map-header, .map-controls, .map-content, .quran-verse');
+        elements.forEach((el, index) => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            
+            setTimeout(() => {
+                el.style.transition = 'all 0.6s ease';
+                el.style.opacity = '1';
+                el.style.transform = 'translateY(0)';
+            }, (index + 1) * 200);
+        });
+    });
+</script>
+{% endblock %}

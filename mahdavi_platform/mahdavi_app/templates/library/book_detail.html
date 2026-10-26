@@ -1,0 +1,473 @@
+{% extends "base.html" %}
+
+{% block title %}{{ book.title }} - کتابخانه مهدوی{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Book Detail Layout */
+    .book-detail-container {
+        background: var(--card-bg);
+        border-radius: 20px;
+        border: 1px solid var(--border-gold);
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .book-hero {
+        background: linear-gradient(135deg, var(--card-bg) 0%, rgba(26, 26, 46, 0.9) 100%);
+        padding: 3rem 2rem;
+        border-bottom: 1px solid var(--border-gold);
+    }
+
+    .book-cover-large {
+        width: 150px;
+        height: 220px;
+        background: var(--gold-gradient);
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--dark-bg);
+        font-size: 3.5rem;
+        box-shadow: 0 15px 35px rgba(212, 175, 55, 0.4);
+        transition: all 0.3s ease;
+        flex-shrink: 0;
+    }
+
+    .book-cover-large:hover {
+        transform: scale(1.05) rotate(2deg);
+        box-shadow: 0 20px 45px rgba(212, 175, 55, 0.5);
+    }
+
+    .book-badges {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        margin-bottom: 1.5rem;
+    }
+
+    .book-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        border: 1px solid;
+    }
+
+    .badge-type {
+        background: rgba(212, 175, 55, 0.1);
+        color: var(--primary-gold);
+        border-color: rgba(212, 175, 55, 0.3);
+    }
+
+    .badge-category {
+        background: rgba(0, 123, 255, 0.1);
+        color: #007bff;
+        border-color: rgba(0, 123, 255, 0.3);
+    }
+
+    .badge-free {
+        background: rgba(40, 167, 69, 0.1);
+        color: #28a745;
+        border-color: rgba(40, 167, 69, 0.3);
+    }
+
+    .badge-premium {
+        background: rgba(212, 175, 55, 0.1);
+        color: var(--primary-gold);
+        border-color: rgba(212, 175, 55, 0.3);
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-lg {
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
+        border-radius: 15px;
+    }
+
+    /* Sidebar Cards */
+    .sidebar-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border-gold);
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .sidebar-card:hover {
+        border-color: var(--primary-gold);
+        box-shadow: 0 8px 25px rgba(212, 175, 55, 0.15);
+    }
+
+    .access-status {
+        text-align: center;
+        padding: 1.5rem;
+        border-radius: 15px;
+        margin-bottom: 1.5rem;
+    }
+
+    .status-approved {
+        background: rgba(40, 167, 69, 0.1);
+        color: #28a745;
+        border: 1px solid rgba(40, 167, 69, 0.3);
+    }
+
+    .status-free {
+        background: rgba(40, 167, 69, 0.1);
+        color: #28a745;
+        border: 1px solid rgba(40, 167, 69, 0.3);
+    }
+
+    .status-locked {
+        background: rgba(255, 193, 7, 0.1);
+        color: #ffc107;
+        border: 1px solid rgba(255, 193, 7, 0.3);
+    }
+
+    /* Related Books */
+    .related-book-card {
+        display: flex;
+        gap: 1rem;
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 12px;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        border: 1px solid transparent;
+    }
+
+    .related-book-card:hover {
+        background: rgba(212, 175, 55, 0.05);
+        border-color: var(--border-gold);
+        text-decoration: none;
+        transform: translateX(-5px);
+    }
+
+    .related-book-cover {
+        width: 50px;
+        height: 70px;
+        background: var(--gold-gradient);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--dark-bg);
+        font-size: 1.2rem;
+        flex-shrink: 0;
+    }
+
+    /* Content Sections */
+    .content-section {
+        padding: 2rem;
+    }
+
+    .section-title {
+        color: var(--primary-gold);
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid var(--border-gold);
+    }
+
+    .info-grid {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .info-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .info-item:last-child {
+        border-bottom: none;
+    }
+
+    /* Responsive */
+    @media (max-width: 992px) {
+        .book-hero-content {
+            flex-direction: column;
+            text-align: center;
+            gap: 2rem;
+        }
+        
+        .book-badges {
+            justify-content: center;
+        }
+        
+        .action-buttons {
+            justify-content: center;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .book-cover-large {
+            width: 120px;
+            height: 180px;
+            font-size: 2.5rem;
+        }
+        
+        .btn-lg {
+            padding: 0.875rem 1.5rem;
+            font-size: 1rem;
+        }
+        
+        .action-buttons {
+            flex-direction: column;
+        }
+        
+        .action-buttons .btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <h1 class="page-title">{{ book.title }}</h1>
+        <p class="page-subtitle">{{ book.author }}</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="book-detail-container">
+        <!-- Book Hero Section -->
+        <div class="book-hero">
+            <div class="book-hero-content" style="display: flex; gap: 2rem; align-items: flex-start;">
+                <div class="book-cover-large">
+                    <i class="fas fa-book"></i>
+                </div>
+                
+                <div style="flex: 1;">
+                    <h2 style="color: var(--text-primary); margin-bottom: 1rem; font-weight: 700; font-size: 2rem;">
+                        {{ book.title }}
+                    </h2>
+                    <p style="color: var(--text-muted); font-size: 1.2rem; margin-bottom: 1.5rem;">
+                        <i class="fas fa-user-edit"></i>
+                        نویسنده: {{ book.author }}
+                    </p>
+                    
+                    <div class="book-badges">
+                        <span class="book-badge badge-type">
+                            <i class="fas fa-tag"></i>
+                            {{ book.get_book_type_display }}
+                        </span>
+                        <span class="book-badge badge-category">
+                            <i class="fas fa-folder"></i>
+                            {{ book.category.name }}
+                        </span>
+                        {% if book.is_free %}
+                        <span class="book-badge badge-free">
+                            <i class="fas fa-gift"></i>
+                            رایگان
+                        </span>
+                        {% else %}
+                        <span class="book-badge badge-premium">
+                            <i class="fas fa-crown"></i>
+                            {{ book.final_price }} تومان
+                        </span>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="action-buttons">
+                        {% if has_access or book.is_free %}
+                            <a href="{% url 'download_book' book.id %}" class="btn btn-primary btn-lg">
+                                <i class="fas fa-download"></i>
+                                دانلود کتاب
+                            </a>
+                            <a href="{% url 'book_reader' book.id %}" class="btn btn-outline btn-lg">
+                                <i class="fas fa-book-open"></i>
+                                مطالعه آنلاین
+                            </a>
+                        {% elif user_order %}
+                            {% if user_order.status == 'paid' %}
+                            <div class="status-approved access-status">
+                                <i class="fas fa-clock" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                                <div>در انتظار تایید ادمین</div>
+                            </div>
+                            {% elif user_order.status == 'approved' %}
+                            <a href="{% url 'download_book' book.id %}" class="btn btn-primary btn-lg">
+                                <i class="fas fa-download"></i>
+                                دانلود کتاب
+                            </a>
+                            {% else %}
+                            <a href="{% url 'add_book_to_cart' book.id %}" class="btn btn-primary btn-lg">
+                                <i class="fas fa-shopping-cart"></i>
+                                خرید مجدد
+                            </a>
+                            {% endif %}
+                        {% else %}
+                            <a href="{% url 'add_book_to_cart' book.id %}" class="btn btn-primary btn-lg">
+                                <i class="fas fa-shopping-cart"></i>
+                                افزودن به سبد خرید
+                            </a>
+                        {% endif %}
+                        
+                        {% if in_wishlist %}
+                        <a href="{% url 'remove_from_wishlist' book.id %}" class="btn btn-outline btn-lg">
+                            <i class="fas fa-heart"></i>
+                            حذف از علاقه‌مندی
+                        </a>
+                        {% else %}
+                        <a href="{% url 'add_to_wishlist' book.id %}" class="btn btn-outline btn-lg">
+                            <i class="far fa-heart"></i>
+                            افزودن به علاقه‌مندی
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-2" style="gap: 2rem; padding: 2rem;">
+            <!-- Main Content -->
+            <div>
+                <!-- Book Description -->
+                <div class="content-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-file-alt"></i>
+                        توضیحات کتاب
+                    </h3>
+                    <div style="color: var(--text-secondary); line-height: 1.8; font-size: 1.05rem;">
+                        {{ book.description|linebreaks }}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sidebar -->
+            <div>
+                <!-- Access Status -->
+                <div class="sidebar-card">
+                    <h3 class="section-title" style="font-size: 1.3rem; margin-bottom: 1rem;">
+                        <i class="fas fa-key"></i>
+                        وضعیت دسترسی
+                    </h3>
+                    {% if has_access %}
+                    <div class="access-status status-approved">
+                        <i class="fas fa-check-circle" style="font-size: 2.5rem; margin-bottom: 1rem;"></i>
+                        <div style="font-weight: 600; font-size: 1.1rem;">شما به این کتاب دسترسی دارید</div>
+                    </div>
+                    {% elif book.is_free %}
+                    <div class="access-status status-free">
+                        <i class="fas fa-gift" style="font-size: 2.5rem; margin-bottom: 1rem;"></i>
+                        <div style="font-weight: 600; font-size: 1.1rem;">این کتاب رایگان است</div>
+                    </div>
+                    {% else %}
+                    <div class="access-status status-locked">
+                        <i class="fas fa-lock" style="font-size: 2.5rem; margin-bottom: 1rem;"></i>
+                        <div style="font-weight: 600; font-size: 1.1rem;">برای دسترسی نیاز به خرید دارید</div>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Technical Information -->
+                <div class="sidebar-card">
+                    <h3 class="section-title" style="font-size: 1.3rem; margin-bottom: 1rem;">
+                        <i class="fas fa-info-circle"></i>
+                        اطلاعات فنی
+                    </h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span style="color: var(--text-muted);">نوع کتاب:</span>
+                            <span style="color: var(--text-primary); font-weight: 500;">{{ book.get_book_type_display }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span style="color: var(--text-muted);">دسته‌بندی:</span>
+                            <span style="color: var(--text-primary); font-weight: 500;">{{ book.category.name }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span style="color: var(--text-muted);">تعداد صفحات:</span>
+                            <span style="color: var(--text-primary); font-weight: 500;">{{ book.pages|default:'-' }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span style="color: var(--text-muted);">حجم فایل:</span>
+                            <span style="color: var(--text-primary); font-weight: 500;">{{ book.file_size|default:'-' }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span style="color: var(--text-muted);">تاریخ انتشار:</span>
+                            <span style="color: var(--text-primary); font-weight: 500;">{{ book.publication_date|date:'Y/m/d' }}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Related Books -->
+                {% if related_books %}
+                <div class="sidebar-card">
+                    <h3 class="section-title" style="font-size: 1.3rem; margin-bottom: 1rem;">
+                        <i class="fas fa-bookmark"></i>
+                        کتاب‌های مرتبط
+                    </h3>
+                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                        {% for related in related_books %}
+                        <a href="{% url 'book_detail' related.id %}" class="related-book-card">
+                            <div class="related-book-cover">
+                                <i class="fas fa-book"></i>
+                            </div>
+                            <div style="flex: 1;">
+                                <div style="color: var(--text-primary); font-weight: 600; margin-bottom: 0.25rem; font-size: 0.9rem;">
+                                    {{ related.title }}
+                                </div>
+                                <div style="color: var(--text-muted); font-size: 0.8rem;">
+                                    {{ related.author }}
+                                </div>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Add animation for book cover
+    document.addEventListener('DOMContentLoaded', function() {
+        const bookCover = document.querySelector('.book-cover-large');
+        if (bookCover) {
+            bookCover.style.opacity = '0';
+            bookCover.style.transform = 'scale(0.8)';
+            
+            setTimeout(() => {
+                bookCover.style.transition = 'all 0.6s ease';
+                bookCover.style.opacity = '1';
+                bookCover.style.transform = 'scale(1)';
+            }, 300);
+        }
+
+        // Animate sidebar cards
+        const sidebarCards = document.querySelectorAll('.sidebar-card');
+        sidebarCards.forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateX(20px)';
+            
+            setTimeout(() => {
+                card.style.transition = 'all 0.5s ease';
+                card.style.opacity = '1';
+                card.style.transform = 'translateX(0)';
+            }, 500 + (index * 150));
+        });
+    });
+</script>
+{% endblock %}

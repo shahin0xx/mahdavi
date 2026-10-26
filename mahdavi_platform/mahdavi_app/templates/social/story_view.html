@@ -1,0 +1,390 @@
+{% extends 'social/base.html' %}
+{% load static %}
+
+{% block title %}استوری {{ story.user.get_full_name }} - نور مهدی{% endblock %}
+
+{% block extra_css %}
+<style>
+.story-view-page {
+    background: #000;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.story-container {
+    position: relative;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.story-content {
+    position: relative;
+    max-width: 400px;
+    max-height: 80vh;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.story-content img,
+.story-content video {
+    width: 100%;
+    height: auto;
+    max-height: 80vh;
+    object-fit: contain;
+    display: block;
+}
+
+.story-caption {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+    color: white;
+    padding: 60px 20px 20px;
+    text-align: center;
+    font-size: 1.1rem;
+}
+
+.story-header {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    right: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 10;
+}
+
+.story-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: white;
+}
+
+.story-user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold), var(--dark-gold));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: #000;
+    overflow: hidden;
+}
+
+.story-user-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.story-username {
+    font-weight: bold;
+    color: white;
+}
+
+.story-time {
+    font-size: 0.8rem;
+    opacity: 0.8;
+}
+
+.close-story {
+    background: rgba(0, 0, 0, 0.5);
+    border: none;
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+}
+
+.close-story:hover {
+    background: rgba(0, 0, 0, 0.7);
+    transform: scale(1.1);
+}
+
+.story-progress {
+    position: absolute;
+    top: 10px;
+    left: 20px;
+    right: 20px;
+    display: flex;
+    gap: 4px;
+    z-index: 10;
+}
+
+.progress-bar {
+    flex: 1;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: white;
+    width: 0%;
+    transition: width linear;
+}
+
+.navigation-buttons {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    pointer-events: none;
+}
+
+.nav-btn {
+    background: rgba(0, 0, 0, 0.3);
+    border: none;
+    color: white;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1.5rem;
+    pointer-events: all;
+    transition: all 0.3s ease;
+    opacity: 0;
+}
+
+.story-container:hover .nav-btn {
+    opacity: 1;
+}
+
+.nav-btn:hover {
+    background: rgba(0, 0, 0, 0.6);
+    transform: scale(1.1);
+}
+
+.story-indicators {
+    position: absolute;
+    bottom: 20px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    z-index: 10;
+}
+
+.story-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.story-indicator.active {
+    background: white;
+    transform: scale(1.2);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="story-view-page">
+    <div class="story-container">
+        <!-- نوار پیشرفت -->
+        <div class="story-progress">
+            {% for s in user_stories %}
+            <div class="progress-bar">
+                <div class="progress-fill" 
+                     data-story-id="{{ s.id }}"
+                     {% if s.id == story.id %}id="current-progress"{% endif %}></div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- هدر استوری -->
+        <div class="story-header">
+            <div class="story-user">
+                <div class="story-user-avatar">
+                    {% if story.user.profile_image %}
+                        <img src="{{ story.user.profile_image.url }}" alt="{{ story.user.get_full_name }}">
+                    {% else %}
+                        <span>{{ story.user.first_name|first }}</span>
+                    {% endif %}
+                </div>
+                <div>
+                    <div class="story-username">{{ story.user.get_full_name }}</div>
+                    <div class="story-time">{{ story.created_at|timesince }} قبل</div>
+                </div>
+            </div>
+            <button class="close-story" onclick="closeStory()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <!-- محتوای استوری -->
+        <div class="story-content">
+            {% if story.content_type == 'image' and story.image %}
+            <img src="{{ story.image.url }}" alt="استوری {{ story.user.get_full_name }}">
+            {% elif story.content_type == 'video' and story.video %}
+            <video controls autoplay id="story-video">
+                <source src="{{ story.video.url }}" type="video/mp4">
+            </video>
+            {% endif %}
+            
+            {% if story.caption %}
+            <div class="story-caption">{{ story.caption }}</div>
+            {% endif %}
+        </div>
+        
+        <!-- دکمه‌های ناوبری -->
+        <div class="navigation-buttons">
+            <button class="nav-btn prev-btn" onclick="prevStory()">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+            <button class="nav-btn next-btn" onclick="nextStory()">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+        </div>
+        
+        <!-- نشانگر استوری‌ها -->
+        <div class="story-indicators">
+            {% for s in user_stories %}
+            <div class="story-indicator {% if s.id == story.id %}active{% endif %}" 
+                 onclick="goToStory({{ forloop.counter0 }})"></div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+let currentStoryIndex = {{ current_story_index }};
+const userStories = [
+    {% for s in user_stories %}
+    {
+        id: {{ s.id }},
+        url: "{% url 'story_view' s.id %}",
+        type: "{{ s.content_type }}",
+        {% if s.content_type == 'video' %}duration: 0{% endif %}
+    },
+    {% endfor %}
+];
+
+let progressInterval;
+const progressDuration = 5000; // 5 ثانیه برای هر استوری
+
+document.addEventListener('DOMContentLoaded', function() {
+    startProgress();
+    
+    // اگر استوری ویدیویی است، مدت آن را دریافت کن
+    const storyVideo = document.getElementById('story-video');
+    if (storyVideo) {
+        storyVideo.addEventListener('loadedmetadata', function() {
+            // مدت ویدیو را تنظیم کن (حداکثر 15 ثانیه)
+            const duration = Math.min(this.duration * 1000, 15000);
+            startProgress(duration);
+        });
+        
+        storyVideo.addEventListener('ended', nextStory);
+    }
+    
+    // کلیدهای کیبورد
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'ArrowRight' || e.key === ' ') {
+            prevStory();
+        } else if (e.key === 'ArrowLeft') {
+            nextStory();
+        } else if (e.key === 'Escape') {
+            closeStory();
+        }
+    });
+});
+
+function startProgress(duration = progressDuration) {
+    clearInterval(progressInterval);
+    
+    const progressFill = document.getElementById('current-progress');
+    if (!progressFill) return;
+    
+    let width = 0;
+    const increment = 100 / (duration / 50);
+    
+    progressInterval = setInterval(() => {
+        width += increment;
+        progressFill.style.width = width + '%';
+        
+        if (width >= 100) {
+            clearInterval(progressInterval);
+            nextStory();
+        }
+    }, 50);
+}
+
+function nextStory() {
+    if (currentStoryIndex < userStories.length - 1) {
+        window.location.href = userStories[currentStoryIndex + 1].url;
+    } else {
+        closeStory();
+    }
+}
+
+function prevStory() {
+    if (currentStoryIndex > 0) {
+        window.location.href = userStories[currentStoryIndex - 1].url;
+    }
+}
+
+function goToStory(index) {
+    window.location.href = userStories[index].url;
+}
+
+function closeStory() {
+    window.history.back();
+    
+    // اگر از صفحه مستقیم آمده‌اید، به صفحه اصلی بروید
+    setTimeout(() => {
+        if (document.referrer.includes(window.location.hostname)) {
+            window.location.href = "{% url 'social_home' %}";
+        }
+    }, 100);
+}
+
+// توقف پیشرفت وقتی صفحه visible نیست
+document.addEventListener('visibilitychange', function() {
+    if (document.hidden) {
+        clearInterval(progressInterval);
+    } else {
+        startProgress();
+    }
+});
+
+// توقف پیشرفت وقتی ماوس روی استوری است
+const storyContainer = document.querySelector('.story-container');
+storyContainer.addEventListener('mouseenter', function() {
+    clearInterval(progressInterval);
+});
+
+storyContainer.addEventListener('mouseleave', function() {
+    startProgress();
+});
+</script>
+{% endblock %}

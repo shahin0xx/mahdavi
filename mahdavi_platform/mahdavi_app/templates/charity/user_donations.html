@@ -1,0 +1,833 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}کمک‌های من - پلتفرم مهدوی{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* متغیرهای مهدوی */
+    :root {
+        --charity-primary: #D4AF37;
+        --charity-secondary: #FFD700;
+        --charity-accent: #F39C12;
+        --charity-success: #27ae60;
+        --charity-danger: #e74c3c;
+        --charity-light: #FFE55C;
+        --charity-gradient: linear-gradient(135deg, var(--charity-primary), var(--charity-secondary));
+        --charity-gradient-dark: linear-gradient(135deg, #B8860B, #D4AF37);
+    }
+
+    /* استایل اصلی */
+    .donations-container {
+        background: linear-gradient(180deg, 
+            rgba(15, 15, 26, 1) 0%,
+            rgba(26, 26, 46, 0.95) 50%,
+            rgba(15, 15, 26, 1) 100%);
+        min-height: 100vh;
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* هدر صفحه */
+    .donations-header {
+        padding: 6rem 2rem 3rem;
+        position: relative;
+        text-align: center;
+        background: linear-gradient(180deg, 
+            rgba(15, 15, 26, 0.9) 0%,
+            rgba(26, 26, 46, 0.7) 100%);
+    }
+
+    .donations-title {
+        font-size: 3.5rem;
+        font-weight: 900;
+        background: var(--charity-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 1rem;
+        animation: titleGlow 4s infinite alternate;
+    }
+
+    .donations-subtitle {
+        font-size: 1.3rem;
+        color: var(--text-secondary);
+        max-width: 600px;
+        margin: 0 auto 3rem;
+        line-height: 1.6;
+    }
+
+    /* کارت‌های آمار */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+        margin: 3rem auto;
+        max-width: 1200px;
+        padding: 0 2rem;
+    }
+
+    .stat-card {
+        background: linear-gradient(145deg, 
+            rgba(212, 175, 55, 0.08) 0%,
+            rgba(212, 175, 55, 0.04) 100%);
+        border: 1px solid rgba(212, 175, 55, 0.15);
+        border-radius: 25px;
+        padding: 2.5rem 2rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        backdrop-filter: blur(10px);
+    }
+
+    .stat-card:hover {
+        transform: translateY(-10px);
+        border-color: var(--charity-primary);
+        box-shadow: 
+            0 20px 40px rgba(212, 175, 55, 0.2),
+            0 0 80px rgba(212, 175, 55, 0.1);
+    }
+
+    .stat-icon {
+        width: 70px;
+        height: 70px;
+        margin: 0 auto 1.5rem;
+        background: var(--charity-gradient);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        color: var(--dark-bg);
+        box-shadow: 0 10px 20px rgba(212, 175, 55, 0.3);
+        transition: all 0.4s ease;
+    }
+
+    .stat-number {
+        font-size: 3rem;
+        font-weight: 800;
+        background: var(--charity-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        display: block;
+        margin-bottom: 0.5rem;
+        font-family: 'Vazirmatn', sans-serif;
+    }
+
+    .stat-label {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        font-weight: 500;
+    }
+
+    /* جدول کمک‌ها */
+    .donations-table-section {
+        padding: 4rem 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .section-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        background: var(--charity-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 2rem;
+        text-align: center;
+        position: relative;
+    }
+
+    .section-title::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100px;
+        height: 4px;
+        background: var(--charity-gradient);
+        border-radius: 2px;
+    }
+
+    .donations-table-container {
+        background: linear-gradient(145deg, 
+            rgba(26, 26, 46, 0.8) 0%,
+            rgba(15, 15, 26, 0.9) 100%);
+        border-radius: 25px;
+        padding: 2rem;
+        border: 1px solid rgba(212, 175, 55, 0.2);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+    }
+
+    /* جدول */
+    .donations-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .donations-table thead {
+        background: linear-gradient(90deg, 
+            rgba(212, 175, 55, 0.1), 
+            rgba(212, 175, 55, 0.05));
+    }
+
+    .donations-table th {
+        padding: 1.5rem 1rem;
+        color: var(--charity-primary);
+        font-weight: 700;
+        text-align: right;
+        border-bottom: 2px solid rgba(212, 175, 55, 0.3);
+        font-size: 1.1rem;
+    }
+
+    .donations-table tbody tr {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        transition: all 0.3s ease;
+    }
+
+    .donations-table tbody tr:hover {
+        background: rgba(212, 175, 55, 0.05);
+        transform: translateX(-5px);
+    }
+
+    .donations-table td {
+        padding: 1.5rem 1rem;
+        color: var(--text-secondary);
+        vertical-align: middle;
+    }
+
+    /* کارت پروژه در جدول */
+    .project-cell {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .project-image {
+        width: 60px;
+        height: 60px;
+        border-radius: 15px;
+        object-fit: cover;
+        border: 2px solid rgba(212, 175, 55, 0.3);
+    }
+
+    .project-info {
+        flex: 1;
+    }
+
+    .project-name {
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.3rem;
+        display: block;
+    }
+
+    .project-category {
+        font-size: 0.9rem;
+        color: var(--charity-primary);
+        background: rgba(212, 175, 55, 0.1);
+        padding: 0.3rem 0.8rem;
+        border-radius: 20px;
+        display: inline-block;
+    }
+
+    /* وضعیت‌ها */
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        backdrop-filter: blur(10px);
+    }
+
+    .status-completed {
+        background: linear-gradient(135deg, rgba(39, 174, 96, 0.2), rgba(39, 174, 96, 0.1));
+        color: #2ecc71;
+        border: 1px solid rgba(39, 174, 96, 0.3);
+    }
+
+    .status-paid {
+        background: linear-gradient(135deg, rgba(52, 152, 219, 0.2), rgba(52, 152, 219, 0.1));
+        color: #3498db;
+        border: 1px solid rgba(52, 152, 219, 0.3);
+    }
+
+    .status-pending {
+        background: linear-gradient(135deg, rgba(241, 196, 15, 0.2), rgba(241, 196, 15, 0.1));
+        color: #f1c40f;
+        border: 1px solid rgba(241, 196, 15, 0.3);
+    }
+
+    .status-rejected {
+        background: linear-gradient(135deg, rgba(231, 76, 60, 0.2), rgba(231, 76, 60, 0.1));
+        color: #e74c3c;
+        border: 1px solid rgba(231, 76, 60, 0.3);
+    }
+
+    /* مبلغ */
+    .amount-cell {
+        font-size: 1.3rem;
+        font-weight: 800;
+        color: var(--charity-primary);
+        text-align: left;
+    }
+
+    .amount-unit {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        margin-right: 0.3rem;
+    }
+
+    /* عملیات */
+    .actions-cell {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .action-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        background: rgba(212, 175, 55, 0.1);
+        color: var(--charity-primary);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        border: 1px solid rgba(212, 175, 55, 0.2);
+    }
+
+    .action-btn:hover {
+        background: var(--charity-gradient);
+        color: var(--dark-bg);
+        transform: translateY(-3px);
+        border-color: transparent;
+    }
+
+    .action-btn.view {
+        background: rgba(52, 152, 219, 0.1);
+        color: #3498db;
+        border-color: rgba(52, 152, 219, 0.2);
+    }
+
+    .action-btn.pay {
+        background: rgba(46, 204, 113, 0.1);
+        color: #2ecc71;
+        border-color: rgba(46, 204, 113, 0.2);
+    }
+
+    .action-btn.receipt {
+        background: rgba(155, 89, 182, 0.1);
+        color: #9b59b6;
+        border-color: rgba(155, 89, 182, 0.2);
+    }
+
+    /* حالت خالی */
+    .empty-state {
+        text-align: center;
+        padding: 5rem 2rem;
+    }
+
+    .empty-icon {
+        font-size: 4rem;
+        color: rgba(212, 175, 55, 0.3);
+        margin-bottom: 2rem;
+    }
+
+    .empty-title {
+        font-size: 2rem;
+        color: var(--text-secondary);
+        margin-bottom: 1rem;
+    }
+
+    .empty-message {
+        color: var(--text-secondary);
+        margin-bottom: 3rem;
+        max-width: 400px;
+        margin-left: auto;
+        margin-right: auto;
+        line-height: 1.6;
+    }
+
+    /* CTA */
+    .cta-btn {
+        padding: 1rem 3rem;
+        border-radius: 15px;
+        font-size: 1.2rem;
+        font-weight: 700;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 1rem;
+        transition: all 0.3s ease;
+        background: var(--charity-gradient);
+        color: var(--dark-bg);
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 10px 30px rgba(212, 175, 55, 0.3);
+    }
+
+    .cta-btn:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px rgba(212, 175, 55, 0.4);
+    }
+
+    /* رسپانسیو */
+    @media (max-width: 768px) {
+        .donations-title {
+            font-size: 2.5rem;
+        }
+        
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+        
+        .stat-card {
+            padding: 1.5rem 1rem;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+        }
+        
+        .donations-table-container {
+            overflow-x: auto;
+        }
+        
+        .donations-table {
+            min-width: 800px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .donations-title {
+            font-size: 2rem;
+        }
+        
+        .actions-cell {
+            flex-wrap: wrap;
+        }
+    }
+
+    /* انیمیشن‌ها */
+    @keyframes titleGlow {
+        0% {
+            text-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
+        }
+        100% {
+            text-shadow: 0 0 40px rgba(212, 175, 55, 0.8);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="donations-container">
+    <!-- هدر صفحه -->
+    <section class="donations-header">
+        <h1 class="donations-title">کمک‌های من</h1>
+        <p class="donations-subtitle">
+            تاریخچه کمک‌های مالی و فعالیت‌های خیریه شما در پلتفرم مهدوی
+        </p>
+        
+        <!-- آمار کلی -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-donate"></i>
+                </div>
+                <span class="stat-number" data-count="{{ total_donations }}">0</span>
+                <div class="stat-label">تعداد کمک‌ها</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-money-bill-wave"></i>
+                </div>
+                <span class="stat-number" data-count="{{ total_amount|floatformat:'0' }}">0</span>
+                <div class="stat-label">تومان جمع‌آوری شده</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <span class="stat-number" data-count="{{ completed_donations }}">0</span>
+                <div class="stat-label">کمک‌های تأیید شده</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <span class="stat-number" data-count="{{ pending_donations }}">0</span>
+                <div class="stat-label">در انتظار تأیید</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- بخش جدول کمک‌ها -->
+    <section class="donations-table-section">
+        <h2 class="section-title">تاریخچه کمک‌ها</h2>
+        
+        {% if donations %}
+        <div class="donations-table-container">
+            <table class="donations-table">
+                <thead>
+                    <tr>
+                        <th>پروژه</th>
+                        <th>مبلغ</th>
+                        <th>تاریخ</th>
+                        <th>وضعیت</th>
+                        <th>عملیات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for donation in donations %}
+                    <tr>
+                        <td>
+                            <div class="project-cell">
+                                {% if donation.project.main_image %}
+                                <img src="{{ donation.project.main_image.url }}" 
+                                     alt="{{ donation.project.title }}"
+                                     class="project-image">
+                                {% else %}
+                                <div class="project-image" style="background: var(--charity-gradient); display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-hands-helping" style="color: var(--dark-bg);"></i>
+                                </div>
+                                {% endif %}
+                                <div class="project-info">
+                                    <span class="project-name">{{ donation.project.title }}</span>
+                                    <span class="project-category">{{ donation.project.category.name }}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="amount-cell">
+                            <span class="amount-unit">تومان</span>
+                            {{ donation.amount|floatformat:0|intcomma }}
+                        </td>
+                        <td>
+                            <div>{{ donation.created_at|date:"Y/m/d" }}</div>
+                            <small style="color: var(--text-secondary);">{{ donation.created_at|date:"H:i" }}</small>
+                        </td>
+                        <td>
+                            {% if donation.status == 'completed' %}
+                            <span class="status-badge status-completed">
+                                <i class="fas fa-check-circle"></i>
+                                تأیید شده
+                            </span>
+                            {% elif donation.status == 'paid' %}
+                            <span class="status-badge status-paid">
+                                <i class="fas fa-clock"></i>
+                                در انتظار تأیید
+                            </span>
+                            {% elif donation.status == 'pending' %}
+                            <span class="status-badge status-pending">
+                                <i class="fas fa-exclamation-circle"></i>
+                                در انتظار پرداخت
+                            </span>
+                            {% elif donation.status == 'rejected' %}
+                            <span class="status-badge status-rejected">
+                                <i class="fas fa-times-circle"></i>
+                                رد شده
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="actions-cell">
+                                <a href="{% url 'charity_project_detail' donation.project.id %}" 
+                                   class="action-btn view" 
+                                   title="مشاهده پروژه">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                
+                                {% if donation.status == 'pending' %}
+                                <a href="{% url 'charity_payment' donation.id %}" 
+                                   class="action-btn pay" 
+                                   title="پرداخت">
+                                    <i class="fas fa-credit-card"></i>
+                                </a>
+                                {% endif %}
+                                
+                                {% if donation.payment_receipt %}
+                                <button class="action-btn receipt" 
+                                        title="مشاهده رسید"
+                                        onclick="showReceiptModal('{{ donation.payment_receipt.url }}', '{{ donation.donation_number }}', '{{ donation.amount }}', '{{ donation.payment_date }}', '{{ donation.tracking_code }}')">
+                                    <i class="fas fa-receipt"></i>
+                                </button>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <!-- حالت خالی -->
+        <div class="empty-state">
+            <div class="empty-icon">
+                <i class="fas fa-donate"></i>
+            </div>
+            <h3 class="empty-title">هنوز کمک‌ای ثبت نکرده‌اید</h3>
+            <p class="empty-message">
+                برای شروع سفر خیریه خود و کمک به پروژه‌های مهدوی، 
+                روی دکمه زیر کلیک کنید و اولین کمک خود را انجام دهید.
+            </p>
+            <a href="{% url 'charity_projects' %}" class="cta-btn">
+                <i class="fas fa-heart ml-2"></i>
+                مشاهده پروژه‌ها
+            </a>
+        </div>
+        {% endif %}
+    </section>
+</div>
+
+<!-- Modal نمایش رسید -->
+<div class="modal fade" id="receiptModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="background: var(--dark-bg); border: 1px solid rgba(212, 175, 55, 0.3);">
+            <div class="modal-header" style="border-bottom-color: rgba(212, 175, 55, 0.3);">
+                <h5 class="modal-title" style="color: var(--charity-primary);">
+                    <i class="fas fa-receipt ml-2"></i>
+                    رسید پرداخت
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" style="filter: invert(1);"></button>
+            </div>
+            <div class="modal-body text-center">
+                <div id="receiptImageContainer">
+                    <!-- تصویر رسید اینجا نمایش داده می‌شود -->
+                </div>
+                <div class="receipt-info mt-4">
+                    <div class="row justify-content-center">
+                        <div class="col-md-6">
+                            <div class="info-item mb-3">
+                                <strong style="color: var(--charity-primary);">شماره کمک:</strong>
+                                <span id="receiptNumber" style="color: var(--text-primary);"></span>
+                            </div>
+                            <div class="info-item mb-3">
+                                <strong style="color: var(--charity-primary);">مبلغ:</strong>
+                                <span id="receiptAmount" style="color: var(--text-primary);"></span>
+                            </div>
+                            <div class="info-item mb-3">
+                                <strong style="color: var(--charity-primary);">تاریخ پرداخت:</strong>
+                                <span id="receiptDate" style="color: var(--text-primary);"></span>
+                            </div>
+                            <div class="info-item">
+                                <strong style="color: var(--charity-primary);">کد رهگیری:</strong>
+                                <span id="receiptTracking" style="color: var(--charity-primary); font-family: monospace;"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+class DonationsPage {
+    constructor() {
+        this.init();
+    }
+
+    init() {
+        this.initCounters();
+        this.initTableAnimations();
+        this.initHoverEffects();
+    }
+
+    initCounters() {
+        const counters = document.querySelectorAll('.stat-number[data-count]');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    this.animateCounter(entry.target);
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.5 });
+
+        counters.forEach(counter => observer.observe(counter));
+    }
+
+    animateCounter(element) {
+        const target = parseInt(element.getAttribute('data-count').replace(/,/g, ''));
+        const duration = 1500;
+        const startTime = Date.now();
+        
+        const animate = () => {
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            
+            const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+            let current = Math.floor(easeOutQuart * target);
+            
+            // فرمت عدد فارسی
+            element.textContent = current.toLocaleString('fa-IR');
+            
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            } else {
+                // افکت تکمیل
+                element.style.color = 'var(--charity-primary)';
+            }
+        };
+        
+        animate();
+    }
+
+    initTableAnimations() {
+        const rows = document.querySelectorAll('.donations-table tbody tr');
+        rows.forEach((row, index) => {
+            row.style.opacity = '0';
+            row.style.transform = 'translateX(50px)';
+            row.style.transition = 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
+            
+            setTimeout(() => {
+                row.style.opacity = '1';
+                row.style.transform = 'translateX(0)';
+            }, index * 100);
+        });
+    }
+
+    initHoverEffects() {
+        // افکت 3D روی کارت‌های آمار
+        const statCards = document.querySelectorAll('.stat-card');
+        statCards.forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                this.handleCardHover(e, card);
+            });
+            
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'translateY(-10px)';
+                card.style.transformStyle = 'flat';
+            });
+        });
+
+        // افکت ripple روی دکمه‌ها
+        const buttons = document.querySelectorAll('.action-btn, .cta-btn');
+        buttons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                this.createRipple(e, btn);
+            });
+        });
+    }
+
+    handleCardHover(e, card) {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        
+        const rotateY = ((x - centerX) / centerX) * 5;
+        const rotateX = ((centerY - y) / centerY) * 5;
+        
+        card.style.transform = `
+            perspective(1000px)
+            rotateX(${rotateX}deg)
+            rotateY(${rotateY}deg)
+            translateY(-10px)
+        `;
+        card.style.transformStyle = 'preserve-3d';
+    }
+
+    createRipple(e, element) {
+        const ripple = document.createElement('div');
+        const rect = element.getBoundingClientRect();
+        
+        const size = Math.max(rect.width, rect.height);
+        const x = e.clientX - rect.left - size / 2;
+        const y = e.clientY - rect.top - size / 2;
+        
+        ripple.style.cssText = `
+            position: absolute;
+            top: ${y}px;
+            left: ${x}px;
+            width: ${size}px;
+            height: ${size}px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.4);
+            transform: scale(0);
+            animation: ripple 0.6s ease-out;
+            pointer-events: none;
+        `;
+        
+        element.style.position = 'relative';
+        element.style.overflow = 'hidden';
+        element.appendChild(ripple);
+        
+        setTimeout(() => {
+            ripple.remove();
+        }, 600);
+    }
+}
+
+// تابع نمایش رسید
+function showReceiptModal(imageUrl, donationNumber, amount, paymentDate, trackingCode) {
+    const modal = new bootstrap.Modal(document.getElementById('receiptModal'));
+    const container = document.getElementById('receiptImageContainer');
+    
+    // پاک کردن محتوای قبلی
+    container.innerHTML = '';
+    
+    // ایجاد تصویر جدید
+    const img = document.createElement('img');
+    img.src = imageUrl;
+    img.alt = 'رسید پرداخت';
+    img.style.maxWidth = '100%';
+    img.style.borderRadius = '15px';
+    img.style.boxShadow = '0 10px 30px rgba(0,0,0,0.3)';
+    container.appendChild(img);
+    
+    // پر کردن اطلاعات
+    document.getElementById('receiptNumber').textContent = donationNumber;
+    document.getElementById('receiptAmount').textContent = 
+        parseInt(amount).toLocaleString('fa-IR') + ' تومان';
+    document.getElementById('receiptDate').textContent = paymentDate;
+    document.getElementById('receiptTracking').textContent = trackingCode || '-';
+    
+    modal.show();
+}
+
+// راه‌اندازی صفحه
+document.addEventListener('DOMContentLoaded', () => {
+    // اضافه کردن استایل‌های داینامیک
+    const styleSheet = document.createElement('style');
+    styleSheet.textContent = `
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+    `;
+    document.head.appendChild(styleSheet);
+    
+    // راه‌اندازی
+    const donationsPage = new DonationsPage();
+    window.DonationsPage = donationsPage;
+});
+</script>
+{% endblock %}

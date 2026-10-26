@@ -1,0 +1,519 @@
+{% extends "base.html" %}
+
+{% block title %}تکمیل خرید - کتابخانه مهدوی{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Checkout Layout */
+    .checkout-container {
+        background: var(--card-bg);
+        border-radius: 20px;
+        border: 1px solid var(--border-gold);
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Form Elements */
+    .form-section {
+        background: var(--card-bg);
+        border: 1px solid var(--border-gold);
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .form-title {
+        color: var(--primary-gold);
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    /* Bank Card */
+    .bank-card {
+        background: rgba(212, 175, 55, 0.1);
+        border: 2px dashed var(--primary-gold);
+        border-radius: 15px;
+        padding: 2rem;
+        text-align: center;
+        margin: 1.5rem 0;
+        transition: all 0.3s ease;
+    }
+
+    .bank-card:hover {
+        background: rgba(212, 175, 55, 0.15);
+        border-style: solid;
+    }
+
+    .bank-number {
+        font-family: 'Courier New', monospace;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary-gold);
+        margin-bottom: 1rem;
+        direction: ltr;
+        text-align: center;
+    }
+
+    /* File Upload */
+    .upload-area {
+        border: 2px dashed var(--border-gold);
+        border-radius: 15px;
+        padding: 3rem 2rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        position: relative;
+    }
+
+    .upload-area:hover {
+        border-color: var(--primary-gold);
+        background: rgba(212, 175, 55, 0.05);
+    }
+
+    .upload-area.dragover {
+        border-color: var(--primary-gold);
+        background: rgba(212, 175, 55, 0.1);
+        transform: scale(1.02);
+    }
+
+    .upload-icon {
+        font-size: 3rem;
+        color: var(--text-muted);
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .upload-area:hover .upload-icon {
+        color: var(--primary-gold);
+        transform: scale(1.1);
+    }
+
+    .file-input {
+        display: none;
+    }
+
+    .file-name {
+        margin-top: 1rem;
+        color: var(--primary-gold);
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    /* Order Summary */
+    .order-summary {
+        background: rgba(212, 175, 55, 0.05);
+        border-radius: 12px;
+        padding: 1.5rem;
+    }
+
+    .summary-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .summary-item:last-child {
+        border-bottom: none;
+    }
+
+    /* Guide Steps */
+    .guide-step {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .guide-step:last-child {
+        margin-bottom: 0;
+    }
+
+    .step-number {
+        width: 35px;
+        height: 35px;
+        background: var(--primary-gold);
+        color: var(--dark-bg);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.9rem;
+        flex-shrink: 0;
+    }
+
+    /* Book List */
+    .checkout-book-item {
+        display: flex;
+        gap: 1rem;
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 10px;
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .checkout-book-item:hover {
+        background: rgba(212, 175, 55, 0.05);
+        transform: translateX(-5px);
+    }
+
+    .checkout-book-cover {
+        width: 50px;
+        height: 70px;
+        background: var(--gold-gradient);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--dark-bg);
+        font-size: 1.2rem;
+        flex-shrink: 0;
+    }
+
+    /* Submit Button */
+    .submit-btn {
+        width: 100%;
+        padding: 1.25rem;
+        font-size: 1.1rem;
+        font-weight: 700;
+        border-radius: 15px;
+        margin-top: 1rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .checkout-book-item {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .checkout-book-cover {
+            align-self: center;
+        }
+        
+        .guide-step {
+            flex-direction: column;
+            text-align: center;
+            gap: 0.5rem;
+        }
+        
+        .step-number {
+            align-self: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <h1 class="page-title">تکمیل فرآیند خرید</h1>
+        <p class="page-subtitle">پرداخت و ثبت نهایی سفارش کتاب</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="grid grid-2" style="gap: 2rem;">
+        <!-- Payment Form -->
+        <div>
+            <div class="checkout-container">
+                <div style="padding: 2rem;">
+                    <form method="post" enctype="multipart/form-data" id="checkoutForm">
+                        {% csrf_token %}
+                        
+                        <div class="grid grid-1 gap-4">
+                            <!-- Bank Information -->
+                            <div class="form-section">
+                                <h3 class="form-title">
+                                    <i class="fas fa-credit-card"></i>
+                                    اطلاعات پرداخت
+                                </h3>
+                                
+                                <div>
+                                    <h4 style="color: var(--text-primary); margin-bottom: 1rem; font-size: 1.1rem;">
+                                        شماره کارت مقصد
+                                    </h4>
+                                    <div class="bank-card">
+                                        <div class="bank-number">6037-XXXX-XXXX-XXXX</div>
+                                        <div style="color: var(--text-muted); font-size: 0.9rem;">
+                                            بانک: ملی ایران - به نام: پلتفرم مهدوی
+                                        </div>
+                                    </div>
+                                    <div style="color: var(--text-secondary); font-size: 0.9rem; text-align: center;">
+                                        مبلغ قابل پرداخت: <strong style="color: var(--primary-gold);">{{ total_amount }} تومان</strong>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Receipt Upload -->
+                            <div class="form-section">
+                                <h3 class="form-title">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    آپلود رسید پرداخت
+                                </h3>
+                                
+                                <div>
+                                    <h4 style="color: var(--text-primary); margin-bottom: 1rem; font-size: 1.1rem;">
+                                        رسید پرداخت خود را آپلود کنید
+                                    </h4>
+                                    <div class="upload-area" id="uploadArea">
+                                        <div class="upload-icon">
+                                            <i class="fas fa-cloud-upload-alt"></i>
+                                        </div>
+                                        <div style="color: var(--text-secondary); margin-bottom: 1.5rem;">
+                                            <div style="font-weight: 600; margin-bottom: 0.5rem;">رسید پرداخت را اینجا رها کنید</div>
+                                            <div style="font-size: 0.9rem;">یا برای انتخاب فایل کلیک کنید</div>
+                                        </div>
+                                        <input type="file" name="payment_receipt" accept="image/*,.pdf" class="file-input" id="receiptInput" required>
+                                        <button type="button" class="btn btn-outline" onclick="document.getElementById('receiptInput').click()">
+                                            <i class="fas fa-folder-open"></i>
+                                            انتخاب فایل
+                                        </button>
+                                        <div class="file-name" id="fileName"></div>
+                                    </div>
+                                    <div style="color: var(--text-muted); font-size: 0.8rem; margin-top: 1rem;">
+                                        فرمت‌های قابل قبول: JPG, PNG, PDF (حداکثر 5MB)
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Order Summary -->
+                            <div class="form-section">
+                                <h3 class="form-title">
+                                    <i class="fas fa-receipt"></i>
+                                    خلاصه سفارش
+                                </h3>
+                                
+                                <div class="order-summary">
+                                    <div class="summary-item">
+                                        <span style="color: var(--text-muted);">تعداد کتاب:</span>
+                                        <span style="color: var(--text-primary); font-weight: 600;">{{ orders.count }} عدد</span>
+                                    </div>
+                                    <div class="summary-item">
+                                        <span style="color: var(--text-muted);">مبلغ قابل پرداخت:</span>
+                                        <span style="color: var(--primary-gold); font-weight: 700; font-size: 1.2rem;">
+                                            {{ total_amount }} تومان
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Submit Button -->
+                            <button type="submit" class="btn btn-primary submit-btn">
+                                <i class="fas fa-check-circle"></i>
+                                ثبت نهایی سفارش
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Order Details & Guide -->
+        <div>
+            <!-- Order Books -->
+            <div class="form-section">
+                <h3 class="form-title">
+                    <i class="fas fa-book"></i>
+                    کتاب‌های سفارش
+                </h3>
+                
+                <div class="grid grid-1">
+                    {% for order in orders %}
+                    <div class="checkout-book-item">
+                        <div class="checkout-book-cover">
+                            <i class="fas fa-book"></i>
+                        </div>
+                        
+                        <div style="flex: 1;">
+                            <div style="color: var(--text-primary); font-weight: 600; margin-bottom: 0.25rem; font-size: 0.95rem;">
+                                {{ order.book.title }}
+                            </div>
+                            <div style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.5rem;">
+                                {{ order.book.author }}
+                            </div>
+                            <div style="color: var(--primary-gold); font-weight: 700; font-size: 1rem;">
+                                {{ order.unit_price }} تومان
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Payment Guide -->
+            <div class="form-section">
+                <h3 class="form-title">
+                    <i class="fas fa-info-circle"></i>
+                    راهنمای کامل پرداخت
+                </h3>
+                
+                <div class="grid grid-1">
+                    <div class="guide-step">
+                        <div class="step-number">1</div>
+                        <div style="flex: 1;">
+                            <div style="color: var(--text-primary); font-weight: 600; margin-bottom: 0.25rem;">
+                                واریز مبلغ
+                            </div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">
+                                مبلغ <strong>{{ total_amount }} تومان</strong> را به شماره کارت بالا واریز کنید
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="guide-step">
+                        <div class="step-number">2</div>
+                        <div style="flex: 1;">
+                            <div style="color: var(--text-primary); font-weight: 600; margin-bottom: 0.25rem;">
+                                ثبت رسید پرداخت
+                            </div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">
+                                از رسید پرداخت عکس بگیرید یا فایل PDF آن را ذخیره کنید
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="guide-step">
+                        <div class="step-number">3</div>
+                        <div style="flex: 1;">
+                            <div style="color: var(--text-primary); font-weight: 600; margin-bottom: 0.25rem;">
+                                آپلود رسید
+                            </div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">
+                                رسید پرداخت را در قسمت مربوطه آپلود کنید
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="guide-step">
+                        <div class="step-number">4</div>
+                        <div style="flex: 1;">
+                            <div style="color: var(--text-primary); font-weight: 600; margin-bottom: 0.25rem;">
+                                تایید نهایی
+                            </div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">
+                                پس از تایید ادمین، دسترسی شما فعال خواهد شد
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="background: rgba(212, 175, 55, 0.1); border-right: 3px solid var(--primary-gold); padding: 1rem; border-radius: 8px; margin-top: 1.5rem;">
+                    <div style="color: var(--primary-gold); font-weight: 600; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fas fa-clock"></i>
+                        زمان تایید سفارش
+                    </div>
+                    <div style="color: var(--text-secondary); font-size: 0.9rem;">
+                        معمولاً طی ۲۴ ساعت پس از آپلود رسید، سفارش شما توسط ادمین بررسی و تایید می‌شود
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // File Upload Management
+    document.addEventListener('DOMContentLoaded', function() {
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('receiptInput');
+        const fileName = document.getElementById('fileName');
+        const form = document.getElementById('checkoutForm');
+
+        // Click to select file
+        uploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        // File selection handler
+        fileInput.addEventListener('change', function() {
+            if (this.files.length > 0) {
+                const file = this.files[0];
+                fileName.textContent = `فایل انتخاب شده: ${file.name}`;
+                fileName.style.color = 'var(--primary-gold)';
+                uploadArea.style.borderColor = 'var(--primary-gold)';
+                uploadArea.style.background = 'rgba(212, 175, 55, 0.05)';
+                
+                // Validate file size
+                if (file.size > 5 * 1024 * 1024) {
+                    fileName.textContent = 'حجم فایل باید کمتر از 5MB باشد';
+                    fileName.style.color = '#dc3545';
+                    fileInput.value = '';
+                }
+            }
+        });
+
+        // Drag and Drop functionality
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            
+            if (e.dataTransfer.files.length > 0) {
+                fileInput.files = e.dataTransfer.files;
+                const file = e.dataTransfer.files[0];
+                fileName.textContent = `فایل انتخاب شده: ${file.name}`;
+                fileName.style.color = 'var(--primary-gold)';
+                uploadArea.style.borderColor = 'var(--primary-gold)';
+                uploadArea.style.background = 'rgba(212, 175, 55, 0.05)';
+                
+                // Validate file size
+                if (file.size > 5 * 1024 * 1024) {
+                    fileName.textContent = 'حجم فایل باید کمتر از 5MB باشد';
+                    fileName.style.color = '#dc3545';
+                    fileInput.value = '';
+                }
+            }
+        });
+
+        // Form submission validation
+        form.addEventListener('submit', function(e) {
+            if (!fileInput.files.length) {
+                e.preventDefault();
+                alert('لطفاً رسید پرداخت را آپلود کنید');
+                return false;
+            }
+            
+            const file = fileInput.files[0];
+            if (file.size > 5 * 1024 * 1024) {
+                e.preventDefault();
+                alert('حجم فایل باید کمتر از 5MB باشد');
+                return false;
+            }
+            
+            // Show loading state
+            const submitBtn = form.querySelector('button[type="submit"]');
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> در حال ثبت سفارش...';
+            submitBtn.disabled = true;
+        });
+
+        // Add animation for form sections
+        const formSections = document.querySelectorAll('.form-section');
+        formSections.forEach((section, index) => {
+            section.style.opacity = '0';
+            section.style.transform = 'translateY(20px)';
+            
+            setTimeout(() => {
+                section.style.transition = 'all 0.6s ease';
+                section.style.opacity = '1';
+                section.style.transform = 'translateY(0)';
+            }, index * 200);
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,200 @@
+{% extends 'social/base.html' %}
+{% load static %}
+
+{% block title %}صفحه اصلی - شبکه اجتماعی مهدوی{% endblock %}
+
+{% block content %}
+<div class="social-home">
+    <!-- استوری‌های کاربران دنبال شده -->
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">
+                <i class="fas fa-circle-play card-icon"></i>
+                استوری‌ها
+            </h2>
+            <a href="{% url 'create_story' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i>
+                افزودن استوری
+            </a>
+        </div>
+        
+        <div class="stories-container">
+            {% if stories %}
+                {% include 'social/includes/story_carousel.html' %}
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-circle-play"></i>
+                    <p>هنوز استوری‌ای وجود ندارد</p>
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'create_story' %}" class="btn btn-primary mt-3">
+                        اولین استوری را ایجاد کنید
+                    </a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- فید پست‌های کاربران دنبال شده -->
+    <div class="posts-feed">
+        {% if posts %}
+            {% for post in posts %}
+                {% include 'social/includes/post_card.html' with post=post %}
+            {% endfor %}
+        {% else %}
+            <div class="card text-center">
+                <div class="empty-state">
+                    <i class="fas fa-users"></i>
+                    <h3>هنوز پستی وجود ندارد</h3>
+                    <p>کاربران را دنبال کنید تا پست‌های آنها را اینجا ببینید</p>
+                    <a href="{% url 'search_users' %}" class="btn btn-primary mt-3">
+                        <i class="fas fa-search"></i>
+                        جستجوی کاربران
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.social-home {
+    width: 100%;
+}
+
+.stories-container {
+    padding: 15px 0;
+}
+
+.stories-scroll {
+    display: flex;
+    gap: 15px;
+    overflow-x: auto;
+    padding: 10px 0;
+}
+
+.story-item {
+    flex: 0 0 auto;
+    text-align: center;
+    width: 80px;
+    cursor: pointer;
+}
+
+.story-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold), var(--dark-gold));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 8px;
+    border: 2px solid var(--gold);
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.story-avatar:hover {
+    transform: scale(1.1);
+}
+
+.story-avatar img {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.story-username {
+    font-size: 0.8rem;
+    color: var(--text-light);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.posts-feed {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.mt-3 {
+    margin-top: 15px;
+}
+
+/* استایل اسکرول بار برای استوری‌ها */
+.stories-scroll::-webkit-scrollbar {
+    height: 4px;
+}
+
+.stories-scroll::-webkit-scrollbar-track {
+    background: rgba(30, 30, 30, 0.8);
+    border-radius: 2px;
+}
+
+.stories-scroll::-webkit-scrollbar-thumb {
+    background: var(--gold);
+    border-radius: 2px;
+}
+
+.stories-scroll::-webkit-scrollbar-thumb:hover {
+    background: var(--dark-gold);
+}
+</style>
+
+<script>
+// مدیریت لایک پست‌ها
+document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.like-btn')) {
+            const likeBtn = e.target.closest('.like-btn');
+            const postId = likeBtn.dataset.postId;
+            toggleLike(postId, likeBtn);
+        }
+    });
+});
+
+function toggleLike(postId, likeBtn) {
+    const likeIcon = likeBtn.querySelector('i');
+    const likesCount = likeBtn.querySelector('.likes-count');
+    
+    fetch(`/social/like/${postId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            if (data.action === 'liked') {
+                likeIcon.className = 'fas fa-heart';
+                likeBtn.classList.add('liked');
+            } else {
+                likeIcon.className = 'far fa-heart';
+                likeBtn.classList.remove('liked');
+            }
+            likesCount.textContent = data.likes_count;
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}

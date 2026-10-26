@@ -1,0 +1,862 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}صفحه اصلی - نور مهدی{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* استایل‌های اختصاصی صفحه اصلی - مشابه home1.htm */
+    .hero-section {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(135deg, 
+            rgba(15, 15, 26, 0.95) 0%, 
+            rgba(26, 26, 46, 0.9) 50%, 
+            rgba(15, 15, 26, 0.95) 100%);
+    }
+
+    .floating-elements {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+    }
+
+    .floating-element {
+        position: absolute;
+        font-size: 2rem;
+        opacity: 0.1;
+        animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-20px) rotate(180deg); }
+    }
+
+    .hero-content {
+        text-align: center;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+        position: relative;
+        z-index: 2;
+    }
+
+    .hero-title {
+        font-size: 4rem;
+        font-weight: 700;
+        color: var(--primary-gold);
+        margin-bottom: 1.5rem;
+        line-height: 1.2;
+        text-shadow: 0 0 30px rgba(212, 175, 55, 0.5);
+        animation: titleGlow 3s infinite alternate;
+    }
+
+    @keyframes titleGlow {
+        0% { text-shadow: 0 0 20px rgba(212, 175, 55, 0.5); }
+        100% { text-shadow: 0 0 40px rgba(212, 175, 55, 0.8), 0 0 60px rgba(212, 175, 55, 0.6); }
+    }
+
+    .hero-subtitle {
+        font-size: 1.5rem;
+        color: var(--text-secondary);
+        margin-bottom: 3rem;
+        line-height: 1.6;
+        animation: fadeInUp 1s ease-out;
+    }
+
+    .hero-actions {
+        display: flex;
+        gap: 1.5rem;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-bottom: 4rem;
+        animation: fadeInUp 1s ease-out 0.3s both;
+    }
+
+    /* آمار و ارقام */
+    .stats-section {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 2rem;
+        margin: 4rem 0;
+    }
+
+    .stat-card {
+        background: rgba(212, 175, 55, 0.1);
+        border: 1px solid var(--border-gold);
+        border-radius: 20px;
+        padding: 2.5rem 2rem;
+        text-align: center;
+        transition: all var(--transition-fast);
+        position: relative;
+        overflow: hidden;
+        animation: fadeInUp 1s ease-out;
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.1), transparent);
+        transition: right var(--transition-slow);
+    }
+
+    .stat-card:hover::before {
+        right: 100%;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-10px);
+        box-shadow: var(--glow-gold);
+    }
+
+    .stat-number {
+        font-size: 3rem;
+        font-weight: 700;
+        color: var(--primary-gold);
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .stat-label {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+    }
+
+    /* بخش امکانات */
+    .features-section {
+        padding: 8rem 0;
+        background: var(--card-bg);
+        position: relative;
+    }
+
+    .section-title {
+        text-align: center;
+        font-size: 3rem;
+        color: var(--primary-gold);
+        margin-bottom: 5rem;
+        font-weight: 700;
+        position: relative;
+    }
+
+    .section-title::after {
+        content: '';
+        position: absolute;
+        bottom: -1rem;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100px;
+        height: 3px;
+        background: linear-gradient(90deg, transparent, var(--primary-gold), transparent);
+    }
+
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 3rem;
+    }
+
+    .feature-card {
+        background: var(--darker-bg);
+        border: 1px solid var(--border-gold);
+        border-radius: 25px;
+        padding: 3rem 2rem;
+        text-align: center;
+        transition: all var(--transition-normal);
+        position: relative;
+        overflow: hidden;
+        opacity: 0;
+        transform: translateY(50px);
+    }
+
+    .feature-card.animate {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .feature-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.1), transparent);
+        transition: right var(--transition-slow);
+    }
+
+    .feature-card:hover::before {
+        right: 100%;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-15px);
+        border-color: var(--primary-gold);
+        box-shadow: var(--shadow-xl);
+    }
+
+    .feature-icon {
+        width: 100px;
+        height: 100px;
+        background: linear-gradient(135deg, var(--primary-gold), var(--light-gold));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 2rem;
+        font-size: 2.5rem;
+        color: var(--dark-bg);
+        box-shadow: var(--glow-gold);
+        transition: all var(--transition-normal);
+    }
+
+    .feature-card:hover .feature-icon {
+        transform: scale(1.1) rotate(10deg);
+    }
+
+    .feature-title {
+        font-size: 1.8rem;
+        color: var(--text-primary);
+        margin-bottom: 1.5rem;
+        font-weight: 600;
+    }
+
+    .feature-description {
+        color: var(--text-secondary);
+        line-height: 1.8;
+        font-size: 1.1rem;
+    }
+
+    /* بخش قرآن */
+    .quran-section {
+        padding: 8rem 0;
+        position: relative;
+        background: rgba(0, 0, 0, 0.3);
+        margin: 40px 0;
+    }
+
+    .quran-verse-large {
+        font-family: 'Scheherazade New', serif;
+        font-size: 1.8rem;
+        text-align: center;
+        line-height: 2.2;
+        margin: 20px 0;
+        padding: 30px;
+        background: rgba(0, 0, 0, 0.5);
+        border-radius: 15px;
+        border: 1px solid var(--border-gold);
+        color: var(--text-lighter);
+        max-width: 900px;
+        margin-left: auto;
+        margin-right: auto;
+        position: relative;
+    }
+
+    .quran-verse-large::before,
+    .quran-verse-large::after {
+        content: '﴿';
+        font-family: 'Scheherazade New', serif;
+        color: var(--primary-gold);
+        font-size: 2.5rem;
+        position: absolute;
+        top: 15px;
+    }
+
+    .quran-verse-large::before {
+        right: 20px;
+        content: '﴾';
+    }
+
+    .quran-verse-large::after {
+        left: 20px;
+        content: '﴿';
+    }
+
+    .verse-reference {
+        text-align: center;
+        margin-top: 15px;
+        color: var(--primary-gold);
+        font-style: italic;
+        font-family: 'Lateef', serif;
+        font-size: 1.1rem;
+    }
+
+    /* بخش دعوت به اقدام */
+    .cta-section {
+        padding: 8rem 0;
+        text-align: center;
+        background: linear-gradient(135deg, var(--primary-gold), var(--dark-gold));
+        color: var(--dark-bg);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .cta-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+        opacity: 0.1;
+    }
+
+    .cta-title {
+        font-size: 3.5rem;
+        margin-bottom: 1.5rem;
+        font-weight: 700;
+        position: relative;
+        z-index: 2;
+        animation: pulse 2s infinite;
+    }
+
+    .cta-description {
+        font-size: 1.3rem;
+        margin-bottom: 3rem;
+        position: relative;
+        z-index: 2;
+        opacity: 0.9;
+    }
+
+    /* انیمیشن‌های عمومی */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* ذرات شناور */
+    .particle {
+        position: absolute;
+        color: var(--primary-gold);
+        pointer-events: none;
+        z-index: 1;
+    }
+    
+    @keyframes floatParticle {
+        0% {
+            transform: translateY(0) rotate(0deg);
+            opacity: 0;
+        }
+        10% {
+            opacity: 1;
+        }
+        90% {
+            opacity: 1;
+        }
+        100% {
+            transform: translateY(-100vh) rotate(360deg);
+            opacity: 0;
+        }
+    }
+
+    /* رسپانسیو */
+    @media (max-width: 768px) {
+        .hero-title {
+            font-size: 2.5rem;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.2rem;
+        }
+        
+        .hero-actions {
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .section-title {
+            font-size: 2.5rem;
+        }
+        
+        .features-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .stats-section {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .cta-title {
+            font-size: 2.5rem;
+        }
+        
+        .quran-verse-large {
+            font-size: 1.4rem;
+            padding: 20px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .hero-title {
+            font-size: 2rem;
+        }
+        
+        .stats-section {
+            grid-template-columns: 1fr;
+        }
+        
+        .feature-card {
+            padding: 2rem 1.5rem;
+        }
+        
+        .quran-verse-large {
+            font-size: 1.2rem;
+            padding: 15px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- بخش هیرو -->
+<section class="hero-section">
+    <div class="floating-elements">
+        <div class="floating-element" style="top: 10%; left: 5%;">🕌</div>
+        <div class="floating-element" style="top: 20%; right: 10%;">📖</div>
+        <div class="floating-element" style="bottom: 30%; left: 15%;">🌟</div>
+        <div class="floating-element" style="bottom: 20%; right: 5%;">🕋</div>
+        <div class="floating-element" style="top: 40%; left: 20%;">✨</div>
+        <div class="floating-element" style="top: 60%; right: 15%;">☪️</div>
+    </div>
+    
+    <div class="hero-content">
+        <h1 class="hero-title">به نور مهدی خوش آمدید</h1>
+        <p class="hero-subtitle">
+            سفر معنوی خود را به سوی امام عصر(عج) آغاز کنید و در مسیر شناخت و عشق به حجت خدا قدم بردارید
+        </p>
+        
+        <div class="hero-actions">
+            {% if user.is_authenticated %}
+                <!-- اگر کاربر لاگین کرده باشد -->
+                <a href="{% url 'index' %}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-rocket"></i>
+                    ورود به سایت
+                </a>
+                <a href="{% url 'dashboard' %}" class="btn btn-outline btn-lg">
+                    <i class="fas fa-tachometer-alt"></i>
+                    داشبورد
+                </a>
+            {% else %}
+                <!-- اگر کاربر لاگین نکرده باشد -->
+                <a href="{% url 'login' %}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-heart"></i>
+                    ورود عاشقان
+                </a>
+                <a href="{% url 'register' %}" class="btn btn-outline btn-lg">
+                    <i class="fas fa-user-plus"></i>
+                    ثبت نام
+                </a>
+            {% endif %}
+        </div>
+
+        <!-- آمار و ارقام -->
+        <div class="stats-section">
+            <div class="stat-card">
+                <span class="stat-number" data-count="500">0</span>
+                <div class="stat-label">کاربر فعال</div>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number" data-count="120">0</span>
+                <div class="stat-label">درس مهدوی</div>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number" data-count="50">0</span>
+                <div class="stat-label">دعا و زیارت</div>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number" data-count="30">0</span>
+                <div class="stat-label">نشان معنوی</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- بخش امکانات -->
+<section class="features-section">
+    <div class="container">
+        <h2 class="section-title">امکانات نور مهدی</h2>
+        
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-quran"></i>
+                </div>
+                <h3 class="feature-title">مطالعه قرآن</h3>
+                <p class="feature-description">
+                    دسترسی به متن کامل قرآن کریم با ترجمه فارسی و امکان جستجو در آیات و تفاسیر
+                </p>
+                <a href="{% url 'quran' %}" class="btn btn-primary" style="margin-top: 1.5rem;">
+                    مشاهده قرآن
+                </a>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-pray"></i>
+                </div>
+                <h3 class="feature-title">ادعیه و زیارات</h3>
+                <p class="feature-description">
+                    مجموعه کاملی از ادعیه، زیارات و اذکار با امکان تنظیم برنامه روزانه برای تلاوت
+                </p>
+                <a href="{% url 'zecr' %}" class="btn btn-primary" style="margin-top: 1.5rem;">
+                    مشاهده ادعیه
+                </a>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <h3 class="feature-title">دستاوردها و نشان‌ها</h3>
+                <p class="feature-description">
+                    کسب نشان‌های معنوی با انجام فعالیت‌های دینی و پیگیری سفر معنوی خود
+                </p>
+                <a href="{% url 'user_achievements' %}" class="btn btn-primary" style="margin-top: 1.5rem;">
+                    مشاهده دستاوردها
+                </a>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h3 class="feature-title">آمار و نمودارها</h3>
+                <p class="feature-description">
+                    پیگیری پیشرفت معنوی خود با نمودارها و آمارهای دقیق از فعالیت‌های دینی
+                </p>
+                <a href="{% url 'user_statistics' %}" class="btn btn-primary" style="margin-top: 1.5rem;">
+                    مشاهده آمار
+                </a>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-gamepad"></i>
+                </div>
+                <h3 class="feature-title">بازی‌های معنوی</h3>
+                <p class="feature-description">
+                    یادگیری مفاهیم دینی به روشی جذاب و سرگرم کننده با بازی‌های طراحی شده
+                </p>
+                <a href="{% url 'games_list' %}" class="btn btn-primary" style="margin-top: 1.5rem;">
+                    مشاهده بازی‌ها
+                </a>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h3 class="feature-title">جامعه معنوی</h3>
+                <p class="feature-description">
+                    ارتباط با سایر کاربران و به اشتراک گذاری تجربیات معنوی در محیطی امن
+                </p>
+                <a href="{% url 'social_home' %}" class="btn btn-primary" style="margin-top: 1.5rem;">
+                    ورود به جامعه
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- بخش قرآن -->
+<section class="quran-section">
+    <div class="container">
+        <div class="quran-verse-large">
+            وَمِنْ آيَاتِهِ أَنْ خَلَقَ لَكُم مِّنْ أَنفُسِكُمْ أَزْوَاجًا لِّتَسْكُنُوا إِلَيْهَا وَجَعَلَ بَيْنَكُم مَّوَدَّةً وَرَحْمَةً ۚ إِنَّ فِي ذَٰلِكَ لَآيَاتٍ لِّقَوْمٍ يَتَفَكَّرُونَ
+        </div>
+        <div class="verse-reference">سوره روم، آیه ۲۱</div>
+    </div>
+</section>
+
+<!-- بخش دعوت به اقدام -->
+<section class="cta-section">
+    <div class="container">
+        <h2 class="cta-title">همین حالا سفر معنوی خود را آغاز کنید</h2>
+        <p class="cta-description">
+            به جامعه نور مهدی بپیوندید و در مسیر شناخت امام عصر(عج) قدم بردارید
+        </p>
+        
+        <div class="hero-actions">
+            {% if user.is_authenticated %}
+                <a href="{% url 'index' %}" class="btn btn-lg" style="background: var(--dark-bg); color: var(--primary-gold);">
+                    <i class="fas fa-rocket"></i>
+                    ورود به سایت
+                </a>
+            {% else %}
+                <a href="{% url 'register' %}" class="btn btn-lg" style="background: var(--dark-bg); color: var(--primary-gold);">
+                    <i class="fas fa-user-plus"></i>
+                    ثبت‌نام رایگان
+                </a>
+                <a href="{% url 'login' %}" class="btn btn-outline btn-lg" style="border-color: var(--dark-bg); color: var(--dark-bg);">
+                    <i class="fas fa-heart"></i>
+                    ورود عاشقان
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // انیمیشن‌های پیشرفته JS - مشابه home1.htm
+    class MahdaviAnimations {
+        constructor() {
+            this.init();
+        }
+
+        init() {
+            this.initScrollAnimations();
+            this.initCounterAnimation();
+            this.initFloatingElements();
+            this.initParticles();
+            this.init3DEffects();
+        }
+
+        // انیمیشن اسکرول
+        initScrollAnimations() {
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('animate');
+                        
+                        // انیمیشن ویژه برای کارت‌های ویژگی
+                        if (entry.target.classList.contains('feature-card')) {
+                            this.animateFeatureCard(entry.target);
+                        }
+                    }
+                });
+            }, observerOptions);
+
+            // مشاهده عناصر برای انیمیشن
+            document.querySelectorAll('.feature-card').forEach(card => {
+                observer.observe(card);
+            });
+        }
+
+        // انیمیشن کارت ویژگی
+        animateFeatureCard(card) {
+            const icon = card.querySelector('.feature-icon');
+            if (icon) {
+                icon.style.animation = 'bounce 0.6s ease';
+                setTimeout(() => {
+                    icon.style.animation = '';
+                }, 600);
+            }
+        }
+
+        // انیمیشن شمارنده آمار
+        initCounterAnimation() {
+            const counters = document.querySelectorAll('.stat-number');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        this.animateCounter(entry.target);
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.5 });
+
+            counters.forEach(counter => observer.observe(counter));
+        }
+
+        animateCounter(counter) {
+            const target = parseInt(counter.getAttribute('data-count'));
+            const duration = 2000;
+            const step = target / (duration / 16);
+            let current = 0;
+            
+            const timer = setInterval(() => {
+                current += step;
+                if (current >= target) {
+                    current = target;
+                    clearInterval(timer);
+                }
+                counter.textContent = Math.floor(current);
+            }, 16);
+        }
+
+        // انیمیشن المان‌های شناور
+        initFloatingElements() {
+            const elements = document.querySelectorAll('.floating-element');
+            elements.forEach((element, index) => {
+                // تأخیرهای مختلف برای ایجاد اثر آبشاری
+                element.style.animationDelay = `${index * 0.5}s`;
+                
+                // انیمیشن‌های تصادفی برای المان‌ها
+                const randomDuration = 4 + Math.random() * 4;
+                element.style.animationDuration = `${randomDuration}s`;
+            });
+        }
+
+        // ایجاد ذرات شناور
+        initParticles() {
+            const heroSection = document.querySelector('.hero-section');
+            if (!heroSection) return;
+
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.innerHTML = '✦';
+                
+                // موقعیت تصادفی
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.top = `${Math.random() * 100}%`;
+                
+                // اندازه تصادفی
+                const size = Math.random() * 20 + 10;
+                particle.style.fontSize = `${size}px`;
+                
+                // شفافیت تصادفی
+                particle.style.opacity = Math.random() * 0.3 + 0.1;
+                
+                // انیمیشن تصادفی
+                const duration = Math.random() * 10 + 10;
+                particle.style.animation = `floatParticle ${duration}s infinite linear`;
+                
+                heroSection.appendChild(particle);
+            }
+        }
+
+        // افکت‌های سه‌بعدی
+        init3DEffects() {
+            // افکت پارالکس برای هیرو سکشن
+            this.createParallaxEffect();
+            
+            // افکت انیمیشن تایپ برای عنوان
+            this.createTypewriterEffect();
+        }
+
+        createParallaxEffect() {
+            const heroSection = document.querySelector('.hero-section');
+            if (!heroSection) return;
+
+            window.addEventListener('scroll', () => {
+                const scrolled = window.pageYOffset;
+                const parallaxSpeed = 0.5;
+                heroSection.style.transform = `translateY(${scrolled * parallaxSpeed}px)`;
+            });
+        }
+
+        createTypewriterEffect() {
+            const title = document.querySelector('.hero-title');
+            if (!title) return;
+
+            const text = title.textContent;
+            title.textContent = '';
+            let i = 0;
+
+            function typeWriter() {
+                if (i < text.length) {
+                    title.textContent += text.charAt(i);
+                    i++;
+                    setTimeout(typeWriter, 100);
+                }
+            }
+
+            // شروع تایپ رایتر پس از لودینگ
+            setTimeout(typeWriter, 1000);
+        }
+    }
+
+    // افکت‌های تعاملی پیشرفته با موس
+    document.addEventListener('mousemove', (e) => {
+        const cards = document.querySelectorAll('.feature-card, .stat-card');
+        cards.forEach(card => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            
+            const angleY = (x - centerX) / 25;
+            const angleX = (centerY - y) / 25;
+            
+            card.style.transform = `perspective(1000px) rotateX(${angleX}deg) rotateY(${angleY}deg) scale3d(1.02, 1.02, 1.02)`;
+        });
+
+        // افکت پارالکس برای المان‌های شناور
+        const floatingElements = document.querySelectorAll('.floating-element, .particle');
+        floatingElements.forEach(element => {
+            const speed = element.classList.contains('particle') ? 0.1 : 0.05;
+            const x = (window.innerWidth - e.pageX * speed) / 100;
+            const y = (window.innerHeight - e.pageY * speed) / 100;
+            element.style.transform = `translate(${x}px, ${y}px)`;
+        });
+    });
+
+    document.addEventListener('mouseleave', () => {
+        const cards = document.querySelectorAll('.feature-card, .stat-card');
+        cards.forEach(card => {
+            card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)';
+        });
+    });
+
+    // راه‌اندازی انیمیشن‌ها
+    document.addEventListener('DOMContentLoaded', () => {
+        new MahdaviAnimations();
+        
+        // اضافه کردن انیمیشن bounce به استایل
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes bounce {
+                0%, 20%, 53%, 80%, 100% {
+                    transform: translate3d(0,0,0);
+                }
+                40%, 43% {
+                    transform: translate3d(0,-15px,0);
+                }
+                70% {
+                    transform: translate3d(0,-7px,0);
+                }
+                90% {
+                    transform: translate3d(0,-3px,0);
+                }
+            }
+            
+            @keyframes pulse {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.05); }
+                100% { transform: scale(1); }
+            }
+        `;
+        document.head.appendChild(style);
+    });
+
+    // مدیریت اسکرول نوبار
+    function handleNavbarScroll() {
+        const navbar = document.getElementById('navbar');
+        if (window.scrollY > 50) {
+            navbar.classList.add('nav-scrolled');
+        } else {
+            navbar.classList.remove('nav-scrolled');
+        }
+    }
+
+    window.addEventListener('scroll', handleNavbarScroll);
+</script>
+{% endblock %}

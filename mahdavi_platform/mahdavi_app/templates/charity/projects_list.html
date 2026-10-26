@@ -1,0 +1,1509 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}جستجوی پیشرفته پروژه‌ها - پلتفرم مهدوی{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ===== متغیرهای اصلی ===== */
+    :root {
+        --search-primary: #3498db;
+        --search-secondary: #2ecc71;
+        --search-accent: #e74c3c;
+        --search-dark: #2c3e50;
+        --search-light: #ecf0f1;
+        --search-gradient: linear-gradient(135deg, var(--search-primary), var(--search-secondary));
+        --search-gradient-dark: linear-gradient(135deg, #2980b9, #27ae60);
+    }
+
+    /* ===== استایل‌های اصلی ===== */
+    .projects-search-page {
+        background: linear-gradient(135deg, 
+            rgba(236, 240, 241, 0.1) 0%,
+            rgba(236, 240, 241, 0.05) 100%);
+        min-height: 100vh;
+        position: relative;
+    }
+
+    /* ===== هیدر جستجو ===== */
+    .search-header {
+        background: var(--search-gradient);
+        padding: 4rem 0 3rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .search-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="search-pattern" width="30" height="30" patternUnits="userSpaceOnUse"><circle cx="15" cy="15" r="3" fill="rgba(255,255,255,0.1)"/><circle cx="45" cy="45" r="2" fill="rgba(255,255,255,0.05)"/></pattern></defs><rect width="100" height="100" fill="url(%23search-pattern)"/></svg>');
+        opacity: 0.3;
+    }
+
+    .search-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 2rem;
+        position: relative;
+        z-index: 10;
+    }
+
+    /* نوار جستجوی اصلی */
+    .main-search-bar {
+        background: white;
+        border-radius: 50px;
+        padding: 1.5rem 2rem;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        margin-bottom: 2rem;
+        animation: slideDown 0.6s ease;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-50px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .search-form {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .search-input-wrapper {
+        flex: 1;
+        min-width: 300px;
+        position: relative;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 1rem 1.5rem 1rem 3rem;
+        border: 2px solid #e9ecef;
+        border-radius: 25px;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+    }
+
+    .search-input:focus {
+        border-color: var(--search-primary);
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        outline: none;
+    }
+
+    .search-icon {
+        position: absolute;
+        right: 1.5rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #95a5a6;
+        font-size: 1.2rem;
+    }
+
+    .search-btn {
+        padding: 1rem 2.5rem;
+        background: var(--search-gradient);
+        color: white;
+        border: none;
+        border-radius: 25px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        white-space: nowrap;
+    }
+
+    .search-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .advanced-search-toggle {
+        background: none;
+        border: none;
+        color: var(--search-primary);
+        font-size: 1rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        transition: all 0.3s ease;
+    }
+
+    .advanced-search-toggle:hover {
+        background: rgba(52, 152, 219, 0.1);
+    }
+
+    /* پنل فیلترهای پیشرفته */
+    .advanced-filters-panel {
+        background: white;
+        border-radius: 25px;
+        padding: 2.5rem;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        margin-top: 1rem;
+        display: none;
+        animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .advanced-filters-panel.show {
+        display: block;
+    }
+
+    .filters-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .filter-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .filter-label {
+        display: block;
+        font-weight: 600;
+        color: var(--search-dark);
+        margin-bottom: 0.8rem;
+        font-size: 1.1rem;
+    }
+
+    .filter-select {
+        width: 100%;
+        padding: 0.8rem 1rem;
+        border: 2px solid #e9ecef;
+        border-radius: 15px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+    .filter-select:focus {
+        border-color: var(--search-primary);
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        outline: none;
+    }
+
+    /* فیلترهای چندگزینه‌ای */
+    .filter-checkbox-group {
+        background: #f8f9fa;
+        border-radius: 15px;
+        padding: 1.5rem;
+        max-height: 200px;
+        overflow-y: auto;
+    }
+
+    .filter-checkbox {
+        margin-bottom: 0.8rem;
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        cursor: pointer;
+    }
+
+    .filter-checkbox input {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+    }
+
+    .filter-checkbox-label {
+        color: var(--search-dark);
+        cursor: pointer;
+        user-select: none;
+    }
+
+    /* رنج انتخاب مبلغ */
+    .amount-range {
+        padding: 1.5rem;
+        background: #f8f9fa;
+        border-radius: 15px;
+    }
+
+    .range-values {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 1rem;
+        font-weight: 600;
+        color: var(--search-primary);
+    }
+
+    .range-slider {
+        width: 100%;
+        height: 6px;
+        background: #dee2e6;
+        border-radius: 3px;
+        outline: none;
+        -webkit-appearance: none;
+    }
+
+    .range-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 20px;
+        height: 20px;
+        background: var(--search-primary);
+        border-radius: 50%;
+        cursor: pointer;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+
+    /* دکمه‌های فیلتر */
+    .filter-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        padding-top: 2rem;
+        border-top: 1px solid #e9ecef;
+    }
+
+    .btn-filter {
+        padding: 0.8rem 2rem;
+        border-radius: 15px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-apply {
+        background: var(--search-gradient);
+        color: white;
+    }
+
+    .btn-apply:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-reset {
+        background: #f8f9fa;
+        color: var(--search-dark);
+        border: 2px solid #dee2e6;
+    }
+
+    .btn-reset:hover {
+        background: #e9ecef;
+    }
+
+    /* ===== نتایج جستجو ===== */
+    .search-results {
+        padding: 3rem 0;
+    }
+
+    .results-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .results-count {
+        font-size: 1.2rem;
+        color: var(--search-dark);
+        font-weight: 600;
+    }
+
+    .results-count span {
+        color: var(--search-primary);
+    }
+
+    .view-options {
+        display: flex;
+        gap: 0.5rem;
+        background: white;
+        padding: 0.5rem;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .view-btn {
+        padding: 0.5rem 1.5rem;
+        border: none;
+        background: none;
+        border-radius: 10px;
+        cursor: pointer;
+        color: #7f8c8d;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .view-btn.active {
+        background: var(--search-primary);
+        color: white;
+    }
+
+    /* حالت نمایش شبکه‌ای */
+    .grid-view {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 2rem;
+    }
+
+    /* حالت نمایش لیستی */
+    .list-view {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .list-view .project-card {
+        flex-direction: row !important;
+    }
+
+    .list-view .project-image {
+        width: 200px;
+        height: 200px;
+        flex-shrink: 0;
+    }
+
+    /* کارت پروژه */
+    .project-card {
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        position: relative;
+    }
+
+    .project-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .project-image {
+        height: 220px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .project-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.6s ease;
+    }
+
+    .project-card:hover .project-image img {
+        transform: scale(1.1);
+    }
+
+    .project-badges {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        z-index: 10;
+    }
+
+    .badge {
+        padding: 0.4rem 1rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-align: center;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+    }
+
+    .badge-urgent {
+        background: linear-gradient(135deg, #e74c3c, #c0392b);
+        color: white;
+        animation: pulseUrgent 2s infinite;
+    }
+
+    @keyframes pulseUrgent {
+        0%, 100% {
+            box-shadow: 0 3px 10px rgba(231, 76, 60, 0.4);
+        }
+        50% {
+            box-shadow: 0 3px 15px rgba(231, 76, 60, 0.6);
+        }
+    }
+
+    .badge-featured {
+        background: var(--search-gradient);
+        color: white;
+    }
+
+    .badge-category {
+        background: rgba(52, 152, 219, 0.1);
+        color: var(--search-primary);
+        border: 1px solid rgba(52, 152, 219, 0.3);
+    }
+
+    .project-content {
+        padding: 1.5rem;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .project-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--search-dark);
+        margin-bottom: 0.8rem;
+        line-height: 1.4;
+        display: block;
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+
+    .project-title:hover {
+        color: var(--search-primary);
+    }
+
+    .project-location {
+        color: #7f8c8d;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .project-description {
+        color: #5d6d7e;
+        line-height: 1.6;
+        margin-bottom: 1.5rem;
+        flex: 1;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .project-progress {
+        margin: 1.5rem 0;
+    }
+
+    .progress-info {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+        color: #7f8c8d;
+    }
+
+    .progress-bar {
+        height: 8px;
+        background: #ecf0f1;
+        border-radius: 4px;
+        overflow: hidden;
+        margin-bottom: 0.5rem;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: var(--search-gradient);
+        border-radius: 4px;
+        width: 0;
+        transition: width 1.5s ease;
+        position: relative;
+    }
+
+    .progress-fill::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, 
+            transparent,
+            rgba(255, 255, 255, 0.4),
+            transparent);
+        animation: shimmer 2s infinite;
+    }
+
+    @keyframes shimmer {
+        0% {
+            transform: translateX(-100%);
+        }
+        100% {
+            transform: translateX(100%);
+        }
+    }
+
+    .amount-raised {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.9rem;
+        color: #7f8c8d;
+    }
+
+    .current-amount {
+        color: var(--search-primary);
+        font-weight: 600;
+    }
+
+    .project-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        margin: 1.5rem 0;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 12px;
+    }
+
+    .stat-item {
+        text-align: center;
+    }
+
+    .stat-value {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--search-primary);
+        display: block;
+    }
+
+    .stat-label {
+        font-size: 0.8rem;
+        color: #7f8c8d;
+        margin-top: 0.3rem;
+    }
+
+    .project-actions {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        margin-top: auto;
+    }
+
+    .action-btn {
+        padding: 0.8rem;
+        border-radius: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        text-align: center;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .btn-details {
+        background: rgba(52, 152, 219, 0.1);
+        color: var(--search-primary);
+        border: 1px solid rgba(52, 152, 219, 0.3);
+    }
+
+    .btn-details:hover {
+        background: var(--search-primary);
+        color: white;
+        transform: translateY(-3px);
+    }
+
+    .btn-donate {
+        background: var(--search-gradient);
+        color: white;
+        border: 1px solid transparent;
+    }
+
+    .btn-donate:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(52, 152, 219, 0.3);
+    }
+
+    /* ===== پاگرد ===== */
+    .pagination-section {
+        padding: 3rem 0;
+        text-align: center;
+    }
+
+    .pagination {
+        display: inline-flex;
+        gap: 0.5rem;
+        background: white;
+        padding: 0.5rem;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .page-item {
+        list-style: none;
+    }
+
+    .page-link {
+        display: block;
+        padding: 0.8rem 1.2rem;
+        border-radius: 15px;
+        text-decoration: none;
+        color: var(--search-dark);
+        font-weight: 600;
+        transition: all 0.3s ease;
+        min-width: 45px;
+        text-align: center;
+    }
+
+    .page-link:hover {
+        background: rgba(52, 152, 219, 0.1);
+        color: var(--search-primary);
+    }
+
+    .page-link.active {
+        background: var(--search-gradient);
+        color: white;
+    }
+
+    .page-link.disabled {
+        color: #bdc3c7;
+        pointer-events: none;
+    }
+
+    /* ===== حالت خالی ===== */
+    .empty-results {
+        text-align: center;
+        padding: 5rem 2rem;
+        background: white;
+        border-radius: 25px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    }
+
+    .empty-icon {
+        font-size: 5rem;
+        color: #ecf0f1;
+        margin-bottom: 2rem;
+        animation: float 3s infinite ease-in-out;
+    }
+
+    @keyframes float {
+        0%, 100% {
+            transform: translateY(0);
+        }
+        50% {
+            transform: translateY(-20px);
+        }
+    }
+
+    .empty-title {
+        font-size: 1.8rem;
+        color: var(--search-dark);
+        margin-bottom: 1rem;
+    }
+
+    .empty-description {
+        color: #7f8c8d;
+        max-width: 500px;
+        margin: 0 auto 2rem;
+        line-height: 1.6;
+    }
+
+    .empty-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    /* ===== رسپانسیو ===== */
+    @media (max-width: 1200px) {
+        .grid-view {
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        }
+        
+        .list-view .project-image {
+            width: 150px;
+            height: 150px;
+        }
+    }
+
+    @media (max-width: 992px) {
+        .search-form {
+            flex-direction: column;
+        }
+        
+        .search-input-wrapper {
+            min-width: 100%;
+        }
+        
+        .search-btn {
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .filters-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .list-view .project-card {
+            flex-direction: column !important;
+        }
+        
+        .list-view .project-image {
+            width: 100%;
+            height: 200px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .search-header {
+            padding: 2rem 0;
+        }
+        
+        .main-search-bar {
+            padding: 1rem;
+            border-radius: 20px;
+        }
+        
+        .search-input {
+            padding: 0.8rem 1rem 0.8rem 2.5rem;
+        }
+        
+        .advanced-filters-panel {
+            padding: 1.5rem;
+        }
+        
+        .results-header {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        .view-options {
+            justify-content: center;
+        }
+        
+        .grid-view {
+            grid-template-columns: 1fr;
+        }
+        
+        .project-actions {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .search-container {
+            padding: 0 1rem;
+        }
+        
+        .filter-actions {
+            flex-direction: column;
+        }
+        
+        .btn-filter {
+            width: 100%;
+        }
+        
+        .pagination {
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .project-stats {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .empty-actions {
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="projects-search-page">
+    <!-- هیدر جستجو -->
+    <div class="search-header">
+        <div class="search-container">
+            <h1 class="text-center text-white mb-4" style="font-size: 2.5rem; font-weight: 800;">
+                جستجوی پیشرفته پروژه‌ها
+            </h1>
+            
+            <!-- نوار جستجوی اصلی -->
+            <div class="main-search-bar">
+                <form method="get" class="search-form" id="searchForm">
+                    <div class="search-input-wrapper">
+                        <input type="text" 
+                               name="q" 
+                               class="search-input" 
+                               placeholder="جستجوی پروژه‌ها..." 
+                               value="{{ query|default:'' }}"
+                               autocomplete="off">
+                        <i class="fas fa-search search-icon"></i>
+                    </div>
+                    
+                    <button type="submit" class="search-btn">
+                        <i class="fas fa-search"></i>
+                        جستجو
+                    </button>
+                    
+                    <button type="button" class="advanced-search-toggle" id="toggleAdvancedFilters">
+                        <i class="fas fa-sliders-h"></i>
+                        فیلترهای پیشرفته
+                        <i class="fas fa-chevron-down" id="toggleIcon"></i>
+                    </button>
+                </form>
+            </div>
+            
+            <!-- پنل فیلترهای پیشرفته -->
+            <div class="advanced-filters-panel" id="advancedFilters">
+                <form method="get" id="advancedFiltersForm">
+                    <div class="filters-grid">
+                        <!-- دسته‌بندی -->
+                        <div class="filter-group">
+                            <label class="filter-label">دسته‌بندی</label>
+                            <div class="filter-checkbox-group">
+                                {% for category in categories %}
+                                <label class="filter-checkbox">
+                                    <input type="checkbox" 
+                                           name="category" 
+                                           value="{{ category.id }}"
+                                           {% if category.id|stringformat:"i" in selected_categories %}checked{% endif %}>
+                                    <span class="filter-checkbox-label">{{ category.name }}</span>
+                                </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <!-- وضعیت پروژه -->
+                        <div class="filter-group">
+                            <label class="filter-label">وضعیت پروژه</label>
+                            <div class="filter-checkbox-group">
+                                <label class="filter-checkbox">
+                                    <input type="checkbox" name="status" value="active" 
+                                           {% if "active" in selected_statuses %}checked{% endif %}>
+                                    <span class="filter-checkbox-label">فعال</span>
+                                </label>
+                                <label class="filter-checkbox">
+                                    <input type="checkbox" name="status" value="completed" 
+                                           {% if "completed" in selected_statuses %}checked{% endif %}>
+                                    <span class="filter-checkbox-label">تکمیل شده</span>
+                                </label>
+                                <label class="filter-checkbox">
+                                    <input type="checkbox" name="status" value="urgent" 
+                                           {% if "urgent" in selected_statuses %}checked{% endif %}>
+                                    <span class="filter-checkbox-label">فوری</span>
+                                </label>
+                                <label class="filter-checkbox">
+                                    <input type="checkbox" name="status" value="featured" 
+                                           {% if "featured" in selected_statuses %}checked{% endif %}>
+                                    <span class="filter-checkbox-label">ویژه</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- مبلغ جمع‌آوری شده -->
+                        <div class="filter-group">
+                            <label class="filter-label">محدوده مبلغ (تومان)</label>
+                            <div class="amount-range">
+                                <input type="range" 
+                                       class="range-slider" 
+                                       id="amountRange" 
+                                       min="0" 
+                                       max="500000000" 
+                                       step="10000000"
+                                       value="{{ max_amount|default:'500000000' }}">
+                                <div class="range-values">
+                                    <span id="minAmount">0</span>
+                                    <span id="maxAmount">500,000,000</span>
+                                </div>
+                                <input type="hidden" name="max_amount" id="maxAmountInput" value="{{ max_amount|default:'500000000' }}">
+                            </div>
+                        </div>
+                        
+                        <!-- مرتب‌سازی -->
+                        <div class="filter-group">
+                            <label class="filter-label">مرتب‌سازی بر اساس</label>
+                            <select name="sort" class="filter-select">
+                                <option value="newest" {% if sort_by == 'newest' %}selected{% endif %}>جدیدترین</option>
+                                <option value="progress" {% if sort_by == 'progress' %}selected{% endif %}>بیشترین پیشرفت</option>
+                                <option value="donors" {% if sort_by == 'donors' %}selected{% endif %}>بیشترین کمک‌کننده</option>
+                                <option value="ending" {% if sort_by == 'ending' %}selected{% endif %}>نزدیک به اتمام</option>
+                                <option value="urgent" {% if sort_by == 'urgent' %}selected{% endif %}>اولویت فوری</option>
+                            </select>
+                        </div>
+                        
+                        <!-- مکان پروژه -->
+                        <div class="filter-group">
+                            <label class="filter-label">مکان پروژه</label>
+                            <select name="location" class="filter-select">
+                                <option value="">همه مناطق</option>
+                                {% for location in locations %}
+                                <option value="{{ location }}" {% if location == selected_location %}selected{% endif %}>
+                                    {{ location }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <!-- تاریخ شروع -->
+                        <div class="filter-group">
+                            <label class="filter-label">بازه زمانی شروع</label>
+                            <select name="timeframe" class="filter-select">
+                                <option value="">همه زمان‌ها</option>
+                                <option value="week" {% if timeframe == 'week' %}selected{% endif %}>هفته جاری</option>
+                                <option value="month" {% if timeframe == 'month' %}selected{% endif %}>ماه جاری</option>
+                                <option value="quarter" {% if timeframe == 'quarter' %}selected{% endif %}>سه ماهه اخیر</option>
+                                <option value="year" {% if timeframe == 'year' %}selected{% endif %}>سال جاری</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-actions">
+                        <button type="button" class="btn-filter btn-reset" id="resetFilters">
+                            <i class="fas fa-redo ml-2"></i>
+                            بازنشانی فیلترها
+                        </button>
+                        <button type="submit" class="btn-filter btn-apply">
+                            <i class="fas fa-check ml-2"></i>
+                            اعمال فیلترها
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- نتایج جستجو -->
+    <div class="search-results">
+        <div class="search-container">
+            {% if projects %}
+            <!-- هدر نتایج -->
+            <div class="results-header">
+                <div class="results-count">
+                    <span>{{ projects.paginator.count }}</span> پروژه یافت شد
+                    {% if query %}
+                    برای "<strong>{{ query }}</strong>"
+                    {% endif %}
+                </div>
+                
+                <div class="view-options">
+                    <button class="view-btn active" data-view="grid">
+                        <i class="fas fa-th-large"></i>
+                        شبکه‌ای
+                    </button>
+                    <button class="view-btn" data-view="list">
+                        <i class="fas fa-list"></i>
+                        لیستی
+                    </button>
+                    <button class="view-btn" data-view="map">
+                        <i class="fas fa-map-marker-alt"></i>
+                        نقشه
+                    </button>
+                </div>
+            </div>
+            
+            <!-- نمایش پروژه‌ها (حالت شبکه‌ای به صورت پیش‌فرض) -->
+            <div class="grid-view" id="projectsView">
+                {% for project in projects %}
+                <div class="project-card">
+                    <div class="project-image">
+                        {% if project.main_image %}
+                        <img src="{{ project.main_image.url }}" alt="{{ project.title }}">
+                        {% else %}
+                        <div style="width: 100%; height: 100%; background: var(--search-gradient); 
+                                  display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-hands-helping fa-3x" style="color: white;"></i>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="project-badges">
+                            {% if project.is_urgent %}
+                            <span class="badge badge-urgent">فوری</span>
+                            {% endif %}
+                            {% if project.is_featured %}
+                            <span class="badge badge-featured">ویژه</span>
+                            {% endif %}
+                            <span class="badge badge-category">{{ project.category.name }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="project-content">
+                        <a href="{% url 'charity_project_detail' project.id %}" class="project-title">
+                            {{ project.title }}
+                        </a>
+                        
+                        <div class="project-location">
+                            <i class="fas fa-map-marker-alt"></i>
+                            {{ project.location|default:"سراسر کشور" }}
+                        </div>
+                        
+                        <p class="project-description">
+                            {{ project.short_description|default:"پروژه خیریه برای کمک به نیازمندان" }}
+                        </p>
+                        
+                        <div class="project-progress">
+                            <div class="progress-info">
+                                <span>پیشرفت پروژه</span>
+                                <span>{{ project.progress_percentage|default:"0" }}%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" data-width="{{ project.progress_percentage|default:'0' }}"></div>
+                            </div>
+                            <div class="amount-raised">
+                                <span class="current-amount">{{ project.current_amount|default:"0"|floatformat:0 }} تومان</span>
+                                <span>{{ project.target_amount|default:"0"|floatformat:0 }} تومان</span>
+                            </div>
+                        </div>
+                        
+                        <div class="project-stats">
+                            <div class="stat-item">
+                                <span class="stat-value">{{ project.donors_count|default:"0" }}</span>
+                                <span class="stat-label">کمک‌کننده</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value">{{ project.beneficiary_count|default:"0" }}</span>
+                                <span class="stat-label">بهره‌بردار</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value">
+                                    {% if project.days_remaining %}
+                                    {{ project.days_remaining }}
+                                    {% else %}
+                                    -
+                                    {% endif %}
+                                </span>
+                                <span class="stat-label">روز باقی‌مانده</span>
+                            </div>
+                        </div>
+                        
+                        <div class="project-actions">
+                            <a href="{% url 'charity_project_detail' project.id %}" class="action-btn btn-details">
+                                <i class="fas fa-info-circle"></i>
+                                جزئیات
+                            </a>
+                            {% if project.status == 'active' %}
+                            <a href="{% url 'make_donation' project.id %}" class="action-btn btn-donate">
+                                <i class="fas fa-hand-holding-heart"></i>
+                                کمک فوری
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- صفحه‌بندی -->
+            {% if projects.has_other_pages %}
+            <div class="pagination-section">
+                <ul class="pagination">
+                    {% if projects.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ projects.previous_page_number }}&{{ query_string }}">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="page-item">
+                        <span class="page-link disabled">
+                            <i class="fas fa-chevron-right"></i>
+                        </span>
+                    </li>
+                    {% endif %}
+                    
+                    {% for num in projects.paginator.page_range %}
+                        {% if projects.number == num %}
+                        <li class="page-item">
+                            <span class="page-link active">{{ num }}</span>
+                        </li>
+                        {% elif num > projects.number|add:'-3' and num < projects.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}&{{ query_string }}">{{ num }}</a>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if projects.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ projects.next_page_number }}&{{ query_string }}">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="page-item">
+                        <span class="page-link disabled">
+                            <i class="fas fa-chevron-left"></i>
+                        </span>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+            {% endif %}
+            
+            {% else %}
+            <!-- حالت خالی -->
+            <div class="empty-results">
+                <div class="empty-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+                <h2 class="empty-title">پروژه‌ای یافت نشد</h2>
+                <p class="empty-description">
+                    {% if query %}
+                    متأسفانه هیچ پروژه‌ای با عبارت "{{ query }}" یافت نشد.
+                    {% else %}
+                    در حال حاضر هیچ پروژه‌ای با فیلترهای انتخاب شده موجود نیست.
+                    {% endif %}
+                </p>
+                <div class="empty-actions">
+                    <button class="btn-filter btn-apply" id="clearSearch">
+                        <i class="fas fa-redo ml-2"></i>
+                        حذف جستجو
+                    </button>
+                    <a href="{% url 'charity_projects' %}" class="btn-filter btn-reset">
+                        <i class="fas fa-list ml-2"></i>
+                        مشاهده همه پروژه‌ها
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    class ProjectsSearchPage {
+        constructor() {
+            this.init();
+        }
+
+        init() {
+            this.initAdvancedFilters();
+            this.initViewSwitcher();
+            this.initRangeSlider();
+            this.initProgressBars();
+            this.initEventListeners();
+            this.initSearchSuggestions();
+            this.initLazyLoading();
+        }
+
+        // مدیریت فیلترهای پیشرفته
+        initAdvancedFilters() {
+            const toggleBtn = document.getElementById('toggleAdvancedFilters');
+            const filtersPanel = document.getElementById('advancedFilters');
+            const toggleIcon = document.getElementById('toggleIcon');
+
+            toggleBtn.addEventListener('click', () => {
+                filtersPanel.classList.toggle('show');
+                toggleIcon.classList.toggle('fa-chevron-down');
+                toggleIcon.classList.toggle('fa-chevron-up');
+            });
+        }
+
+        // سوئیچ بین حالت‌های نمایش
+        initViewSwitcher() {
+            const viewBtns = document.querySelectorAll('.view-btn');
+            const projectsView = document.getElementById('projectsView');
+
+            viewBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // حذف کلاس active از همه دکمه‌ها
+                    viewBtns.forEach(b => b.classList.remove('active'));
+                    
+                    // اضافه کردن کلاس active به دکمه کلیک شده
+                    btn.classList.add('active');
+                    
+                    // تغییر حالت نمایش
+                    const viewType = btn.getAttribute('data-view');
+                    this.switchView(viewType);
+                });
+            });
+        }
+
+        switchView(viewType) {
+            const projectsView = document.getElementById('projectsView');
+            const projectCards = document.querySelectorAll('.project-card');
+
+            if (viewType === 'grid') {
+                projectsView.className = 'grid-view';
+                projectCards.forEach(card => {
+                    card.style.flexDirection = 'column';
+                });
+            } else if (viewType === 'list') {
+                projectsView.className = 'list-view';
+                projectCards.forEach(card => {
+                    card.style.flexDirection = 'row';
+                });
+            } else if (viewType === 'map') {
+                // اگر نقشه‌ی گوگل یا Leaflet موجود باشد، این بخش فعال می‌شود
+                this.showMapView();
+            }
+        }
+
+        // مدیریت اسلایدر مبلغ
+        initRangeSlider() {
+            const rangeSlider = document.getElementById('amountRange');
+            const maxAmountSpan = document.getElementById('maxAmount');
+            const maxAmountInput = document.getElementById('maxAmountInput');
+
+            if (rangeSlider) {
+                // فرمت کردن عدد به فارسی
+                const formatNumber = (num) => {
+                    return new Intl.NumberFormat('fa-IR').format(num);
+                };
+
+                // به‌روزرسانی مقدار نمایشی
+                const updateAmountDisplay = () => {
+                    const value = parseInt(rangeSlider.value);
+                    maxAmountSpan.textContent = formatNumber(value);
+                    maxAmountInput.value = value;
+                };
+
+                // مقدار اولیه
+                updateAmountDisplay();
+
+                // رویداد تغییر اسلایدر
+                rangeSlider.addEventListener('input', updateAmountDisplay);
+            }
+        }
+
+        // انیمیشن نوارهای پیشرفت
+        initProgressBars() {
+            const progressBars = document.querySelectorAll('.progress-fill');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const width = entry.target.getAttribute('data-width');
+                        entry.target.style.width = width + '%';
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.5 });
+            
+            progressBars.forEach(bar => observer.observe(bar));
+        }
+
+        // پیشنهادات جستجو
+        initSearchSuggestions() {
+            const searchInput = document.querySelector('.search-input');
+            const suggestionsContainer = document.createElement('div');
+            suggestionsContainer.className = 'search-suggestions';
+            suggestionsContainer.style.cssText = `
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: white;
+                border-radius: 15px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+                margin-top: 5px;
+                display: none;
+                z-index: 1000;
+                max-height: 300px;
+                overflow-y: auto;
+            `;
+            
+            searchInput.parentElement.appendChild(suggestionsContainer);
+            
+            // داده‌های نمونه برای پیشنهادات
+            const sampleSuggestions = [
+                'آموزش کودکان',
+                'کمک به سالمندان',
+                'تأمین مسکن',
+                'درمان بیماران',
+                'حمایت از خانواده‌های بی‌بضاعت',
+                'کمک به زلزله‌زدگان',
+                'تجهیز مدارس',
+                'کمک به بیماران خاص',
+                'تأمین جهیزیه',
+                'حمایت از دانش‌آموزان بی‌بضاعت'
+            ];
+            
+            searchInput.addEventListener('input', (e) => {
+                const query = e.target.value.trim();
+                
+                if (query.length > 1) {
+                    // فیلتر کردن پیشنهادات
+                    const filteredSuggestions = sampleSuggestions.filter(suggestion => 
+                        suggestion.includes(query)
+                    );
+                    
+                    this.showSuggestions(filteredSuggestions, suggestionsContainer, searchInput);
+                } else {
+                    suggestionsContainer.style.display = 'none';
+                }
+            });
+            
+            // بستن پیشنهادات هنگام کلیک خارج
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.search-input-wrapper')) {
+                    suggestionsContainer.style.display = 'none';
+                }
+            });
+        }
+
+        showSuggestions(suggestions, container, input) {
+            container.innerHTML = '';
+            
+            if (suggestions.length > 0) {
+                suggestions.forEach(suggestion => {
+                    const suggestionItem = document.createElement('div');
+                    suggestionItem.className = 'suggestion-item';
+                    suggestionItem.textContent = suggestion;
+                    suggestionItem.style.cssText = `
+                        padding: 1rem 1.5rem;
+                        cursor: pointer;
+                        transition: all 0.2s ease;
+                        border-bottom: 1px solid #f8f9fa;
+                    `;
+                    
+                    suggestionItem.addEventListener('mouseenter', () => {
+                        suggestionItem.style.background = '#f8f9fa';
+                    });
+                    
+                    suggestionItem.addEventListener('mouseleave', () => {
+                        suggestionItem.style.background = 'white';
+                    });
+                    
+                    suggestionItem.addEventListener('click', () => {
+                        input.value = suggestion;
+                        container.style.display = 'none';
+                        input.focus();
+                        document.getElementById('searchForm').submit();
+                    });
+                    
+                    container.appendChild(suggestionItem);
+                });
+                
+                container.style.display = 'block';
+            } else {
+                container.style.display = 'none';
+            }
+        }
+
+        // لودینگ تنبل تصاویر
+        initLazyLoading() {
+            const images = document.querySelectorAll('.project-image img');
+            
+            const imageObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const img = entry.target;
+                        const src = img.getAttribute('data-src') || img.src;
+                        
+                        img.src = src;
+                        img.classList.add('loaded');
+                        imageObserver.unobserve(img);
+                    }
+                });
+            }, { rootMargin: '50px' });
+            
+            images.forEach(img => {
+                if (img.complete) {
+                    img.classList.add('loaded');
+                } else {
+                    img.addEventListener('load', () => {
+                        img.classList.add('loaded');
+                    });
+                }
+                imageObserver.observe(img);
+            });
+        }
+
+        // رویدادهای اضافی
+        initEventListeners() {
+            // بازنشانی فیلترها
+            const resetBtn = document.getElementById('resetFilters');
+            if (resetBtn) {
+                resetBtn.addEventListener('click', () => {
+                    document.getElementById('advancedFiltersForm').reset();
+                    document.getElementById('searchForm').reset();
+                    
+                    // بازنشانی اسلایدر
+                    const rangeSlider = document.getElementById('amountRange');
+                    if (rangeSlider) {
+                        rangeSlider.value = 500000000;
+                        document.getElementById('maxAmount').textContent = '500,000,000';
+                        document.getElementById('maxAmountInput').value = '500000000';
+                    }
+                    
+                    // ارسال فرم
+                    document.getElementById('advancedFiltersForm').submit();
+                });
+            }
+            
+            // حذف جستجو
+            const clearSearchBtn = document.getElementById('clearSearch');
+            if (clearSearchBtn) {
+                clearSearchBtn.addEventListener('click', () => {
+                    window.location.href = '{% url "charity_projects" %}';
+                });
+            }
+            
+            // جستجوی سریع با Enter
+            const searchInput = document.querySelector('.search-input');
+            if (searchInput) {
+                searchInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        document.getElementById('searchForm').submit();
+                    }
+                });
+            }
+        }
+
+        // نمایش نقشه (نمونه)
+        showMapView() {
+            // این تابع می‌تواند از Google Maps API یا Leaflet استفاده کند
+            const projectsView = document.getElementById('projectsView');
+            
+            projectsView.innerHTML = `
+                <div class="map-view-placeholder" style="
+                    background: #f8f9fa;
+                    border-radius: 20px;
+                    padding: 3rem;
+                    text-align: center;
+                    color: #7f8c8d;
+                ">
+                    <i class="fas fa-map-marked-alt fa-4x mb-3"></i>
+                    <h3>نمایش نقشه</h3>
+                    <p class="mb-4">این قابلیت به زودی فعال خواهد شد</p>
+                    <button class="btn btn-primary" onclick="location.reload()">
+                        بازگشت به لیست
+                    </button>
+                </div>
+            `;
+        }
+    }
+
+    // راه‌اندازی صفحه
+    document.addEventListener('DOMContentLoaded', () => {
+        const searchPage = new ProjectsSearchPage();
+        window.ProjectsSearchPage = searchPage;
+        
+        // راه‌اندازی نوارهای پیشرفت
+        searchPage.initProgressBars();
+    });
+</script>
+{% endblock %}
+[file content end]

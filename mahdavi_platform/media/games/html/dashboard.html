@@ -1,0 +1,435 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- هدر داشبورد -->
+<div class="card fade-in golden-border islamic-art">
+    <div class="dashboard-header">
+        <div class="user-welcome">
+            <h1 class="welcome-title">
+                <i class="fas fa-hand-peace"></i>
+                السلام علیک یا صاحب الزمان
+            </h1>
+            <p class="welcome-text">خوش آمدید {{ user.get_full_name }} عزیز</p>
+        </div>
+        
+        <div class="user-stats">
+            <div class="stat-badge">
+                <div class="stat-icon">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-number">{{ user.points }}</div>
+                    <div class="stat-label">امتیاز کل</div>
+                </div>
+            </div>
+            
+            <div class="stat-badge">
+                <div class="stat-icon">
+                    <i class="fas fa-road"></i>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-number">{{ completed_stations }}/{{ total_stations }}</div>
+                    <div class="stat-label">ایستگاه‌ها</div>
+                </div>
+            </div>
+            
+            <div class="stat-badge">
+                <div class="stat-icon">
+                    <i class="fas fa-user-graduate"></i>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-level">{{ spiritual_grade.grade }}</div>
+                    <div class="stat-label">{{ spiritual_grade.title }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="grid grid-2">
+    <!-- پیشرفت در ایستگاه‌ها -->
+    <div class="card fade-in">
+        <div class="card-header">
+            <h2 class="card-title">
+                <i class="fas fa-road card-icon"></i>
+                پیشرفت در ایستگاه‌ها
+            </h2>
+            <span class="progress-text">{{ completed_stations }}/{{ total_stations }} تکمیل شده</span>
+        </div>
+        
+        <div class="stations-progress">
+            {% for progress in station_progress %}
+            <div class="station-progress-item">
+                <div class="station-info">
+                    <div class="station-name">{{ progress.station.name }}</div>
+                    <div class="station-progress">
+                        <span class="progress-percentage">{{ progress.percentage|floatformat:0 }}%</span>
+                        <span class="progress-numbers">{{ progress.completed }}/{{ progress.total }}</span>
+                    </div>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-bar" style="width: {{ progress.percentage }}%; 
+                        {% if progress.percentage == 100 %}background: linear-gradient(90deg, #27ae60, #2ecc71);{% endif %}"></div>
+                </div>
+                <div class="station-access">
+                    {% if progress.is_accessible %}
+                    <a href="{% url 'station_detail' progress.station.id %}" class="btn btn-success btn-sm">
+                        <i class="fas fa-play"></i>
+                    </a>
+                    {% else %}
+                    <span class="access-locked">
+                        <i class="fas fa-lock"></i>
+                        {{ progress.station.points_required }}
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- اطلاعات کاربر -->
+    <div class="card fade-in">
+        <div class="card-header">
+            <h2 class="card-title">
+                <i class="fas fa-user card-icon"></i>
+                وضعیت معنوی
+            </h2>
+        </div>
+        
+        <div class="spiritual-status">
+            <div class="level-card" style="border-color: {{ spiritual_grade.color }};">
+                <div class="level-icon" style="color: {{ spiritual_grade.color }};">
+                    <i class="fas fa-star"></i>
+                </div>
+                <div class="level-info">
+                    <h3 class="level-title">{{ spiritual_grade.title }}</h3>
+                    <p class="level-grade">درجه: {{ spiritual_grade.grade }}</p>
+                    <div class="level-progress">
+                        <div class="progress-container">
+                            <div class="progress-bar" style="width: {{ spiritual_grade.percentage }}%; background: {{ spiritual_grade.color }};"></div>
+                        </div>
+                        <span class="progress-text">{{ spiritual_grade.percentage|floatformat:0 }}%</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="badges-section">
+                <h4 class="section-title">
+                    <i class="fas fa-medal"></i>
+                    نشان‌های شما
+                </h4>
+                <div class="badges-grid">
+                    {% for badge in badges %}
+                    <div class="badge-item">
+                        <div class="badge-icon">
+                            <i class="fas fa-medal"></i>
+                        </div>
+                        <div class="badge-info">
+                            <div class="badge-name">{{ badge.badge.name }}</div>
+                            <div class="badge-date">{{ badge.awarded_date|date:"Y/m/d" }}</div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="empty-badges">
+                        <i class="fas fa-star"></i>
+                        <p>هنوز نشان‌ای دریافت نکرده‌اید</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- دعای روز -->
+<div class="card fade-in prayer-card">
+    <div class="prayer-header">
+        <i class="fas fa-hands-praying"></i>
+        <h3>دعای امروز</h3>
+        <i class="fas fa-hands-praying"></i>
+    </div>
+    <div class="prayer-content">
+        <p class="prayer-text">
+            اَللّٰهُمَّ عَجِّلْ لِوَلِيِّكَ الْفَرَجَ وَالْعَافِيَةَ وَالنَّصْرَ
+        </p>
+        <div class="prayer-footer">
+            <i class="fas fa-clock"></i>
+            <span>برای تعجیل در فرج امام زمان(عج)</span>
+        </div>
+    </div>
+</div>
+
+<style>
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+    
+    .user-welcome {
+        flex: 1;
+    }
+    
+    .welcome-title {
+        color: var(--gold);
+        font-size: 1.8rem;
+        margin-bottom: 10px;
+        font-family: 'Lateef', serif;
+    }
+    
+    .welcome-text {
+        color: var(--text-light);
+        font-size: 1.1rem;
+    }
+    
+    .user-stats {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+    
+    .stat-badge {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 15px 20px;
+        background: rgba(40, 40, 40, 0.8);
+        border-radius: 12px;
+        border: 1px solid var(--border-gold);
+        min-width: 150px;
+    }
+    
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, var(--gold), var(--dark-gold));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        color: #000;
+    }
+    
+    .stat-number {
+        font-size: 1.5rem;
+        color: var(--gold);
+        font-weight: bold;
+        font-family: 'Lateef', serif;
+    }
+    
+    .stat-level {
+        font-size: 1.5rem;
+        color: var(--gold);
+        font-weight: bold;
+    }
+    
+    .stat-label {
+        color: var(--text-light);
+        font-size: 0.9rem;
+        margin-top: 2px;
+    }
+    
+    .stations-progress {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    
+    .station-progress-item {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 15px 0;
+        border-bottom: 1px solid var(--border-gold);
+    }
+    
+    .station-progress-item:last-child {
+        border-bottom: none;
+    }
+    
+    .station-info {
+        flex: 1;
+    }
+    
+    .station-name {
+        color: var(--text-light);
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    
+    .station-progress {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.85rem;
+        color: var(--text-light);
+    }
+    
+    .progress-percentage {
+        color: var(--gold);
+        font-weight: bold;
+    }
+    
+    .station-access {
+        flex: 0 0 auto;
+    }
+    
+    .btn-sm {
+        padding: 8px 12px;
+        font-size: 0.8rem;
+    }
+    
+    .access-locked {
+        color: var(--text-light);
+        font-size: 0.8rem;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .spiritual-status {
+        display: flex;
+        flex-direction: column;
+        gap: 25px;
+    }
+    
+    .level-card {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        padding: 20px;
+        background: rgba(40, 40, 40, 0.6);
+        border-radius: 12px;
+        border: 2px solid;
+    }
+    
+    .level-icon {
+        font-size: 3rem;
+        flex: 0 0 auto;
+    }
+    
+    .level-info {
+        flex: 1;
+    }
+    
+    .level-title {
+        color: var(--gold);
+        font-size: 1.3rem;
+        margin-bottom: 5px;
+    }
+    
+    .level-grade {
+        color: var(--text-light);
+        margin-bottom: 10px;
+    }
+    
+    .level-progress {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .level-progress .progress-container {
+        flex: 1;
+    }
+    
+    .badges-section {
+        margin-top: 10px;
+    }
+    
+    .section-title {
+        color: var(--gold);
+        margin-bottom: 15px;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .badges-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 10px;
+    }
+    
+    .badge-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        background: rgba(30, 30, 30, 0.8);
+        border-radius: 8px;
+        border: 1px solid var(--border-gold);
+    }
+    
+    .badge-icon {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, var(--gold), var(--dark-gold));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #000;
+        font-size: 1rem;
+    }
+    
+    .badge-name {
+        color: var(--text-light);
+        font-weight: bold;
+        font-size: 0.9rem;
+    }
+    
+    .badge-date {
+        color: var(--text-light);
+        font-size: 0.8rem;
+        opacity: 0.7;
+    }
+    
+    .empty-badges {
+        text-align: center;
+        padding: 30px;
+        color: var(--text-light);
+        grid-column: 1 / -1;
+    }
+    
+    .empty-badges i {
+        font-size: 2rem;
+        color: var(--gold);
+        margin-bottom: 10px;
+        opacity: 0.5;
+    }
+    
+    @media (max-width: 768px) {
+        .dashboard-header {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .user-stats {
+            justify-content: center;
+        }
+        
+        .stat-badge {
+            min-width: 120px;
+        }
+        
+        .station-progress-item {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 10px;
+        }
+        
+        .level-card {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .badges-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}

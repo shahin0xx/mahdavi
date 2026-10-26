@@ -1,0 +1,92 @@
+<!-- marja_register.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="grid" style="min-height: 80vh; place-items: center;">
+    <div class="card" style="max-width: 500px; width: 100%;">
+        <div class="card-header">
+            <h2 class="card-title">
+                <i class="fas fa-user-tie card-icon"></i>
+                درخواست مرجعیت
+            </h2>
+        </div>
+        
+        <div style="margin-bottom: 25px; padding: 15px; background: rgba(212, 175, 55, 0.1); 
+                    border-radius: 8px; border: 1px solid var(--border-gold);">
+            <h4 style="color: var(--gold); margin-bottom: 10px;">
+                <i class="fas fa-info-circle"></i>
+                شرایط مرجعیت
+            </h4>
+            <p style="font-size: 0.9rem; opacity: 0.8; line-height: 1.6;">
+                برای ثبت درخواست مرجعیت، لطفاً حداقل یکی از مدارک زیر را ارسال نمایید.
+                پس از تأیید مدیریت، دسترسی پنل مرجعیت برای شما فعال خواهد شد.
+            </p>
+        </div>
+        
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-graduation-cap"></i>
+                    تصویر مدرک حوزوی (اختیاری)
+                </label>
+                {{ form.educational_certificate }}
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-envelope"></i>
+                    تصویر معرفی‌نامه (اختیاری)
+                </label>
+                {{ form.recommendation_letter }}
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-id-card"></i>
+                    تصویر کارت ملی (اختیاری)
+                </label>
+                {{ form.id_card_image }}
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-book"></i>
+                    زندگینامه و سوابق
+                </label>
+                {{ form.marja_bio }}
+                <small style="opacity: 0.7;">شرح مختصری از سوابق علمی و فعالیت‌های مذهبی خود بنویسید</small>
+            </div>
+            
+            {% if form.non_field_errors %}
+            <div class="alert alert-error" style="margin-bottom: 20px;">
+                {% for error in form.non_field_errors %}
+                {{ error }}
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 20px;">
+                <i class="fas fa-paper-plane"></i>
+                ارسال درخواست مرجعیت
+            </button>
+        </form>
+        
+        <div style="text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-gold);">
+            <a href="{% url 'profile' %}" class="btn btn-secondary" style="width: 100%;">
+                <i class="fas fa-arrow-right"></i>
+                بازگشت به پروفایل
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="hadith fade-in">
+    <i class="fas fa-quote-right" style="color: var(--gold); margin-left: 10px;"></i>
+    "طلب العلم فریضة علی کل مسلم"
+    <i class="fas fa-quote-left" style="color: var(--gold); margin-right: 10px;"></i>
+    <br>
+    <span style="opacity: 0.8; font-size: 0.9rem;">- پیامبر اکرم (ص)</span>
+</div>
+{% endblock %}

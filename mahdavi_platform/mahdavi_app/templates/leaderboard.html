@@ -1,0 +1,872 @@
+{% extends 'base.html' %}
+
+{% block title %}جدول رتبه‌بندی - پلتفرم مهدوی{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 100px; min-height: 100vh;">
+    <!-- هدر صفحه -->
+    <div class="card golden-border text-center" style="margin-bottom: 2rem;">
+        <div class="card-header" style="border-bottom: none;">
+            <div class="logo-icon" style="width: 80px; height: 80px; margin: 0 auto 1rem; background: linear-gradient(135deg, var(--primary-gold), var(--light-gold));">
+                <i class="fas fa-trophy" style="font-size: 2rem;"></i>
+            </div>
+            <h1 style="color: var(--primary-gold); margin-bottom: 0.5rem; font-family: 'Lateef', serif; font-size: 2.5rem;">
+                جدول رتبه‌بندی
+            </h1>
+            <p style="color: var(--text-secondary); font-size: 1.1rem;">
+                برترین عاشقان امام زمان (عج) در پلتفرم مهدوی
+            </p>
+        </div>
+    </div>
+
+    <!-- فیلترها و جستجو -->
+    <div class="card" style="margin-bottom: 2rem;">
+        <div class="leaderboard-filters">
+            <div class="filter-buttons">
+                <button class="filter-btn active" data-filter="all">
+                    <i class="fas fa-list"></i>
+                    همه کاربران
+                </button>
+                <button class="filter-btn" data-filter="weekly">
+                    <i class="fas fa-calendar-week"></i>
+                    هفته جاری
+                </button>
+                <button class="filter-btn" data-filter="monthly">
+                    <i class="fas fa-calendar-alt"></i>
+                    ماه جاری
+                </button>
+                <button class="filter-btn" data-filter="friends">
+                    <i class="fas fa-user-friends"></i>
+                    دوستان
+                </button>
+            </div>
+            
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" class="search-input" placeholder="جستجوی کاربر...">
+            </div>
+        </div>
+    </div>
+
+    <!-- رتبه‌های برتر -->
+    <div class="card" style="margin-bottom: 2rem;">
+        <div class="card-header">
+            <h2 class="card-title">
+                <i class="fas fa-crown"></i>
+                برترین‌های پلتفرم
+            </h2>
+        </div>
+        
+        <div class="top-three">
+            {% for user in leaderboard|slice:":3" %}
+            <div class="top-user rank-{{ forloop.counter }}" data-user-id="{{ user.id }}">
+                <div class="rank-medal">
+                    {% if forloop.counter == 1 %}
+                    <i class="fas fa-crown"></i>
+                    {% elif forloop.counter == 2 %}
+                    <i class="fas fa-medal"></i>
+                    {% else %}
+                    <i class="fas fa-award"></i>
+                    {% endif %}
+                </div>
+                
+                <div class="user-avatar">
+                    {% if user.profile.avatar %}
+                    <img src="{{ user.profile.avatar.url }}" alt="{{ user.get_full_name }}">
+                    {% else %}
+                    <div class="avatar-default">
+                        {{ user.first_name|first }}{{ user.last_name|first }}
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="user-info">
+                    <h3 class="user-name">{{ user.get_full_name|default:user.username }}</h3>
+                    <div class="user-level">سطح {{ user.profile.level|default:1 }} - {{ user.profile.get_spiritual_title }}</div>
+                </div>
+                
+                <div class="user-stats">
+                    <div class="stat-item">
+                        <i class="fas fa-star"></i>
+                        <span class="stat-value">{{ user.profile.points|default:0 }}</span>
+                        <span class="stat-label">امتیاز</span>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-flag-checkered"></i>
+                        <span class="stat-value">{{ user.profile.completed_stations|default:0 }}</span>
+                        <span class="stat-label">ایستگاه</span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- لیست رتبه‌بندی -->
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">
+                <i class="fas fa-ranking-star"></i>
+                رتبه‌بندی کامل
+            </h2>
+            <span class="users-count">{{ leaderboard|length }} کاربر فعال</span>
+        </div>
+        
+        <div class="leaderboard-list">
+            {% for user in leaderboard %}
+            {% if forloop.counter > 3 %}
+            <div class="leaderboard-item {% if user.id == request.user.id %}current-user{% endif %}" data-user-id="{{ user.id }}">
+                <div class="rank-number">
+                    {{ forloop.counter }}
+                </div>
+                
+                <div class="user-avatar-small">
+                    {% if user.profile.avatar %}
+                    <img src="{{ user.profile.avatar.url }}" alt="{{ user.get_full_name }}">
+                    {% else %}
+                    <div class="avatar-default-small">
+                        {{ user.first_name|first }}{{ user.last_name|first }}
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="user-details">
+                    <div class="user-main">
+                        <h4 class="user-name">{{ user.get_full_name|default:user.username }}</h4>
+                        <span class="user-level">سطح {{ user.profile.level|default:1 }}</span>
+                    </div>
+                    
+                    <div class="user-progress">
+                        <div class="progress-bar-small">
+                            <div class="progress-fill" style="width: {% widthratio user.profile.completed_stations|default:0 20 100 %}%"></div>
+                        </div>
+                        <span class="progress-text">{{ user.profile.completed_stations|default:0 }}/20 ایستگاه</span>
+                    </div>
+                </div>
+                
+                <div class="user-score">
+                    <div class="points-badge">
+                        <i class="fas fa-star"></i>
+                        {{ user.profile.points|default:0 }}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            {% empty %}
+            <div class="empty-state text-center" style="padding: 3rem;">
+                <i class="fas fa-users" style="font-size: 4rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
+                <h3 style="color: var(--text-secondary); margin-bottom: 1rem;">هنوز کاربری در جدول قرار ندارد</h3>
+                <p style="color: var(--text-muted);">اولین نفری باشید که در جدول رتبه‌بندی قرار می‌گیرد</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- وضعیت کاربر فعلی -->
+    {% if request.user.is_authenticated %}
+    <div class="card golden-border" style="margin-top: 2rem;">
+        <div class="card-header">
+            <h2 class="card-title">
+                <i class="fas fa-user"></i>
+                وضعیت شما
+            </h2>
+        </div>
+        
+        <div class="current-user-status">
+            {% for user in leaderboard %}
+                {% if user.id == request.user.id %}
+                <div class="current-user-rank">
+                    <div class="rank-info">
+                        <div class="rank-number-large">{{ forloop.counter }}</div>
+                        <div class="rank-label">رتبه شما</div>
+                    </div>
+                    
+                    <div class="user-info-large">
+                        <div class="user-avatar-medium">
+                            {% if request.user.profile.avatar %}
+                            <img src="{{ request.user.profile.avatar.url }}" alt="{{ request.user.get_full_name }}">
+                            {% else %}
+                            <div class="avatar-default-medium">
+                                {{ request.user.first_name|first }}{{ request.user.last_name|first }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="user-details-large">
+                            <h3 class="user-name">{{ request.user.get_full_name|default:request.user.username }}</h3>
+                            <div class="user-stats-large">
+                                <div class="stat">
+                                    <i class="fas fa-star"></i>
+                                    {{ request.user.profile.points|default:0 }} امتیاز
+                                </div>
+                                <div class="stat">
+                                    <i class="fas fa-flag-checkered"></i>
+                                    {{ request.user.profile.completed_stations|default:0 }} ایستگاه
+                                </div>
+                                <div class="stat">
+                                    <i class="fas fa-medal"></i>
+                                    سطح {{ request.user.profile.level|default:1 }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            {% empty %}
+            <div class="no-rank text-center" style="padding: 2rem;">
+                <i class="fas fa-chart-line" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
+                <h3 style="color: var(--text-secondary); margin-bottom: 1rem;">شما هنوز در جدول قرار ندارید</h3>
+                <p style="color: var(--text-muted); margin-bottom: 1.5rem;">با تکمیل ایستگاه‌ها و کسب امتیاز، رتبه خود را بهبود ببخشید</p>
+                <a href="{% url 'stations' %}" class="btn btn-primary">
+                    <i class="fas fa-play"></i>
+                    شروع یادگیری
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- آمار پلتفرم -->
+    <div class="grid grid-3" style="margin-top: 2rem;">
+        <div class="card text-center">
+            <div class="stat-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-number">{{ total_users|default:"۱,۲۴۳" }}</div>
+            <div class="stat-label">کاربر فعال</div>
+        </div>
+        
+        <div class="card text-center">
+            <div class="stat-icon">
+                <i class="fas fa-route"></i>
+            </div>
+            <div class="stat-number">{{ total_stations_completed|default:"۸,۷۵۶" }}</div>
+            <div class="stat-label">ایستگاه تکمیل شده</div>
+        </div>
+        
+        <div class="card text-center">
+            <div class="stat-icon">
+                <i class="fas fa-star"></i>
+            </div>
+            <div class="stat-number">{{ total_points|default:"۱۲۴,۵۸۹" }}</div>
+            <div class="stat-label">امتیاز کل</div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* فیلترها */
+    .leaderboard-filters {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.5rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .filter-buttons {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .filter-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1rem;
+        background: var(--card-bg);
+        border: 1px solid var(--border-gold);
+        border-radius: 8px;
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+    }
+
+    .filter-btn.active,
+    .filter-btn:hover {
+        background: linear-gradient(135deg, var(--primary-gold), var(--dark-gold));
+        color: var(--dark-bg);
+        border-color: var(--primary-gold);
+    }
+
+    .search-box {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .search-box i {
+        position: absolute;
+        right: 12px;
+        color: var(--primary-gold);
+    }
+
+    .search-input {
+        padding: 0.75rem 2.5rem 0.75rem 1rem;
+        background: var(--hover-bg);
+        border: 1px solid var(--border-gold);
+        border-radius: 8px;
+        color: var(--text-primary);
+        width: 250px;
+        font-family: inherit;
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: var(--primary-gold);
+        box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+    }
+
+    /* رتبه‌های برتر */
+    .top-three {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+        padding: 2rem;
+    }
+
+    .top-user {
+        background: var(--card-bg);
+        border: 2px solid var(--border-gold);
+        border-radius: 20px;
+        padding: 2rem 1.5rem;
+        text-align: center;
+        position: relative;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+    }
+
+    .top-user:hover {
+        transform: translateY(-5px);
+        border-color: var(--primary-gold);
+        box-shadow: var(--shadow-xl);
+    }
+
+    .rank-1 {
+        border-color: var(--primary-gold);
+        order: 2;
+    }
+
+    .rank-2 {
+        border-color: #c0c0c0;
+        order: 1;
+    }
+
+    .rank-3 {
+        border-color: #cd7f32;
+        order: 3;
+    }
+
+    .rank-medal {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .rank-1 .rank-medal {
+        color: var(--primary-gold);
+    }
+
+    .rank-2 .rank-medal {
+        color: #c0c0c0;
+    }
+
+    .rank-3 .rank-medal {
+        color: #cd7f32;
+    }
+
+    .user-avatar {
+        margin-bottom: 1rem;
+    }
+
+    .user-avatar img,
+    .avatar-default {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        margin: 0 auto;
+        border: 3px solid var(--primary-gold);
+    }
+
+    .avatar-default {
+        background: linear-gradient(135deg, var(--primary-gold), var(--light-gold));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--dark-bg);
+        font-size: 1.5rem;
+        font-weight: bold;
+    }
+
+    .user-info h3 {
+        color: var(--primary-gold);
+        margin-bottom: 0.5rem;
+        font-size: 1.2rem;
+    }
+
+    .user-level {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .user-stats {
+        display: flex;
+        justify-content: space-around;
+        gap: 1rem;
+    }
+
+    .stat-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .stat-item i {
+        color: var(--primary-gold);
+        font-size: 1rem;
+    }
+
+    .stat-value {
+        font-weight: bold;
+        font-size: 1.1rem;
+    }
+
+    .stat-label {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+    }
+
+    /* لیست رتبه‌بندی */
+    .leaderboard-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        padding: 1rem;
+    }
+
+    .leaderboard-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem 1.5rem;
+        background: var(--card-bg);
+        border: 1px solid var(--border-gold);
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .leaderboard-item:hover {
+        background: var(--hover-bg);
+        border-color: var(--primary-gold);
+        transform: translateX(-5px);
+    }
+
+    .leaderboard-item.current-user {
+        background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(180, 150, 50, 0.05));
+        border-color: var(--primary-gold);
+    }
+
+    .rank-number {
+        width: 35px;
+        height: 35px;
+        background: linear-gradient(135deg, var(--primary-gold), var(--dark-gold));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        color: var(--dark-bg);
+        font-size: 0.9rem;
+        flex-shrink: 0;
+    }
+
+    .user-avatar-small img,
+    .avatar-default-small {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        border: 2px solid var(--border-gold);
+        flex-shrink: 0;
+    }
+
+    .avatar-default-small {
+        background: linear-gradient(135deg, var(--primary-gold), var(--light-gold));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--dark-bg);
+        font-weight: bold;
+        font-size: 1rem;
+    }
+
+    .user-details {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .user-main {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .user-name {
+        color: var(--text-primary);
+        margin: 0;
+        font-size: 1rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .user-level {
+        background: rgba(212, 175, 55, 0.1);
+        color: var(--primary-gold);
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        white-space: nowrap;
+    }
+
+    .user-progress {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .progress-bar-small {
+        flex: 1;
+        height: 6px;
+        background: var(--hover-bg);
+        border-radius: 3px;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--primary-gold), var(--light-gold));
+        border-radius: 3px;
+        transition: width 0.5s ease;
+    }
+
+    .progress-text {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        white-space: nowrap;
+    }
+
+    .user-score {
+        flex-shrink: 0;
+    }
+
+    .points-badge {
+        background: linear-gradient(135deg, var(--primary-gold), var(--dark-gold));
+        color: var(--dark-bg);
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: bold;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    /* وضعیت کاربر فعلی */
+    .current-user-status {
+        padding: 2rem;
+    }
+
+    .current-user-rank {
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+        background: var(--card-bg);
+        border-radius: 16px;
+        padding: 2rem;
+    }
+
+    .rank-info {
+        text-align: center;
+        flex-shrink: 0;
+    }
+
+    .rank-number-large {
+        font-size: 3rem;
+        color: var(--primary-gold);
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+
+    .rank-label {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+
+    .user-info-large {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        flex: 1;
+    }
+
+    .user-avatar-medium img,
+    .avatar-default-medium {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        border: 3px solid var(--primary-gold);
+        flex-shrink: 0;
+    }
+
+    .avatar-default-medium {
+        background: linear-gradient(135deg, var(--primary-gold), var(--light-gold));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--dark-bg);
+        font-size: 1.5rem;
+        font-weight: bold;
+    }
+
+    .user-details-large {
+        flex: 1;
+    }
+
+    .user-details-large h3 {
+        color: var(--primary-gold);
+        margin-bottom: 1rem;
+        font-size: 1.5rem;
+    }
+
+    .user-stats-large {
+        display: flex;
+        gap: 1.5rem;
+    }
+
+    .user-stats-large .stat {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: var(--hover-bg);
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        border: 1px solid var(--border-gold);
+        font-size: 0.9rem;
+    }
+
+    .user-stats-large .stat i {
+        color: var(--primary-gold);
+    }
+
+    .no-rank {
+        padding: 3rem 2rem;
+    }
+
+    /* آمار */
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, var(--primary-gold), var(--light-gold));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--dark-bg);
+        font-size: 1.5rem;
+        margin: 0 auto 1rem;
+    }
+
+    .stat-number {
+        font-size: 2rem;
+        color: var(--primary-gold);
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+
+    .users-count {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+
+    /* انیمیشن‌ها */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .leaderboard-item {
+        animation: fadeInUp 0.6s ease;
+    }
+
+    .leaderboard-item:nth-child(1) { animation-delay: 0.1s; }
+    .leaderboard-item:nth-child(2) { animation-delay: 0.2s; }
+    .leaderboard-item:nth-child(3) { animation-delay: 0.3s; }
+    .leaderboard-item:nth-child(4) { animation-delay: 0.4s; }
+    .leaderboard-item:nth-child(5) { animation-delay: 0.5s; }
+
+    /* ریسپانسیو */
+    @media (max-width: 768px) {
+        .leaderboard-filters {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .filter-buttons {
+            justify-content: center;
+        }
+
+        .search-box {
+            width: 100%;
+        }
+
+        .search-input {
+            width: 100%;
+        }
+
+        .top-three {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .top-user {
+            order: 0 !important;
+        }
+
+        .current-user-rank {
+            flex-direction: column;
+            text-align: center;
+            gap: 1.5rem;
+        }
+
+        .user-info-large {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .user-stats-large {
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .grid-3 {
+            grid-template-columns: 1fr;
+        }
+
+        .user-main {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .user-progress {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .filter-buttons {
+            flex-direction: column;
+        }
+
+        .user-stats {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // فیلترهای رتبه‌بندی
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        
+        filterButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // حذف کلاس active از همه دکمه‌ها
+                filterButtons.forEach(btn => btn.classList.remove('active'));
+                // اضافه کردن کلاس active به دکمه کلیک شده
+                this.classList.add('active');
+                
+                // شبیه‌سازی فیلتر کردن
+                const filter = this.dataset.filter;
+                if (window.MahdaviApp) {
+                    window.MahdaviApp.showNotification(`فیلتر "${this.textContent.trim()}" اعمال شد`, 'info');
+                }
+            });
+        });
+
+        // جستجو
+        const searchInput = document.querySelector('.search-input');
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const items = document.querySelectorAll('.leaderboard-item');
+            
+            items.forEach(item => {
+                const userName = item.querySelector('.user-name').textContent.toLowerCase();
+                if (userName.includes(searchTerm)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+
+        // انیمیشن نوارهای پیشرفت
+        const progressBars = document.querySelectorAll('.progress-fill');
+        progressBars.forEach(bar => {
+            const finalWidth = bar.style.width;
+            bar.style.width = '0%';
+            
+            setTimeout(() => {
+                bar.style.transition = 'width 1s ease';
+                bar.style.width = finalWidth;
+            }, 500);
+        });
+
+        // کلیک روی کاربران
+        const userItems = document.querySelectorAll('.leaderboard-item, .top-user');
+        userItems.forEach(item => {
+            item.addEventListener('click', function() {
+                const userId = this.dataset.userId;
+                if (userId && window.MahdaviApp) {
+                    window.MahdaviApp.showNotification('نمایش پروفایل کاربر', 'info');
+                    // در اینجا می‌توانید کاربر را به پروفایل هدایت کنید
+                }
+            });
+        });
+
+        // انیمیشن ورود
+        const cards = document.querySelectorAll('.card');
+        cards.forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            
+            setTimeout(() => {
+                card.style.transition = 'all 0.6s ease';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, (index + 1) * 200);
+        });
+    });
+</script>
+{% endblock %}

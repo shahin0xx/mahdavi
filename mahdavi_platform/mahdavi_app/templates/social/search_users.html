@@ -1,0 +1,405 @@
+{% extends 'social/base.html' %}
+{% load static %}
+
+{% block title %}جستجوی کاربران - نور مهدی{% endblock %}
+
+{% block content %}
+<div class="search-users">
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">
+                <i class="fas fa-search card-icon"></i>
+                جستجوی کاربران
+            </h2>
+            <a href="{% url 'social_home' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-right"></i>
+                بازگشت
+            </a>
+        </div>
+        
+        <!-- فرم جستجو -->
+        <div class="search-form">
+            <form method="get" class="search-form-inner">
+                <div class="search-input-group">
+                    <input type="text" name="q" value="{{ query }}" 
+                           placeholder="جستجو بر اساس نام، نام خانوادگی یا شماره موبایل..." 
+                           class="search-input">
+                    <button type="submit" class="btn btn-primary search-btn">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- نتایج جستجو -->
+        <div class="search-results">
+            {% if query %}
+            <h3 class="results-title">
+                نتایج جستجو برای "{{ query }}"
+                <span class="results-count">({{ users|length }} نتیجه)</span>
+            </h3>
+            
+            {% if users %}
+            <div class="users-list">
+                {% for user_data in users %}
+                <div class="user-card">
+                    <div class="user-avatar">
+                        {% if user_data.user.profile_image %}
+                            <img src="{{ user_data.user.profile_image.url }}" alt="{{ user_data.user.get_full_name }}">
+                        {% else %}
+                            <span>{{ user_data.user.first_name|first }}</span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="user-info">
+                        <a href="{% url 'social_profile' user_data.user.id %}" class="user-name">
+                            {{ user_data.user.get_full_name }}
+                        </a>
+                        <div class="user-stats">
+                            <span>{{ user_data.social_profile.posts_count }} پست</span>
+                            <span>{{ user_data.social_profile.followers_count }} دنبال‌کننده</span>
+                        </div>
+                        {% if user_data.social_profile.bio %}
+                        <p class="user-bio">{{ user_data.social_profile.bio }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="user-actions">
+                        {% if user_data.user.id != request.user.id %}
+                            {% if user_data.is_following %}
+                            <form method="post" action="{% url 'unfollow_user' user_data.user.id %}" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-secondary btn-sm">
+                                    <i class="fas fa-user-minus"></i>
+                                    لغو دنبال
+                                </button>
+                            </form>
+                            {% else %}
+                            <form method="post" action="{% url 'follow_user' user_data.user.id %}" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-user-plus"></i>
+                                    دنبال کردن
+                                </button>
+                            </form>
+                            {% endif %}
+                            
+                            <a href="{% url 'create_private_chat' user_data.user.id %}" class="btn btn-secondary btn-sm">
+                                <i class="fas fa-comment"></i>
+                                پیام
+                            </a>
+                        {% else %}
+                            <span class="current-user-badge">شما</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="no-results">
+                <i class="fas fa-user-slash"></i>
+                <h4>کاربری یافت نشد</h4>
+                <p>هیچ کاربری با مشخصات وارد شده پیدا نشد.</p>
+            </div>
+            {% endif %}
+            
+            {% else %}
+            <div class="search-guide">
+                <div class="guide-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h3>کاربران را پیدا کنید</h3>
+                <p>نام، نام خانوادگی یا شماره موبایل کاربر مورد نظر را وارد کنید</p>
+                <div class="guide-tips">
+                    <div class="tip">
+                        <i class="fas fa-search"></i>
+                        <span>برای جستجوی دقیق‌تر از نام کامل استفاده کنید</span>
+                    </div>
+                    <div class="tip">
+                        <i class="fas fa-user-friends"></i>
+                        <span>کاربران را دنبال کنید تا پست‌هایشان را ببینید</span>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.search-users {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.search-form {
+    padding: 20px;
+    border-bottom: 1px solid var(--border-gold);
+}
+
+.search-form-inner {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.search-input-group {
+    display: flex;
+    gap: 10px;
+}
+
+.search-input {
+    flex: 1;
+    padding: 12px 15px;
+    background: rgba(30, 30, 30, 0.8);
+    border: 1px solid var(--border-gold);
+    border-radius: 8px;
+    color: var(--text-light);
+    font-size: 1rem;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--gold);
+    box-shadow: 0 0 8px rgba(212, 175, 55, 0.3);
+}
+
+.search-btn {
+    padding: 12px 20px;
+}
+
+.search-results {
+    padding: 20px;
+}
+
+.results-title {
+    color: var(--gold);
+    margin-bottom: 20px;
+    font-size: 1.1rem;
+}
+
+.results-count {
+    font-size: 0.9rem;
+    color: var(--text-light);
+    opacity: 0.7;
+}
+
+.users-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.user-card {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    background: rgba(30, 30, 30, 0.5);
+    border-radius: 8px;
+    border: 1px solid var(--border-gold);
+    transition: all 0.3s ease;
+}
+
+.user-card:hover {
+    background: rgba(212, 175, 55, 0.1);
+    border-color: var(--gold);
+    transform: translateX(-5px);
+}
+
+.user-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold), var(--dark-gold));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: #000;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.user-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.user-info {
+    flex: 1;
+}
+
+.user-name {
+    font-weight: bold;
+    color: var(--text-light);
+    text-decoration: none;
+    font-size: 1.1rem;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.user-name:hover {
+    color: var(--gold);
+}
+
+.user-stats {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 8px;
+}
+
+.user-stats span {
+    font-size: 0.8rem;
+    color: var(--text-light);
+    opacity: 0.7;
+}
+
+.user-bio {
+    font-size: 0.9rem;
+    color: var(--text-light);
+    opacity: 0.9;
+    line-height: 1.4;
+    margin: 0;
+}
+
+.user-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+}
+
+.current-user-badge {
+    background: rgba(212, 175, 55, 0.2);
+    color: var(--gold);
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    border: 1px solid var(--border-gold);
+}
+
+.no-results {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-light);
+}
+
+.no-results i {
+    font-size: 3rem;
+    color: var(--gold);
+    margin-bottom: 15px;
+}
+
+.no-results h4 {
+    color: var(--gold);
+    margin-bottom: 10px;
+}
+
+.search-guide {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.guide-icon {
+    font-size: 4rem;
+    color: var(--gold);
+    margin-bottom: 20px;
+}
+
+.guide-icon i {
+    opacity: 0.7;
+}
+
+.search-guide h3 {
+    color: var(--gold);
+    margin-bottom: 10px;
+}
+
+.search-guide p {
+    color: var(--text-light);
+    margin-bottom: 30px;
+    opacity: 0.8;
+}
+
+.guide-tips {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.tip {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: rgba(30, 30, 30, 0.5);
+    border-radius: 8px;
+    border: 1px solid var(--border-gold);
+}
+
+.tip i {
+    color: var(--gold);
+    width: 20px;
+    text-align: center;
+}
+
+.tip span {
+    color: var(--text-light);
+    font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+    .user-card {
+        flex-direction: column;
+        text-align: center;
+        gap: 12px;
+    }
+    
+    .user-info {
+        text-align: center;
+    }
+    
+    .user-stats {
+        justify-content: center;
+    }
+    
+    .search-input-group {
+        flex-direction: column;
+    }
+    
+    .guide-tips {
+        text-align: right;
+    }
+    
+    .tip {
+        text-align: right;
+    }
+}
+</style>
+
+<script>
+// جستجوی لحظه‌ای
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.querySelector('.search-input');
+    let searchTimeout;
+    
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        
+        searchTimeout = setTimeout(() => {
+            if (this.value.trim().length >= 2 || this.value.trim().length === 0) {
+                this.form.submit();
+            }
+        }, 500);
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,1349 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}داشبورد شخصی - پلتفرم مهدوی{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ===== متغیرهای اصلی ===== */
+    :root {
+        --dashboard-primary: #3498db;
+        --dashboard-secondary: #2ecc71;
+        --dashboard-accent: #e74c3c;
+        --dashboard-warning: #f39c12;
+        --dashboard-info: #9b59b6;
+        --dashboard-dark: #2c3e50;
+        --dashboard-light: #ecf0f1;
+        --dashboard-gradient: linear-gradient(135deg, var(--dashboard-primary), var(--dashboard-secondary));
+        --dashboard-gradient-dark: linear-gradient(135deg, #2980b9, #27ae60);
+    }
+
+    /* ===== استایل‌های اصلی ===== */
+    .dashboard-page {
+        background: linear-gradient(135deg, 
+            rgba(236, 240, 241, 0.1) 0%,
+            rgba(236, 240, 241, 0.05) 100%);
+        min-height: 100vh;
+        position: relative;
+    }
+
+    /* ===== هیدر داشبورد ===== */
+    .dashboard-header {
+        background: var(--dashboard-gradient);
+        padding: 3rem 0 4rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .dashboard-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="pattern" width="40" height="40" patternUnits="userSpaceOnUse"><circle cx="20" cy="20" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="60" cy="60" r="2" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23pattern)"/></svg>');
+        opacity: 0.3;
+    }
+
+    .dashboard-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 2rem;
+        position: relative;
+        z-index: 10;
+    }
+
+    /* اطلاعات کاربر */
+    .user-profile-card {
+        background: white;
+        border-radius: 25px;
+        padding: 2.5rem;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        margin-bottom: -3rem;
+        position: relative;
+        z-index: 20;
+        animation: slideDown 0.8s ease;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-50px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .profile-header {
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: var(--dashboard-gradient);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        color: white;
+        border: 5px solid white;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .profile-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .profile-info {
+        flex: 1;
+        min-width: 300px;
+    }
+
+    .profile-name {
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--dashboard-dark);
+        margin-bottom: 0.5rem;
+    }
+
+    .profile-email {
+        color: #7f8c8d;
+        margin-bottom: 1rem;
+        font-size: 1.1rem;
+    }
+
+    .profile-badges {
+        display: flex;
+        gap: 0.8rem;
+        flex-wrap: wrap;
+    }
+
+    .badge {
+        padding: 0.5rem 1.2rem;
+        border-radius: 50px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .badge-donor {
+        background: linear-gradient(135deg, #3498db, #2980b9);
+        color: white;
+    }
+
+    .badge-volunteer {
+        background: linear-gradient(135deg, #2ecc71, #27ae60);
+        color: white;
+    }
+
+    .badge-premium {
+        background: linear-gradient(135deg, #f39c12, #e67e22);
+        color: white;
+    }
+
+    /* استات‌های کاربر */
+    .profile-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        padding-top: 2rem;
+        border-top: 1px solid #ecf0f1;
+    }
+
+    .stat-item {
+        text-align: center;
+        padding: 1.5rem;
+        background: #f8f9fa;
+        border-radius: 15px;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stat-item:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        background: white;
+    }
+
+    .stat-value {
+        font-size: 2.5rem;
+        font-weight: 800;
+        display: block;
+        margin-bottom: 0.5rem;
+        color: var(--dashboard-primary);
+    }
+
+    .stat-label {
+        font-size: 0.95rem;
+        color: #7f8c8d;
+    }
+
+    /* ===== محتوای اصلی داشبورد ===== */
+    .dashboard-content {
+        padding: 6rem 2rem 4rem;
+    }
+
+    .content-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 2rem;
+        margin-bottom: 3rem;
+    }
+
+    /* بخش‌های داشبورد */
+    .dashboard-section {
+        background: white;
+        border-radius: 25px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+    }
+
+    .dashboard-section:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    }
+
+    .section-header {
+        background: var(--dashboard-gradient);
+        padding: 1.5rem 2rem;
+        color: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+    }
+
+    .section-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .section-body {
+        padding: 2rem;
+    }
+
+    /* لیست کمک‌ها */
+    .donations-list {
+        max-height: 400px;
+        overflow-y: auto;
+        padding-right: 0.5rem;
+    }
+
+    .donation-item {
+        display: flex;
+        align-items: center;
+        gap: 1.2rem;
+        padding: 1.2rem;
+        border-radius: 12px;
+        margin-bottom: 1rem;
+        background: #f8f9fa;
+        transition: all 0.3s ease;
+        border-right: 4px solid transparent;
+    }
+
+    .donation-item:hover {
+        background: white;
+        border-right-color: var(--dashboard-primary);
+        transform: translateX(5px);
+    }
+
+    .donation-icon {
+        width: 50px;
+        height: 50px;
+        background: var(--dashboard-gradient);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+    }
+
+    .donation-details {
+        flex: 1;
+    }
+
+    .donation-project {
+        font-weight: 600;
+        color: var(--dashboard-dark);
+        margin-bottom: 0.3rem;
+        display: block;
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+
+    .donation-project:hover {
+        color: var(--dashboard-primary);
+    }
+
+    .donation-meta {
+        display: flex;
+        gap: 1.5rem;
+        font-size: 0.9rem;
+        color: #7f8c8d;
+    }
+
+    .donation-amount {
+        color: var(--dashboard-secondary);
+        font-weight: 700;
+    }
+
+    .donation-status {
+        padding: 0.3rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .status-success {
+        background: rgba(46, 204, 113, 0.1);
+        color: var(--dashboard-secondary);
+    }
+
+    .status-pending {
+        background: rgba(243, 156, 18, 0.1);
+        color: var(--dashboard-warning);
+    }
+
+    /* پروژه‌های دنبال‌شده */
+    .projects-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .project-card {
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+        border: 1px solid #ecf0f1;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .project-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        border-color: var(--dashboard-primary);
+    }
+
+    .project-image {
+        height: 180px;
+        overflow: hidden;
+    }
+
+    .project-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+
+    .project-card:hover .project-image img {
+        transform: scale(1.1);
+    }
+
+    .project-content {
+        padding: 1.5rem;
+    }
+
+    .project-title {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--dashboard-dark);
+        margin-bottom: 0.8rem;
+        display: block;
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+
+    .project-title:hover {
+        color: var(--dashboard-primary);
+    }
+
+    .project-progress {
+        margin: 1rem 0;
+    }
+
+    .progress-info {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+        color: #7f8c8d;
+    }
+
+    .progress-bar {
+        height: 8px;
+        background: #ecf0f1;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: var(--dashboard-gradient);
+        border-radius: 4px;
+        width: 0;
+        transition: width 1.5s ease;
+    }
+
+    /* فعالیت‌ها */
+    .activities-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .activity-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 1.2rem;
+        padding: 1.2rem;
+        background: #f8f9fa;
+        border-radius: 15px;
+        transition: all 0.3s ease;
+    }
+
+    .activity-item:hover {
+        background: white;
+        transform: translateX(5px);
+    }
+
+    .activity-icon {
+        width: 50px;
+        height: 50px;
+        background: var(--dashboard-gradient);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+        flex-shrink: 0;
+    }
+
+    .activity-details {
+        flex: 1;
+    }
+
+    .activity-title {
+        font-weight: 600;
+        color: var(--dashboard-dark);
+        margin-bottom: 0.3rem;
+    }
+
+    .activity-description {
+        color: #7f8c8d;
+        font-size: 0.95rem;
+        line-height: 1.5;
+    }
+
+    .activity-time {
+        color: #95a5a6;
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+    }
+
+    /* سایدبار */
+    .dashboard-sidebar {
+        position: sticky;
+        top: 2rem;
+    }
+
+    .sidebar-section {
+        background: white;
+        border-radius: 25px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        margin-bottom: 2rem;
+    }
+
+    .sidebar-header {
+        background: var(--dashboard-gradient);
+        padding: 1.2rem 1.5rem;
+        color: white;
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+
+    .sidebar-body {
+        padding: 1.5rem;
+    }
+
+    /* منوی سریع */
+    .quick-actions {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+
+    .action-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.8rem;
+        padding: 1.5rem 1rem;
+        background: #f8f9fa;
+        border-radius: 15px;
+        text-decoration: none;
+        color: var(--dashboard-dark);
+        transition: all 0.3s ease;
+        text-align: center;
+    }
+
+    .action-btn:hover {
+        background: var(--dashboard-primary);
+        color: white;
+        transform: translateY(-5px);
+    }
+
+    .action-icon {
+        width: 50px;
+        height: 50px;
+        background: var(--dashboard-gradient);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: white;
+        transition: all 0.3s ease;
+    }
+
+    .action-btn:hover .action-icon {
+        background: white;
+        color: var(--dashboard-primary);
+    }
+
+    .action-label {
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    /* دستاوردها */
+    .achievements-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+    }
+
+    .achievement-item {
+        text-align: center;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+    }
+
+    .achievement-item:hover {
+        background: white;
+        transform: scale(1.05);
+    }
+
+    .achievement-icon {
+        width: 50px;
+        height: 50px;
+        margin: 0 auto 0.8rem;
+        background: var(--dashboard-gradient);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+    }
+
+    .achievement-title {
+        font-size: 0.8rem;
+        color: #7f8c8d;
+        margin-bottom: 0.3rem;
+    }
+
+    .achievement-value {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--dashboard-primary);
+    }
+
+    /* رسپانسیو */
+    @media (max-width: 1200px) {
+        .content-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .dashboard-sidebar {
+            position: static;
+            margin-top: 2rem;
+        }
+    }
+
+    @media (max-width: 992px) {
+        .dashboard-header {
+            padding: 2rem 0 3rem;
+        }
+        
+        .user-profile-card {
+            margin-bottom: 1rem;
+        }
+        
+        .profile-header {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .profile-info {
+            min-width: 100%;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-container {
+            padding: 0 1rem;
+        }
+        
+        .profile-stats {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .projects-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .quick-actions {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    @media (max-width: 576px) {
+        .profile-stats {
+            grid-template-columns: 1fr;
+        }
+        
+        .donation-meta {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .quick-actions {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .achievements-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-page">
+    <!-- هیدر داشبورد -->
+    <div class="dashboard-header">
+        <div class="dashboard-container">
+            <!-- کارت پروفایل کاربر -->
+            <div class="user-profile-card">
+                <div class="profile-header">
+                    <div class="profile-avatar">
+                        {% if user.avatar %}
+                        <img src="{{ user.avatar.url }}" alt="{{ user.get_full_name }}">
+                        {% else %}
+                        <i class="fas fa-user"></i>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="profile-info">
+                        <h1 class="profile-name">{{ user.get_full_name|default:user.username }}</h1>
+                        <p class="profile-email">{{ user.email }}</p>
+                        
+                        <div class="profile-badges">
+                            <span class="badge badge-donor">
+                                <i class="fas fa-hand-holding-heart"></i>
+                                کمک‌کننده فعال
+                            </span>
+                            
+                            {% if user.is_volunteer %}
+                            <span class="badge badge-volunteer">
+                                <i class="fas fa-hands-helping"></i>
+                                داوطلب
+                            </span>
+                            {% endif %}
+                            
+                            {% if user.is_premium %}
+                            <span class="badge badge-premium">
+                                <i class="fas fa-crown"></i>
+                                عضو ویژه
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- آمار کاربر -->
+                <div class="profile-stats">
+                    <div class="stat-item">
+                        <span class="stat-value">{{ total_donations|default:"0" }}</span>
+                        <span class="stat-label">کمک مالی</span>
+                    </div>
+                    
+                    <div class="stat-item">
+                        <span class="stat-value">{{ total_amount|default:"0"|floatformat:0 }}</span>
+                        <span class="stat-label">تومان کمک</span>
+                    </div>
+                    
+                    <div class="stat-item">
+                        <span class="stat-value">{{ followed_projects|default:"0" }}</span>
+                        <span class="stat-label">پروژه دنبال‌شده</span>
+                    </div>
+                    
+                    <div class="stat-item">
+                        <span class="stat-value">{{ volunteer_hours|default:"0" }}</span>
+                        <span class="stat-label">ساعت داوطلبی</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- محتوای اصلی -->
+    <div class="dashboard-content">
+        <div class="dashboard-container">
+            <div class="row">
+                <!-- محتوای سمت راست -->
+                <div class="col-lg-8">
+                    <div class="content-grid">
+                        <!-- بخش کمک‌های اخیر -->
+                        <div class="dashboard-section">
+                            <div class="section-header">
+                                <h3 class="section-title">
+                                    <i class="fas fa-history"></i>
+                                    کمک‌های اخیر
+                                </h3>
+                                <div class="section-actions">
+                                    <a href="{% url 'donation_history' %}" class="btn btn-sm btn-light">
+                                        مشاهده همه
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <div class="section-body">
+                                <div class="donations-list">
+                                    {% for donation in recent_donations %}
+                                    <div class="donation-item">
+                                        <div class="donation-icon">
+                                            <i class="fas fa-heart"></i>
+                                        </div>
+                                        
+                                        <div class="donation-details">
+                                            <a href="{% url 'charity_project_detail' donation.project.id %}" class="donation-project">
+                                                {{ donation.project.title }}
+                                            </a>
+                                            
+                                            <div class="donation-meta">
+                                                <span class="donation-amount">{{ donation.amount|floatformat:0 }} تومان</span>
+                                                <span class="text-muted">{{ donation.created_at|date:"Y/m/d" }}</span>
+                                                <span class="donation-status status-{{ donation.status }}">
+                                                    {{ donation.get_status_display }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% empty %}
+                                    <div class="text-center py-4">
+                                        <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                                        <p class="text-muted">هنوز کمک مالی نداشته‌اید</p>
+                                        <a href="{% url 'charity_projects' %}" class="btn btn-primary">
+                                            اولین کمک را انجام دهید
+                                        </a>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- بخش پروژه‌های دنبال‌شده -->
+                        <div class="dashboard-section">
+                            <div class="section-header">
+                                <h3 class="section-title">
+                                    <i class="fas fa-bookmark"></i>
+                                    پروژه‌های دنبال‌شده
+                                </h3>
+                                <div class="section-actions">
+                                    <a href="{% url 'followed_projects' %}" class="btn btn-sm btn-light">
+                                        همه پروژه‌ها
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <div class="section-body">
+                                <div class="projects-grid">
+                                    {% for project in followed_projects_list %}
+                                    <div class="project-card">
+                                        <div class="project-image">
+                                            {% if project.main_image %}
+                                            <img src="{{ project.main_image.url }}" alt="{{ project.title }}">
+                                            {% else %}
+                                            <div style="width: 100%; height: 100%; background: var(--dashboard-gradient); 
+                                                      display: flex; align-items: center; justify-content: center;">
+                                                <i class="fas fa-hands-helping fa-2x" style="color: white;"></i>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <div class="project-content">
+                                            <a href="{% url 'charity_project_detail' project.id %}" class="project-title">
+                                                {{ project.title }}
+                                            </a>
+                                            
+                                            <div class="project-progress">
+                                                <div class="progress-info">
+                                                    <span>پیشرفت</span>
+                                                    <span>{{ project.progress_percentage|default:"0" }}%</span>
+                                                </div>
+                                                <div class="progress-bar">
+                                                    <div class="progress-fill" data-width="{{ project.progress_percentage|default:'0' }}"></div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="d-flex justify-content-between mt-3">
+                                                <small class="text-muted">
+                                                    <i class="fas fa-users ml-1"></i>
+                                                    {{ project.donors_count|default:"0" }}
+                                                </small>
+                                                <a href="{% url 'charity_project_detail' project.id %}" class="btn btn-sm btn-primary">
+                                                    مشاهده
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% empty %}
+                                    <div class="text-center py-4" style="grid-column: 1 / -1;">
+                                        <i class="fas fa-bookmark fa-3x text-muted mb-3"></i>
+                                        <p class="text-muted">هنوز پروژه‌ای را دنبال نکرده‌اید</p>
+                                        <a href="{% url 'charity_projects' %}" class="btn btn-primary">
+                                            کشف پروژه‌ها
+                                        </a>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- بخش فعالیت‌های اخیر -->
+                        <div class="dashboard-section">
+                            <div class="section-header">
+                                <h3 class="section-title">
+                                    <i class="fas fa-bell"></i>
+                                    فعالیت‌های اخیر
+                                </h3>
+                            </div>
+                            
+                            <div class="section-body">
+                                <div class="activities-list">
+                                    {% for activity in recent_activities %}
+                                    <div class="activity-item">
+                                        <div class="activity-icon">
+                                            {% if activity.type == 'donation' %}
+                                            <i class="fas fa-heart"></i>
+                                            {% elif activity.type == 'project_update' %}
+                                            <i class="fas fa-sync-alt"></i>
+                                            {% elif activity.type == 'achievement' %}
+                                            <i class="fas fa-trophy"></i>
+                                            {% else %}
+                                            <i class="fas fa-bell"></i>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <div class="activity-details">
+                                            <div class="activity-title">{{ activity.title }}</div>
+                                            <div class="activity-description">{{ activity.description }}</div>
+                                            <div class="activity-time">
+                                                <i class="far fa-clock ml-1"></i>
+                                                {{ activity.time|timesince }} پیش
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% empty %}
+                                    <div class="text-center py-4">
+                                        <i class="fas fa-bell-slash fa-3x text-muted mb-3"></i>
+                                        <p class="text-muted">هنوز فعالیتی ثبت نشده است</p>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- سایدبار سمت چپ -->
+                <div class="col-lg-4">
+                    <div class="dashboard-sidebar">
+                        <!-- منوی سریع اقدامات -->
+                        <div class="sidebar-section">
+                            <div class="sidebar-header">
+                                اقدامات سریع
+                            </div>
+                            <div class="sidebar-body">
+                                <div class="quick-actions">
+                                    <a href="{% url 'charity_projects' %}" class="action-btn">
+                                        <div class="action-icon">
+                                            <i class="fas fa-hand-holding-heart"></i>
+                                        </div>
+                                        <div class="action-label">کمک جدید</div>
+                                    </a>
+                                    
+                                    <a href="{% url 'profile_edit' %}" class="action-btn">
+                                        <div class="action-icon">
+                                            <i class="fas fa-user-edit"></i>
+                                        </div>
+                                        <div class="action-label">ویرایش پروفایل</div>
+                                    </a>
+                                    
+                                    <a href="{% url 'charity_volunteer' %}" class="action-btn">
+                                        <div class="action-icon">
+                                            <i class="fas fa-hands-helping"></i>
+                                        </div>
+                                        <div class="action-label">داوطلب شدن</div>
+                                    </a>
+                                    
+                                    <a href="{% url 'wallet' %}" class="action-btn">
+                                        <div class="action-icon">
+                                            <i class="fas fa-wallet"></i>
+                                        </div>
+                                        <div class="action-label">کیف پول</div>
+                                    </a>
+                                    
+                                    <a href="{% url 'certificates' %}" class="action-btn">
+                                        <div class="action-icon">
+                                            <i class="fas fa-award"></i>
+                                        </div>
+                                        <div class="action-label">گواهی‌ها</div>
+                                    </a>
+                                    
+                                    <a href="{% url 'support' %}" class="action-btn">
+                                        <div class="action-icon">
+                                            <i class="fas fa-headset"></i>
+                                        </div>
+                                        <div class="action-label">پشتیبانی</div>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- دستاوردها -->
+                        <div class="sidebar-section">
+                            <div class="sidebar-header">
+                                دستاوردهای شما
+                            </div>
+                            <div class="sidebar-body">
+                                <div class="achievements-grid">
+                                    <div class="achievement-item">
+                                        <div class="achievement-icon">
+                                            <i class="fas fa-heart"></i>
+                                        </div>
+                                        <div class="achievement-title">کمک‌های موفق</div>
+                                        <div class="achievement-value">{{ successful_donations|default:"0" }}</div>
+                                    </div>
+                                    
+                                    <div class="achievement-item">
+                                        <div class="achievement-icon">
+                                            <i class="fas fa-fire"></i>
+                                        </div>
+                                        <div class="achievement-title">روز متوالی</div>
+                                        <div class="achievement-value">{{ streak_days|default:"0" }}</div>
+                                    </div>
+                                    
+                                    <div class="achievement-item">
+                                        <div class="achievement-icon">
+                                            <i class="fas fa-users"></i>
+                                        </div>
+                                        <div class="achievement-title">دعوت شده</div>
+                                        <div class="achievement-value">{{ invited_users|default:"0" }}</div>
+                                    </div>
+                                    
+                                    <div class="achievement-item">
+                                        <div class="achievement-icon">
+                                            <i class="fas fa-star"></i>
+                                        </div>
+                                        <div class="achievement-title">امتیاز</div>
+                                        <div class="achievement-value">{{ points|default:"0" }}</div>
+                                    </div>
+                                    
+                                    <div class="achievement-item">
+                                        <div class="achievement-icon">
+                                            <i class="fas fa-trophy"></i>
+                                        </div>
+                                        <div class="achievement-title">رتبه</div>
+                                        <div class="achievement-value">#{{ rank|default:"-" }}</div>
+                                    </div>
+                                    
+                                    <div class="achievement-item">
+                                        <div class="achievement-icon">
+                                            <i class="fas fa-medal"></i>
+                                        </div>
+                                        <div class="achievement-title">سطح</div>
+                                        <div class="achievement-value">{{ level|default:"1" }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- اطلاعات کیف پول -->
+                        <div class="sidebar-section">
+                            <div class="sidebar-header">
+                                کیف پول
+                            </div>
+                            <div class="sidebar-body">
+                                <div class="text-center mb-3">
+                                    <div class="h2 mb-1" style="color: var(--dashboard-primary);">
+                                        {{ wallet_balance|default:"0"|floatformat:0 }}
+                                    </div>
+                                    <div class="text-muted mb-3">موجودی (تومان)</div>
+                                </div>
+                                
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <a href="{% url 'wallet_charge' %}" class="btn btn-primary w-100">
+                                            <i class="fas fa-plus ml-1"></i>
+                                            افزایش موجودی
+                                        </a>
+                                    </div>
+                                    <div class="col-6">
+                                        <a href="{% url 'wallet_withdraw' %}" class="btn btn-outline-primary w-100">
+                                            <i class="fas fa-exchange-alt ml-1"></i>
+                                            برداشت
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    class DashboardPage {
+        constructor() {
+            this.init();
+        }
+
+        init() {
+            this.initProgressBars();
+            this.initAnimations();
+            this.initCharts();
+            this.initEventListeners();
+            this.initRealTimeUpdates();
+        }
+
+        // انیمیشن نوارهای پیشرفت
+        initProgressBars() {
+            const progressBars = document.querySelectorAll('.progress-fill');
+            
+            progressBars.forEach(bar => {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            const width = bar.getAttribute('data-width');
+                            bar.style.width = width + '%';
+                            observer.unobserve(bar);
+                        }
+                    });
+                }, { threshold: 0.5 });
+                
+                observer.observe(bar);
+            });
+        }
+
+        // انیمیشن‌های ورود
+        initAnimations() {
+            // انیمیشن کارت‌ها با تأخیر
+            const cards = document.querySelectorAll('.dashboard-section, .sidebar-section');
+            
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(30px)';
+                
+                setTimeout(() => {
+                    card.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, 100 + (index * 150));
+            });
+
+            // انیمیشن آمار
+            const statValues = document.querySelectorAll('.stat-value');
+            statValues.forEach((stat, index) => {
+                this.animateCounter(stat);
+            });
+        }
+
+        // انیمیشن شمارنده‌ها
+        animateCounter(element) {
+            const text = element.textContent;
+            const value = parseInt(text.replace(/\D/g, ''));
+            
+            if (isNaN(value)) return;
+            
+            element.textContent = '0';
+            
+            let current = 0;
+            const duration = 2000;
+            const step = value / (duration / 16);
+            
+            const timer = setInterval(() => {
+                current += step;
+                if (current >= value) {
+                    element.textContent = value.toLocaleString('fa-IR');
+                    clearInterval(timer);
+                    
+                    // افکت تکمیل
+                    element.style.color = 'var(--dashboard-primary)';
+                    setTimeout(() => {
+                        element.style.color = '';
+                    }, 300);
+                } else {
+                    element.textContent = Math.floor(current).toLocaleString('fa-IR');
+                }
+            }, 16);
+        }
+
+        // نمودارها (در صورت نیاز)
+        initCharts() {
+            // می‌توانید از Chart.js یا کتابخانه‌ی دیگر استفاده کنید
+            // اینجا یک نمونه ساده قرار داده‌ام
+            const chartContainers = document.querySelectorAll('[data-chart]');
+            
+            if (chartContainers.length > 0 && typeof Chart !== 'undefined') {
+                chartContainers.forEach(container => {
+                    this.createChart(container);
+                });
+            }
+        }
+
+        createChart(container) {
+            // نمونه‌ای از ایجاد نمودار
+            const ctx = container.getContext('2d');
+            const chartType = container.getAttribute('data-chart-type') || 'line';
+            
+            new Chart(ctx, {
+                type: chartType,
+                data: {
+                    labels: ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور'],
+                    datasets: [{
+                        label: 'کمک‌های شما',
+                        data: [12, 19, 3, 5, 2, 3],
+                        backgroundColor: 'rgba(52, 152, 219, 0.2)',
+                        borderColor: 'rgba(52, 152, 219, 1)',
+                        borderWidth: 2,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            rtl: true,
+                            labels: {
+                                font: {
+                                    family: 'Vazirmatn, IranSans, sans-serif'
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // رویدادها
+        initEventListeners() {
+            // کلیک روی کارت‌های پروژه
+            const projectCards = document.querySelectorAll('.project-card');
+            projectCards.forEach(card => {
+                card.addEventListener('click', (e) => {
+                    if (!e.target.closest('a')) {
+                        const link = card.querySelector('.project-title');
+                        if (link) link.click();
+                    }
+                });
+            });
+
+            // رفرش داده‌ها
+            const refreshBtn = document.querySelector('[data-refresh]');
+            if (refreshBtn) {
+                refreshBtn.addEventListener('click', () => {
+                    this.refreshDashboard();
+                });
+            }
+        }
+
+        // بروزرسانی‌های لحظه‌ای
+        initRealTimeUpdates() {
+            // می‌توانید از WebSocket یا Polling استفاده کنید
+            setInterval(() => {
+                this.updateNotifications();
+            }, 30000); // هر 30 ثانیه
+        }
+
+        updateNotifications() {
+            // شبیه‌سازی بروزرسانی اعلان‌ها
+            const activityCount = Math.floor(Math.random() * 3);
+            if (activityCount > 0) {
+                this.showNotification(`${activityCount} فعالیت جدید`);
+            }
+        }
+
+        showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'notification-toast';
+            notification.innerHTML = `
+                <div class="toast-content">
+                    <i class="fas fa-bell ml-2"></i>
+                    ${message}
+                </div>
+                <button class="toast-close">&times;</button>
+            `;
+            
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: white;
+                border-radius: 10px;
+                box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+                padding: 1rem 1.5rem;
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+                z-index: 10000;
+                animation: slideIn 0.3s ease;
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // حذف خودکار بعد از 5 ثانیه
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+            
+            // دکمه بستن
+            const closeBtn = notification.querySelector('.toast-close');
+            closeBtn.addEventListener('click', () => {
+                notification.remove();
+            });
+        }
+
+        // رفرش داشبورد
+        refreshDashboard() {
+            const refreshBtn = document.querySelector('[data-refresh]');
+            if (refreshBtn) {
+                refreshBtn.disabled = true;
+                refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin ml-2"></i>در حال بروزرسانی...';
+                
+                // شبیه‌سازی بارگذاری
+                setTimeout(() => {
+                    refreshBtn.disabled = false;
+                    refreshBtn.innerHTML = '<i class="fas fa-sync-alt ml-2"></i>بروزرسانی';
+                    
+                    // نمایش پیام موفقیت
+                    this.showNotification('داشبورد با موفقیت بروزرسانی شد');
+                }, 1500);
+            }
+        }
+    }
+
+    // اضافه کردن استایل‌های CSS داینامیک
+    const dynamicStyles = `
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .notification-toast {
+            animation: slideIn 0.3s ease !important;
+        }
+        
+        .toast-content {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .toast-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #7f8c8d;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .toast-close:hover {
+            color: #e74c3c;
+        }
+    `;
+
+    // راه‌اندازی صفحه
+    document.addEventListener('DOMContentLoaded', () => {
+        // اضافه کردن استایل‌های داینامیک
+        const styleSheet = document.createElement('style');
+        styleSheet.textContent = dynamicStyles;
+        document.head.appendChild(styleSheet);
+        
+        // راه‌اندازی داشبورد
+        const dashboardPage = new DashboardPage();
+        window.DashboardPage = dashboardPage;
+        
+        // راه‌اندازی نمودارها اگر Chart.js موجود باشد
+        if (typeof Chart !== 'undefined') {
+            dashboardPage.initCharts();
+        }
+    });
+</script>
+{% endblock %}
+[file content end]
